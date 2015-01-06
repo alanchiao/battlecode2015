@@ -3,11 +3,10 @@ package battlecode2015.buildings;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
-import battlecode2015.Robot;
 import battlecode2015.utils.Broadcast;
 import battlecode2015.utils.DirectionHelper;
 
-public class Barracks extends Robot {
+public class Barracks extends Building {
 	protected void actions() throws GameActionException {
         // get information broadcasted by the HQ
 		int numSoldiers = rc.readBroadcast(1);

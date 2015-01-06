@@ -1,11 +1,10 @@
 package battlecode2015.units;
 
 import battlecode.common.*;
-import battlecode2015.Robot;
 import battlecode2015.utils.DirectionHelper;
 import battlecode2015.utils.Broadcast;
 
-public class Soldier extends Robot {
+public class Soldier extends Unit {
 	protected void actions() throws GameActionException {
         if (rc.isWeaponReady()) {
         	RobotInfo[] enemies = rc.senseNearbyRobots(
@@ -21,6 +20,8 @@ public class Soldier extends Robot {
 			// told by headquarters to attack
 			final int soldierClusterMin = 5;
 			boolean toldToAttack = rc.readBroadcast(Broadcast.soldierMarchCh) == 1 ? true : false;
+			
+			// only attack if soldiers are near enough allied units
 			boolean enoughFriendlyUnits = countNearbyFriendlyUnits() > soldierClusterMin ? true: false;
 			MapLocation target;
 			if (toldToAttack && enoughFriendlyUnits) {
@@ -48,7 +49,12 @@ public class Soldier extends Robot {
 	///////////////////////////////
 	// Navigation methods
 	
-	// move from point a to point b
+	// try to keep moving towards destination point
+	public void moveToDestinationPoint() {
+		Direction fastestDirection = rc.getLocation().directionTo(destinationPoint);
+		
+	}
+	
 	public void avoidObstacle(RobotController RC) {
 		
 	}
