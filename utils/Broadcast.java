@@ -10,7 +10,7 @@ public class Broadcast {
 	
 	public static final int soldierMarchCh = 300;
 	
-	
+	public static final int soldierRallyCh = 400;
 	
 	
 }
