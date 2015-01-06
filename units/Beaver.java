@@ -22,15 +22,20 @@ public class Beaver extends Robot {
 				rc.mine();
 			
 				int fate = rand.nextInt(1000);
-				if (fate < 8 && rc.getTeamOre() >= 300) {
+				if (rc.readBroadcast(200) == rc.getID()) {
+					rc.broadcast(200, 0);
 					int offsetIndex = 0;
 					int[] offsets = {0,1,-1,2,-2,3,-3,4};
-					int dirint = rand.nextInt(8);
+					int dirint = DirectionHelper.directionToInt(rc.getLocation().directionTo(rc.senseHQLocation()));
 					while (offsetIndex < 8 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
 						offsetIndex++;
 					}
+					Direction buildDirection = null;
 					if (offsetIndex < 8) {
-						rc.build(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BARRACKS);
+						buildDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
+					}
+					if (buildDirection != null && rc.canBuild(buildDirection, RobotType.BARRACKS)) {
+						rc.build(buildDirection, RobotType.BARRACKS);
 					}
 				} else if (fate < 600) {
 					rc.mine();
