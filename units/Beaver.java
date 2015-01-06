@@ -68,11 +68,4 @@ public class Beaver extends Robot {
 		}
 
 	}
-	public int countNearbyFriendlyUnits() {
-		RobotInfo[] allies = rc.senseNearbyRobots(
-				rc.getType().attackRadiusSquared,
-				rc.getTeam()
-			);
-		return allies.length;
-	}
 }
