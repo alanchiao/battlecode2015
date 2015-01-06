@@ -5,7 +5,7 @@ import battlecode.common.RobotType;
 import battlecode2015.Robot;
 import battlecode2015.utils.DirectionHelper;
 
-public class Barracks extends Robot {
+public class Barracks extends Building {
 	protected void actions() throws GameActionException {
 		int fate = rand.nextInt(10000);
 		

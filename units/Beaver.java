@@ -4,7 +4,7 @@ import battlecode.common.*;
 import battlecode2015.Robot;
 import battlecode2015.utils.*;
 
-public class Beaver extends Robot {
+public class Beaver extends Unit {
 	protected void actions() throws GameActionException {
 		MapLocation myLocation = rc.getLocation();
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());

@@ -5,7 +5,7 @@ import battlecode2015.Robot;
 import battlecode2015.utils.DirectionHelper;
 import battlecode2015.utils.Broadcast;
 
-public class Headquarters extends Robot {
+public class Headquarters extends Building {
 	protected void actions() throws GameActionException {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
 		MapLocation myLocation = rc.getLocation();
