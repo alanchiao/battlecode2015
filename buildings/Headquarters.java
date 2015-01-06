@@ -62,7 +62,15 @@ public class Headquarters extends Robot {
 			else if (numBarracks < 3) {
 				if (ore >= 300) {
 					rc.broadcast(200, closestBeaver);
+				// tell closest beaver to build barracks
 				}
+			}
+			
+			// soldier count high enough, tell them to move
+			if (numSoldiers > 5) {
+				rc.broadcast(100, 1);
+			} else {
+				rc.broadcast(100, 0);
 			}
 		}
 	}
