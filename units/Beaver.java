@@ -5,10 +5,11 @@ import battlecode2015.Robot;
 import battlecode2015.utils.DirectionHelper;
 
 public class Beaver extends Robot {
+	private static boolean  clustering = false;
 	public static void move() {
 		try {
-			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
-			if (enemies.length >0 && rc.isWeaponReady()) { 
+			if (rc.isWeaponReady()) {
+				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
 				if (rc.isWeaponReady()) {
 					if (enemies.length == 1) {
 						rc.attackLocation(enemies[0].location);	
@@ -17,6 +18,10 @@ public class Beaver extends Robot {
 				else {
 					rc.move(rc.getLocation().directionTo(enemies[0].location).opposite());	
 				}
+			}
+			if (clustering) {
+				RobotInfo[] allies = rc.senseNearbyRobots();
+				rc.broadcast(101,allies[0].ID);
 			}
 			if (rc.isCoreReady()) {
 				// HQ has given command for this particular
