@@ -18,17 +18,30 @@ public class Soldier extends Robot {
         }
 
 		if (rc.isCoreReady()) {
-			Direction intendedDir;
 			// told by headquarters to attack
-			int soldierClusterMin = 5;
+			final int soldierClusterMin = 5;
 			boolean toldToAttack = rc.readBroadcast(Broadcast.soldierMarchCh) == 1 ? true : false;
 			boolean enoughFriendlyUnits = countNearbyFriendlyUnits() > soldierClusterMin ? true: false;
+			MapLocation target;
 			if (toldToAttack && enoughFriendlyUnits) {
-				int intendedDirIndex = DirectionHelper.directionToInt(rc.getLocation().directionTo(rc.senseEnemyHQLocation()));
-				intendedDir = DirectionHelper.directions[intendedDirIndex];
-				if (rc.canMove(intendedDir)) {
-					rc.move(intendedDir);
-				}
+				target = rc.senseEnemyHQLocation();
+			}
+			else {
+				int loc = rc.readBroadcast(Broadcast.soldierRallyCh);
+				target = new MapLocation(loc / 65536, loc % 65536);
+			}
+			int dirint = DirectionHelper.directionToInt(rc.getLocation().directionTo(target));
+			int offsetIndex = 0;
+			int[] offsets = {0,1,-1,2,-2};
+			while (offsetIndex < 5 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
+				offsetIndex++;
+			}
+			Direction moveDirection = null;
+			if (offsetIndex < 5) {
+				moveDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
+			}
+			if (moveDirection != null) {
+				rc.move(moveDirection);
 			}
 		}	
 	}

@@ -29,7 +29,7 @@ public class Barracks extends Robot {
 					offsetIndex++;
 				}
 			}
-			rc.broadcast(Broadcast.soldierRallyCh, rally.x * 256 + rally.y);
+			rc.broadcast(Broadcast.soldierRallyCh, rally.x * 65536 + rally.y);
 		}
 		if (rc.isCoreReady() && rc.getTeamOre() >= 60 && numSoldiers < 20) {
 			int offsetIndex = 0;

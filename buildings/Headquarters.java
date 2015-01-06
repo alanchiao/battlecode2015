@@ -45,7 +45,7 @@ public class Headquarters extends Robot {
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
-			if (numBeavers < 10) {
+			if (numBeavers < 5) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = rand.nextInt(8);
@@ -68,7 +68,7 @@ public class Headquarters extends Robot {
 			}
 			
 			// soldier count high enough, tell them to move
-			if (numSoldiers > 5) {
+			if (numSoldiers > 15) {
 				rc.broadcast(Broadcast.soldierMarchCh, 1);
 			} else {
 				rc.broadcast(Broadcast.soldierMarchCh, 0);
