@@ -14,6 +14,13 @@ public class Beaver extends Robot {
 				}
 			}
 			if (rc.isCoreReady()) {
+				for (Direction dir: DirectionHelper.directions) {
+					if(rc.senseOre(rc.getLocation().add(dir)) > rc.senseOre(rc.getLocation()) && rc.canMove(dir)) {
+						rc.move(dir);
+					}
+				}
+				rc.mine();
+			
 				int fate = rand.nextInt(1000);
 				if (fate < 8 && rc.getTeamOre() >= 300) {
 					int offsetIndex = 0;
