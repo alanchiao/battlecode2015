@@ -2,7 +2,7 @@ package battlecode2015.units;
 
 import battlecode.common.*;
 import battlecode2015.Robot;
-import battlecode2015.utils.DirectionHelper;
+import battlecode2015.utils.*;
 
 public class Beaver extends Robot {
 	protected void actions() throws GameActionException {
@@ -20,8 +20,8 @@ public class Beaver extends Robot {
 		}
 		if (rc.isCoreReady()) {
 			// HQ has given command for this particular beaver to build a barracks
-			if (rc.readBroadcast(200) == rc.getID()) {
-				rc.broadcast(200, 0);
+			if (rc.readBroadcast(Broadcast.closetBeaverCh) == rc.getID()) {
+				rc.broadcast(Broadcast.closetBeaverCh, 0);
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));

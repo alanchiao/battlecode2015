@@ -3,6 +3,7 @@ package battlecode2015.buildings;
 import battlecode.common.*;
 import battlecode2015.Robot;
 import battlecode2015.utils.DirectionHelper;
+import battlecode2015.utils.Broadcast;
 
 public class Headquarters extends Robot {
 	protected void actions() throws GameActionException {
@@ -28,9 +29,9 @@ public class Headquarters extends Robot {
 				numBarracks++;
 			}
 		}
-		rc.broadcast(0, numBeavers);
-		rc.broadcast(1, numSoldiers);
-		rc.broadcast(100, numBarracks);
+		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
+		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
+		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		
 		if (rc.isWeaponReady()) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(
@@ -61,16 +62,16 @@ public class Headquarters extends Robot {
 			}
 			else if (numBarracks < 3) {
 				if (ore >= 300) {
-					rc.broadcast(200, closestBeaver);
+					rc.broadcast(Broadcast.closetBeaverCh, closestBeaver);
 				// tell closest beaver to build barracks
 				}
 			}
 			
 			// soldier count high enough, tell them to move
 			if (numSoldiers > 5) {
-				rc.broadcast(100, 1);
+				rc.broadcast(Broadcast.soldierMarchCh, 1);
 			} else {
-				rc.broadcast(100, 0);
+				rc.broadcast(Broadcast.soldierMarchCh, 0);
 			}
 		}
 	}
