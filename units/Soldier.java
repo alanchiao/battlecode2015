@@ -3,39 +3,52 @@ package battlecode2015.units;
 import battlecode.common.*;
 import battlecode2015.Robot;
 import battlecode2015.utils.DirectionHelper;
+import battlecode2015.utils.Broadcast;
 
 public class Soldier extends Robot {
-	public static void move() {
-		try {
-            if (rc.isWeaponReady()) {
-            	RobotInfo[] enemies = rc.senseNearbyRobots(
-					rc.getType().attackRadiusSquared,
-					rc.getTeam().opponent()
-				);
-				if (enemies.length > 0) {
-					rc.attackLocation(enemies[0].location);
-				}
+	protected void actions() throws GameActionException {
+        if (rc.isWeaponReady()) {
+        	RobotInfo[] enemies = rc.senseNearbyRobots(
+				rc.getType().attackRadiusSquared,
+				rc.getTeam().opponent()
+			);
+			if (enemies.length > 0) {
+				rc.attackLocation(enemies[0].location);
 			}
-			if (rc.isCoreReady()) {
-				int fate = rand.nextInt(1000);
-				int intendedDirection;
-				if (fate < 800) {
-					intendedDirection = rand.nextInt(8);
-				} else {
-					intendedDirection = DirectionHelper.directionToInt(rc.getLocation().directionTo(rc.senseEnemyHQLocation()));
-				}
-				int offsetIndex = 0;
-				int[] offsets = {0,1,-1,2,-2};
-				while (offsetIndex < 5 && !rc.canMove(DirectionHelper.directions[(intendedDirection+offsets[offsetIndex]+8)%8])) {
-					offsetIndex++;
-				}
-				if (offsetIndex < 5) {
-					rc.move(DirectionHelper.directions[(intendedDirection+offsets[offsetIndex]+8)%8]);
-				}
-			}
-        } catch (Exception e) {
-			System.out.println("Soldier Exception");
-			e.printStackTrace();
         }
+
+		if (rc.isCoreReady()) {
+			Direction intendedDir;
+			// told by headquarters to attack
+			int soldierClusterMin = 5;
+			boolean toldToAttack = rc.readBroadcast(Broadcast.soldierMarchCh) == 1 ? true : false;
+			boolean enoughFriendlyUnits = countNearbyFriendlyUnits() > soldierClusterMin ? true: false;
+			if (toldToAttack && enoughFriendlyUnits) {
+				int intendedDirIndex = DirectionHelper.directionToInt(rc.getLocation().directionTo(rc.senseEnemyHQLocation()));
+				intendedDir = DirectionHelper.directions[intendedDirIndex];
+				if (rc.canMove(intendedDir)) {
+					rc.move(intendedDir);
+				}
+			}
+		}	
+	}
+	///////////////////////////////
+	// Navigation methods
+	
+	// move from point a to point b
+	public void avoidObstacle(RobotController RC) {
+		
+	}
+	
+	//////////////////////////////
+	// Detection methods
+	
+	// count number of friend units next to you
+	public int countNearbyFriendlyUnits() {
+		RobotInfo[] allies = rc.senseNearbyRobots(
+				rc.getType().attackRadiusSquared,
+				rc.getTeam()
+			);
+		return allies.length;
 	}
 }
