@@ -20,6 +20,8 @@ public class Beaver extends Robot {
 			}
 			if (rc.isCoreReady()) {
 				int fate = rand.nextInt(1000);
+				// HQ has given command for this particular
+				// beaver to build a barracks
 				if (rc.readBroadcast(200) == rc.getID()) {
 					rc.broadcast(200, 0);
 					int offsetIndex = 0;
