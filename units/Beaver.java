@@ -19,7 +19,6 @@ public class Beaver extends Robot {
 				}
 			}
 			if (rc.isCoreReady()) {
-				int fate = rand.nextInt(1000);
 				// HQ has given command for this particular
 				// beaver to build a barracks
 				if (rc.readBroadcast(200) == rc.getID()) {
@@ -39,10 +38,14 @@ public class Beaver extends Robot {
 					}
 				} 
 				
+				// looks around for an ore concentration that is bigger than it's current location by a certain fraction
 				for (Direction dir: DirectionHelper.directions) {
-					if(rc.senseOre(rc.getLocation().add(dir)) > rc.senseOre(rc.getLocation()) && rc.canMove(dir)) {
+					if(rc.senseOre(rc.getLocation().add(dir)) > (double)3/2*rc.senseOre(rc.getLocation())  && rc.canMove(dir)) {
 						rc.move(dir);
 					}
+				}
+				if (rc.senseOre(rc.getLocation()) == 0) {
+					rc.move(Direction.EAST);
 				}
 				rc.mine();
 			}
