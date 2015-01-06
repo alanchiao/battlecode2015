@@ -8,27 +8,37 @@ import battlecode2015.units.Beaver;
 import battlecode2015.units.Soldier;
 
 public class RobotPlayer {
-	static RobotController rc;
+	private static RobotController rc;
+	private static Headquarters headquarters;
+	private static Tower tower;
+	private static Soldier soldier;
+	private static Beaver beaver;
+	private static Barracks barracks;
 	
 	public static void run(RobotController r) {
 		rc = r;
 		if (rc.getType() == RobotType.HQ) {
-			Headquarters.setRC(rc);
+			headquarters = new Headquarters();
+			headquarters.setRC(rc);
 		}
         if (rc.getType() == RobotType.TOWER) {
-           Tower.setRC(rc);
+        	tower = new Tower();
+        	tower.setRC(rc);
         }
 		
         if (rc.getType() == RobotType.SOLDIER) {
-            Soldier.setRC(rc);
+        	soldier = new Soldier();
+            soldier.setRC(rc);
         }
 		
 		if (rc.getType() == RobotType.BEAVER) {
-			Beaver.setRC(rc);
+			beaver = new Beaver();
+			beaver.setRC(rc);
 		}
 
         if (rc.getType() == RobotType.BARRACKS) {
-			Barracks.setRC(rc);
+        	barracks = new Barracks();
+			barracks.setRC(rc);
 		}
 
 		while(true) {
@@ -41,23 +51,23 @@ public class RobotPlayer {
             }
 
 			if (rc.getType() == RobotType.HQ) {
-				Headquarters.move();
+				headquarters.move();
 			}
 			
             if (rc.getType() == RobotType.TOWER) {
-               Tower.move();
+            	tower.move();
             }
 			
             if (rc.getType() == RobotType.SOLDIER) {
-                Soldier.move();
+                soldier.move();
             }
 			
 			if (rc.getType() == RobotType.BEAVER) {
-				Beaver.move();
+				beaver.move();
 			}
 
             if (rc.getType() == RobotType.BARRACKS) {
-				Barracks.move();
+				barracks.move();
 			}
 			
 			rc.yield();
