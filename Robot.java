@@ -1,9 +1,7 @@
 package battlecode2015;
 
 import java.util.Random;
-import battlecode.common.GameActionException;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
+import battlecode.common.*;
 
 public abstract class Robot {
 	protected Random rand;
