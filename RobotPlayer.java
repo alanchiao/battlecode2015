@@ -3,8 +3,10 @@ package battlecode2015;
 import battlecode.common.*;
 import battlecode2015.buildings.Barracks;
 import battlecode2015.buildings.Headquarters;
+import battlecode2015.buildings.MinerFactory;
 import battlecode2015.buildings.Tower;
 import battlecode2015.units.Beaver;
+import battlecode2015.units.Miner;
 import battlecode2015.units.Soldier;
 
 public class RobotPlayer {
@@ -14,6 +16,8 @@ public class RobotPlayer {
 	private static Soldier soldier;
 	private static Beaver beaver;
 	private static Barracks barracks;
+	private static Miner miner;
+	private static MinerFactory minerfactory;
 	
 	public static void run(RobotController r) {
 		rc = r;
@@ -25,20 +29,25 @@ public class RobotPlayer {
         	tower = new Tower();
         	tower.setRC(rc);
         }
-		
         if (rc.getType() == RobotType.SOLDIER) {
         	soldier = new Soldier();
             soldier.setRC(rc);
         }
-		
 		if (rc.getType() == RobotType.BEAVER) {
 			beaver = new Beaver();
 			beaver.setRC(rc);
 		}
-
         if (rc.getType() == RobotType.BARRACKS) {
         	barracks = new Barracks();
 			barracks.setRC(rc);
+		}
+        if (rc.getType() == RobotType.MINER) {
+        	miner = new Miner();
+			miner.setRC(rc);
+		}
+        if (rc.getType() == RobotType.MINERFACTORY) {
+        	minerfactory = new MinerFactory();
+			minerfactory.setRC(rc);
 		}
 
 		while(true) {
@@ -53,21 +62,23 @@ public class RobotPlayer {
 			if (rc.getType() == RobotType.HQ) {
 				headquarters.move();
 			}
-			
             if (rc.getType() == RobotType.TOWER) {
             	tower.move();
             }
-			
             if (rc.getType() == RobotType.SOLDIER) {
                 soldier.move();
             }
-			
 			if (rc.getType() == RobotType.BEAVER) {
 				beaver.move();
 			}
-
             if (rc.getType() == RobotType.BARRACKS) {
 				barracks.move();
+			}
+            if (rc.getType() == RobotType.MINER) {
+				miner.move();
+			}
+            if (rc.getType() == RobotType.MINERFACTORY) {
+				minerfactory.move();
 			}
 			
 			rc.yield();
