@@ -1,6 +1,7 @@
 package battlecode2015.units;
 
 import battlecode.common.*;
+import battlecode2015.units.com.Navigation;
 import battlecode2015.utils.DirectionHelper;
 import battlecode2015.utils.Broadcast;
 
@@ -30,6 +31,8 @@ public class Soldier extends Unit {
 				int loc = rc.readBroadcast(Broadcast.soldierRallyCh);
 				target = new MapLocation(loc / 65536, loc % 65536);
 			}
+			this.destinationPoint = target;
+			/**
 			int dirint = DirectionHelper.directionToInt(rc.getLocation().directionTo(target));
 			int offsetIndex = 0;
 			int[] offsets = {0,1,-1,2,-2};
@@ -43,12 +46,10 @@ public class Soldier extends Unit {
 			if (moveDirection != null) {
 				rc.move(moveDirection);
 			}
+			**/
+			Navigation.moveToDestinationPoint(rc, this);
 		}	
 	}
-	///////////////////////////////
-	// Navigation methods
-	
-	
 	//////////////////////////////
 	// Detection methods
 	

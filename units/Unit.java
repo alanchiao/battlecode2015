@@ -8,8 +8,11 @@ public abstract class Unit extends Robot {
 	// stored information about reaching a destination
 	// for navigation
 	public MapLocation destinationPoint;
+	public boolean avoidingObstacle = false;
+	public MapLocation lastObstacle; // obstacle tile to move relative to
+	public MapLocation lastLocation; // unit's location in previous step
 	public Direction lastDirectionMoved;
-	boolean avoidingObstacle = false;
+	
 	
 	public void move() {
 		try {
