@@ -30,7 +30,7 @@ public class Barracks extends Building {
 			}
 			rc.broadcast(Broadcast.soldierRallyCh, rally.x * 65536 + rally.y);
 		}
-		if (rc.isCoreReady() && rc.getTeamOre() >= 60 && numSoldiers < 20) {
+		if (rc.isCoreReady() && rc.getTeamOre() >= 60 && numSoldiers < 30) {
 			int offsetIndex = 0;
 			while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.SOLDIER)) {
 				offsetIndex++;
