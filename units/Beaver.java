@@ -70,15 +70,9 @@ public class Beaver extends Unit {
 						maxOre = possibleOre;
 						bestDirection = dir;
 					}
-					if (rc.canMove(dir)) {
-						possibleDirection = dir;
-					}
 				}
 				if (maxOre > 1.5 * currentOre && bestDirection != null) {
 					rc.move(bestDirection);
-				}
-				else if (maxOre == -2) {
-					rc.move(possibleDirection);
 				}
 				else {
 					rc.mine();

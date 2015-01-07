@@ -6,7 +6,7 @@ import battlecode2015.utils.*;
 public abstract class Unit extends Robot {
 	// stored information about reaching a destination
 	// for navigation
-	public int groupID;
+	public int groupID = -1;
 	public MapLocation destinationPoint;
 	public Direction lastDirectionMoved;
 	boolean avoidingObstacle = false;
@@ -32,18 +32,9 @@ public abstract class Unit extends Robot {
 			else if (rc.getType() == RobotType.BASHER) {
 				broadcastCh = Broadcast.groupingBashersCh;
 			}
-			if (broadcastCh == -1) {
-				int groupInfo = rc.readBroadcast(broadcastCh);
-				int ID = groupInfo/100;
-				int size = groupInfo %100;
-				if (size > 0) {
-					groupID = ID;
-					rc.broadcast(broadcastCh, ID*100+size);
-				}
+			if (broadcastCh != -1 && rc.readBroadcast(700) !=1) {
+				groupID = rc.readBroadcast(broadcastCh);
 			}
-			
-
-			
 			actions();
 		}
 		catch (Exception e) {
@@ -66,8 +57,18 @@ public abstract class Unit extends Robot {
 	
 	public void moveByGroup() {
 		try {
-			int loc = rc.readBroadcast(groupID);
-			MapLocation target = new MapLocation(loc / 65536, loc % 65536);
+			boolean toldToAttack = rc.readBroadcast(groupID) == 1;
+//			System.out.println(groupID);
+//			System.out.println("toldToAttack = " + toldToAttack);
+			
+			MapLocation target;
+			if (toldToAttack) {
+				target = rc.senseEnemyHQLocation();
+			}
+			else {
+				int loc = rc.readBroadcast(Broadcast.soldierRallyCh);
+				target = new MapLocation(loc / 65536, loc % 65536);
+			}
 			
 			int dirint = DirectionHelper.directionToInt(rc.getLocation().directionTo(target));
 			int offsetIndex = 0;
