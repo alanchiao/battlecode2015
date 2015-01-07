@@ -11,7 +11,7 @@ public abstract class Unit extends Robot {
 	public boolean avoidingObstacle = false;
 	public MapLocation lastObstacle; // obstacle tile to move relative to
 	public MapLocation lastLocation; // unit's location in previous step
-	public Direction lastDirectionMoved;
+	public Direction lastDirectionMoved = null;
 	
 	
 	public void move() {

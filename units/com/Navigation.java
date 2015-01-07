@@ -20,8 +20,8 @@ public class Navigation {
 				
 				// first way - unit to obstacle direction, rotate clockwise
 				for (int i = 1; i < 7; i++) {
-					int dirInt = DirectionHelper.directionToInt(dirToObstacle);
-					Direction nextDir = DirectionHelper.directions[(dirInt + i) % 8];
+					int dirToObstacleValue = DirectionHelper.directionToInt(dirToObstacle);
+					Direction nextDir = DirectionHelper.directions[(dirToObstacleValue + i) % 8];
 					// should not be going back to old location, try other rotation direction
 					if(rc.getLocation().add(nextDir) == unit.lastLocation) {
 						break;
@@ -34,6 +34,23 @@ public class Navigation {
 							unit.lastObstacle = potentialNextObstacle;
 						}
 						// successfully moved to hug wall
+						int fastestDirectionValue = DirectionHelper.directionToInt(fastestDirection);
+						int lastDirectionValue = DirectionHelper.directionToInt(unit.lastDirectionMoved);
+						int nextDirValue = DirectionHelper.directionToInt(nextDir);
+						
+						// check if angle of direction to destination is between angle of movement of this turn and last turn
+						// obstacle avoided if that is the case
+						if(unit.lastDirectionMoved != null) {		
+							if(lastDirectionValue >= nextDirValue) {
+								if (nextDirValue <= fastestDirectionValue && fastestDirectionValue <= lastDirectionValue) {
+									unit.avoidingObstacle = false;
+								}
+							} else {
+								if (fastestDirectionValue <= lastDirectionValue || fastestDirectionValue >= nextDirValue) {
+									unit.avoidingObstacle = false;
+								}
+							}
+						}
 						unit.lastDirectionMoved = nextDir;
 						rc.move(nextDir);
 					}
@@ -57,7 +74,7 @@ public class Navigation {
 			}
 			else if(rc.canMove(fastestDirection)) {
 				rc.move(fastestDirection);
-			// found obstacle
+			// possibly found obstacle
 			} else {
 				unit.avoidingObstacle = true;
 				unit.lastObstacle = rc.getLocation().add(fastestDirection);
