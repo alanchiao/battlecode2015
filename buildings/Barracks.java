@@ -3,7 +3,6 @@ package battlecode2015.buildings;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
-import battlecode2015.Robot;
 import battlecode2015.utils.Broadcast;
 import battlecode2015.utils.DirectionHelper;
 
@@ -29,7 +28,7 @@ public class Barracks extends Building {
 					offsetIndex++;
 				}
 			}
-			rc.broadcast(Broadcast.soldierRallyCh, rally.x * 256 + rally.y);
+			rc.broadcast(Broadcast.soldierRallyCh, rally.x * 65536 + rally.y);
 		}
 		if (rc.isCoreReady() && rc.getTeamOre() >= 60 && numSoldiers < 20) {
 			int offsetIndex = 0;

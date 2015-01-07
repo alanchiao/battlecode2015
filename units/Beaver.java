@@ -1,7 +1,6 @@
 package battlecode2015.units;
 
 import battlecode.common.*;
-import battlecode2015.Robot;
 import battlecode2015.utils.*;
 
 public class Beaver extends Unit {

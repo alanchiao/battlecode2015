@@ -1,7 +1,6 @@
 package battlecode2015.buildings;
 
 import battlecode.common.*;
-import battlecode2015.Robot;
 import battlecode2015.utils.DirectionHelper;
 import battlecode2015.utils.Broadcast;
 
@@ -45,7 +44,7 @@ public class Headquarters extends Building {
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
-			if (numBeavers < 10) {
+			if (numBeavers < 5) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = rand.nextInt(8);
@@ -68,7 +67,7 @@ public class Headquarters extends Building {
 			}
 			
 			// soldier count high enough, tell them to move
-			if (numSoldiers > 5) {
+			if (numSoldiers > 15) {
 				rc.broadcast(Broadcast.soldierMarchCh, 1);
 			} else {
 				rc.broadcast(Broadcast.soldierMarchCh, 0);
