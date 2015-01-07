@@ -4,7 +4,8 @@ public class Broadcast {
 	
 	public static final int numBeaversCh = 0;
 	public static final int numSoldiersCh = 1;
-	public static final int numMinersCh = 2;
+	public static final int numBashersCh = 2;
+	public static final int numMinersCh = 3;
 	public static final int numBarracksCh = 101;
 	public static final int numMinerFactoriesCh = 102;
 	

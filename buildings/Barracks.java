@@ -10,6 +10,7 @@ public class Barracks extends Building {
 	protected void actions() throws GameActionException {
         // get information broadcasted by the HQ
 		int numSoldiers = rc.readBroadcast(1);
+		int numBashers = rc.readBroadcast(2);
 
 		MapLocation myLocation = rc.getLocation();
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
@@ -33,7 +34,7 @@ public class Barracks extends Building {
 			rc.broadcast(Broadcast.soldierRallyXCh, rally.x);
 			rc.broadcast(Broadcast.soldierRallyYCh, rally.y);
 		}
-		if (rc.isCoreReady() && rc.getTeamOre() >= 60 && numSoldiers < 30) {
+		if (rc.isCoreReady() && rc.getTeamOre() >= 60 && numSoldiers < 80) {
 			int offsetIndex = 0;
 			while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.SOLDIER)) {
 				offsetIndex++;
