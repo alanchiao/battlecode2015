@@ -6,25 +6,24 @@ import battlecode2015.utils.Broadcast;
 
 public class Soldier extends Unit {
 	protected void actions() throws GameActionException {
-        if (rc.isWeaponReady()) {
-        	RobotInfo[] enemies = rc.senseNearbyRobots(
+		RobotInfo[] enemies = rc.senseNearbyRobots(
 				rc.getType().attackRadiusSquared,
 				rc.getTeam().opponent()
 			);
+
+		if (rc.isWeaponReady()) {
 			if (enemies.length > 0) {
-				rc.attackLocation(enemies[0].location);
+				rc.attackLocation(selectTarget(enemies));
 			}
         }
 
-		if (rc.isCoreReady()) {
+		// Only move if there are few enemies
+		if (rc.isCoreReady() && enemies.length < 1) {
 			// told by headquarters to attack
-			final int soldierClusterMin = 5;
 			boolean toldToAttack = rc.readBroadcast(Broadcast.soldierMarchCh) == 1 ? true : false;
-			
-			// only attack if soldiers are near enough allied units
-			boolean enoughFriendlyUnits = countNearbyFriendlyUnits() > soldierClusterMin ? true: false;
+
 			MapLocation target;
-			if (toldToAttack && enoughFriendlyUnits) {
+			if (toldToAttack) {
 				target = rc.senseEnemyHQLocation();
 			}
 			else {
