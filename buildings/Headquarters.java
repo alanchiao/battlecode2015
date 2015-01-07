@@ -4,6 +4,8 @@ import battlecode.common.*;
 import battlecode2015.utils.DirectionHelper;
 import battlecode2015.utils.Broadcast;
 
+import java.util.*;
+
 public class Headquarters extends Building {
 	protected void actions() throws GameActionException {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
@@ -82,6 +84,9 @@ public class Headquarters extends Building {
 				// tell closest beaver to build barracks
 				}
 			}
+			ArrayList<Integer> Groups = new ArrayList<Integer>();
+			
+			groupUnits(700, RobotType.SOLDIER, 15);
 			
 			// soldier count high enough, tell them to move
 			if (numSoldiers > 20) {
@@ -89,6 +94,29 @@ public class Headquarters extends Building {
 			} else if (numSoldiers < 10) {
 				rc.broadcast(Broadcast.soldierMarchCh, 0);
 			}
+		}
+	}
+	
+	public void groupUnits(int ID_Broadcast, RobotType rt, int size) {
+		int broadcastCh;
+		if (rt == RobotType.SOLDIER) {
+			broadcastCh = Broadcast.groupingSoldiersCh;
+		}
+		else if (rt == RobotType.DRONE) {
+			broadcastCh = Broadcast.groupingDronesCh;
+		}
+		else if (rt == RobotType.BASHER) {
+			broadcastCh = Broadcast.groupingBashersCh;
+		}
+		else {
+			broadcastCh = 9999;
+		}
+		int groupingInfo = ID_Broadcast*100+size;
+		try {
+			rc.broadcast(broadcastCh, groupingInfo);
+		}
+		catch (GameActionException e) {
+			return;
 		}
 	}
 }

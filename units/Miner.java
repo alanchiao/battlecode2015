@@ -30,11 +30,11 @@ public class Miner extends Unit {
 					maxOre = possibleOre;
 					bestDirection = dir;
 				}
-//				if (rc.canMove(dir)) {
-//					possibleDirection = dir;
-//				}
+				if (rc.canMove(dir)) {
+					possibleDirection = dir;
+				}
 			}
-			if (rc.senseOre(myLocation) == 0) {
+			if (rc.senseOre(myLocation) == 0 && bestDirection != null) {
 				rc.move(bestDirection);
 			}
 //			else {

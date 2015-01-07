@@ -69,7 +69,7 @@ public class Beaver extends Unit {
 						possibleDirection = dir;
 					}
 				}
-				if (maxOre > 1.5 * currentOre) {
+				if (maxOre > 1.5 * currentOre && bestDirection != null) {
 					rc.move(bestDirection);
 				}
 				else if (maxOre == -2) {
