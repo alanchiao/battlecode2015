@@ -1,7 +1,6 @@
 package battlecode2015.buildings;
 
 import battlecode.common.*;
-import battlecode2015.Robot;
 import battlecode2015.utils.DirectionHelper;
 import battlecode2015.utils.Broadcast;
 
@@ -12,6 +11,8 @@ public class Headquarters extends Building {
 		int numSoldiers = 0;
 		int numBeavers = 0;
 		int numBarracks = 0;
+		int numMiners = 0;
+		int numMinerFactories = 0;
 		int minBeaverDistance = 25; // Make sure that the closest beaver is actually close
 		int closestBeaver = 0;
 		for (RobotInfo r : myRobots) {
@@ -27,11 +28,17 @@ public class Headquarters extends Building {
 				}
 			} else if (type == RobotType.BARRACKS) {
 				numBarracks++;
+			} else if (type == RobotType.MINER) {
+				numMiners++;
+			} else if (type == RobotType.MINERFACTORY) {
+				numMinerFactories++;
 			}
 		}
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
 		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
 		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
+		rc.broadcast(Broadcast.numMinersCh, numMiners);
+		rc.broadcast(Broadcast.numMinerFactoriesCh, numMinerFactories);
 		
 		if (rc.isWeaponReady()) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(
@@ -45,7 +52,9 @@ public class Headquarters extends Building {
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
-			if (numBeavers < 10) {
+			
+			// Spawn beavers
+			if (numBeavers < 5) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = rand.nextInt(8);
@@ -60,17 +69,24 @@ public class Headquarters extends Building {
 					rc.spawn(buildDirection, RobotType.BEAVER);
 				}
 			}
+
+			// Broadcast to build structures
+			if (numMinerFactories < 2) {
+				if (ore >= 500) {
+					rc.broadcast(Broadcast.buildMinerFactoriesCh, closestBeaver);
+				}
+			}
 			else if (numBarracks < 3) {
 				if (ore >= 300) {
-					rc.broadcast(Broadcast.closetBeaverCh, closestBeaver);
+					rc.broadcast(Broadcast.buildBarracksCh, closestBeaver);
 				// tell closest beaver to build barracks
 				}
 			}
 			
 			// soldier count high enough, tell them to move
-			if (numSoldiers > 5) {
+			if (numSoldiers > 20) {
 				rc.broadcast(Broadcast.soldierMarchCh, 1);
-			} else {
+			} else if (numSoldiers < 10) {
 				rc.broadcast(Broadcast.soldierMarchCh, 0);
 			}
 		}

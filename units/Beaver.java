@@ -1,7 +1,6 @@
 package battlecode2015.units;
 
 import battlecode.common.*;
-import battlecode2015.Robot;
 import battlecode2015.utils.*;
 
 public class Beaver extends Unit {
@@ -18,10 +17,28 @@ public class Beaver extends Unit {
 				rc.move(myLocation.directionTo(enemies[0].location).opposite());	
 			}
 		}
+		
 		if (rc.isCoreReady()) {
+			// HQ has given command for this particular beaver to build a miner factory
+			if (rc.readBroadcast(Broadcast.buildMinerFactoriesCh) == rc.getID()) {
+				rc.broadcast(Broadcast.buildMinerFactoriesCh, 0);
+				int offsetIndex = 0;
+				int[] offsets = {0,1,-1,2,-2,3,-3,4};
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));
+				while (offsetIndex < 8 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
+					offsetIndex++;
+				}
+				Direction buildDirection = null;
+				if (offsetIndex < 8) {
+					buildDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
+				}
+				if (buildDirection != null && rc.canBuild(buildDirection, RobotType.MINERFACTORY)) {
+					rc.build(buildDirection, RobotType.MINERFACTORY);
+				}
+			}
 			// HQ has given command for this particular beaver to build a barracks
-			if (rc.readBroadcast(Broadcast.closetBeaverCh) == rc.getID()) {
-				rc.broadcast(Broadcast.closetBeaverCh, 0);
+			else if (rc.readBroadcast(Broadcast.buildBarracksCh) == rc.getID()) {
+				rc.broadcast(Broadcast.buildBarracksCh, 0);
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));
@@ -40,6 +57,7 @@ public class Beaver extends Unit {
 				double currentOre = rc.senseOre(myLocation);
 				double maxOre = -2;
 				Direction bestDirection = null;
+				Direction possibleDirection = null;
 				// looks around for an ore concentration that is bigger than its current location by a certain fraction
 				for (Direction dir: DirectionHelper.directions) {
 					double possibleOre = rc.senseOre(myLocation.add(dir));
@@ -47,14 +65,21 @@ public class Beaver extends Unit {
 						maxOre = possibleOre;
 						bestDirection = dir;
 					}
+					if (rc.canMove(dir)) {
+						possibleDirection = dir;
+					}
 				}
 				if (maxOre > 1.5 * currentOre) {
 					rc.move(bestDirection);
+				}
+				else if (maxOre == -2) {
+					rc.move(possibleDirection);
 				}
 				else {
 					rc.mine();
 				}
 			}
 		}
+
 	}
 }
