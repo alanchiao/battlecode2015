@@ -48,15 +48,6 @@ public class Soldier extends Unit {
 	///////////////////////////////
 	// Navigation methods
 	
-	// try to keep moving towards destination point
-	public void moveToDestinationPoint() {
-		Direction fastestDirection = rc.getLocation().directionTo(destinationPoint);
-		
-	}
-	
-	public void avoidObstacle(RobotController RC) {
-		
-	}
 	
 	//////////////////////////////
 	// Detection methods

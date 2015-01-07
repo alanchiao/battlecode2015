@@ -1,4 +1,5 @@
 package battlecode2015.units;
+import battlecode.common.Direction;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode2015.Robot;
@@ -6,7 +7,9 @@ import battlecode2015.Robot;
 public abstract class Unit extends Robot {
 	// stored information about reaching a destination
 	// for navigation
-	protected MapLocation destinationPoint;
+	public MapLocation destinationPoint;
+	public Direction lastDirectionMoved;
+	boolean avoidingObstacle = false;
 	
 	public void move() {
 		try {
