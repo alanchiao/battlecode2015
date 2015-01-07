@@ -56,6 +56,8 @@ public class Miner extends Unit {
 					}
 				}
 				else {
+					int ore = rc.readBroadcast(Broadcast.minerOreCh);
+					rc.broadcast(Broadcast.minerOreCh, ore + (int)maxOre);
 					rc.move(bestDirection);
 					prevDirection = null;
 				}
