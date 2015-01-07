@@ -78,7 +78,6 @@ public class Beaver extends Unit {
 				else {
 					rc.mine();
 				}
-				rc.mine();
 			}
 		}
 
