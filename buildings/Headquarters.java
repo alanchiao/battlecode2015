@@ -56,7 +56,7 @@ public class Headquarters extends Building {
 			double ore = rc.getTeamOre();
 			
 			// Spawn beavers
-			if (numBeavers < 5) {
+			if (numBeavers < 2) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = rand.nextInt(8);
@@ -73,25 +73,23 @@ public class Headquarters extends Building {
 			}
 
 			// Broadcast to build structures
-			if (numMinerFactories < 2) {
+			else if (numMinerFactories < 2) {
 				if (ore >= 500) {
 					rc.broadcast(Broadcast.buildMinerFactoriesCh, closestBeaver);
 				}
 			}
-			else if (numBarracks < 3) {
-				if (ore >= 300) {
-					rc.broadcast(Broadcast.buildBarracksCh, closestBeaver);
+			else if (ore >= 300 * numBarracks) {
+				rc.broadcast(Broadcast.buildBarracksCh, closestBeaver);
 				// tell closest beaver to build barracks
-				}
 			}
 			ArrayList<Integer> Groups = new ArrayList<Integer>();
 			
 			groupUnits(700, RobotType.SOLDIER, 15);
 			
 			// soldier count high enough, tell them to move
-			if (numSoldiers > 20) {
+			if (numSoldiers > 25) {
 				rc.broadcast(Broadcast.soldierMarchCh, 1);
-			} else if (numSoldiers < 10) {
+			} else if (numSoldiers < 15) {
 				rc.broadcast(Broadcast.soldierMarchCh, 0);
 			}
 		}

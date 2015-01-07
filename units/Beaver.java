@@ -6,6 +6,7 @@ import battlecode2015.utils.*;
 public class Beaver extends Unit {
 	protected void actions() throws GameActionException {
 		MapLocation myLocation = rc.getLocation();
+		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
 		if (enemies.length >0 && rc.isWeaponReady()) { 
 			if (rc.isWeaponReady()) {
@@ -23,9 +24,8 @@ public class Beaver extends Unit {
 			if (rc.readBroadcast(Broadcast.buildMinerFactoriesCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildMinerFactoriesCh, 0);
 				int offsetIndex = 0;
-				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));
-				while (offsetIndex < 8 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
+				while (offsetIndex < 8 && !rc.canBuild(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.MINERFACTORY)) {
 					offsetIndex++;
 				}
 				Direction buildDirection = null;
@@ -35,14 +35,16 @@ public class Beaver extends Unit {
 				if (buildDirection != null && rc.canBuild(buildDirection, RobotType.MINERFACTORY)) {
 					rc.build(buildDirection, RobotType.MINERFACTORY);
 				}
+				else {
+					rc.disintegrate();
+				}
 			}
 			// HQ has given command for this particular beaver to build a barracks
 			else if (rc.readBroadcast(Broadcast.buildBarracksCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildBarracksCh, 0);
 				int offsetIndex = 0;
-				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));
-				while (offsetIndex < 8 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
+				while (offsetIndex < 8 && !rc.canBuild(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BARRACKS)) {
 					offsetIndex++;
 				}
 				Direction buildDirection = null;
@@ -51,6 +53,9 @@ public class Beaver extends Unit {
 				}
 				if (buildDirection != null && rc.canBuild(buildDirection, RobotType.BARRACKS)) {
 					rc.build(buildDirection, RobotType.BARRACKS);
+				}
+				else {
+					rc.disintegrate();
 				}
 			} 
 			else {

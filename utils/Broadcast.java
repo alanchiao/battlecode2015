@@ -19,7 +19,7 @@ public class Broadcast {
 	public static final int groupingBashersCh = 502;
 	public static final int groupingDronesCh = 503;
 	
-	//Channels 700-800 are used for grouping
+	//Channels 700-799 are used for grouping
 	
 	
 }

@@ -6,8 +6,10 @@ import battlecode2015.utils.*;
 public abstract class Unit extends Robot {
 	// stored information about reaching a destination
 	// for navigation
-	protected int groupID;
-	protected MapLocation destinationPoint;
+	public int groupID;
+	public MapLocation destinationPoint;
+	public Direction lastDirectionMoved;
+	boolean avoidingObstacle = false;
 	
 	public void move() {
 		try {
