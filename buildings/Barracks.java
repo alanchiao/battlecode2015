@@ -14,7 +14,7 @@ public class Barracks extends Building {
 		MapLocation myLocation = rc.getLocation();
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseEnemyHQLocation()));
-		if (rc.readBroadcast(Broadcast.soldierRallyCh) == 0) {
+		if (rc.readBroadcast(Broadcast.soldierRallyXCh) == 0) {
 			MapLocation rally = myLocation;
 			// Move 5 squares away
 			for (int i = 0; i < 5; i++) {
@@ -28,7 +28,10 @@ public class Barracks extends Building {
 					offsetIndex++;
 				}
 			}
-			rc.broadcast(Broadcast.soldierRallyCh, rally.x * 65536 + rally.y);
+			System.out.println("here");
+			System.out.println(rally);
+			rc.broadcast(Broadcast.soldierRallyXCh, rally.x);
+			rc.broadcast(Broadcast.soldierRallyYCh, rally.y);
 		}
 		if (rc.isCoreReady() && rc.getTeamOre() >= 60 && numSoldiers < 30) {
 			int offsetIndex = 0;

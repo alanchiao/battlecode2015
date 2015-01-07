@@ -20,19 +20,24 @@ public class Soldier extends Unit {
 		// Only move if there are few enemies
 		if (rc.isCoreReady() && enemies.length < 1) {
 			// told by headquarters to attack
+
+			MapLocation target;
 			if (groupID != -1) {
-				moveByGroup();
+				int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
+				int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
+				target = new MapLocation(xLoc, yLoc);
+				moveByGroup(target);
 			}
 			else {
 				boolean toldToAttack = rc.readBroadcast(Broadcast.soldierMarchCh) == 1 ? true : false;
 	
-				MapLocation target;
 				if (toldToAttack) {
 					target = rc.senseEnemyHQLocation();
 				}
 				else {
-					int loc = rc.readBroadcast(Broadcast.soldierRallyCh);
-					target = new MapLocation(loc / 65536, loc % 65536);
+					int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
+					int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
+					target = new MapLocation(xLoc, yLoc);
 				}
 				int dirint = DirectionHelper.directionToInt(rc.getLocation().directionTo(target));
 				int offsetIndex = 0;

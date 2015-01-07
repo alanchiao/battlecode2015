@@ -90,10 +90,10 @@ public class Headquarters extends Building {
 			
 
 			
-			if (numSoldiers700 > 25) {
+			if (numSoldiers700 > 30) {
 				//System.out.println(numSoldiers700);
 				rc.broadcast(700, 1);
-			} else if (numSoldiers700 <= 25) {
+			} else if (numSoldiers700 <= 30) {
 				//System.out.println(numSoldiers700);
 				rc.broadcast(700, 0);
 				groupUnits(700, RobotType.SOLDIER);

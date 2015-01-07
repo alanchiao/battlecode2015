@@ -13,7 +13,8 @@ public class Broadcast {
 	
 	public static final int soldierMarchCh = 300;
 	
-	public static final int soldierRallyCh = 400;
+	public static final int soldierRallyXCh = 400;
+	public static final int soldierRallyYCh = 401;
 	
 	public static final int groupingSoldiersCh = 501;
 	public static final int groupingBashersCh = 502;

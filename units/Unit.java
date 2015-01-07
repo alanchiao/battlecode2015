@@ -55,7 +55,7 @@ public abstract class Unit extends Robot {
 		return target;
 	}
 	
-	public void moveByGroup() {
+	public void moveByGroup(MapLocation location) {
 		try {
 			boolean toldToAttack = rc.readBroadcast(groupID) == 1;
 //			System.out.println(groupID);
@@ -66,8 +66,9 @@ public abstract class Unit extends Robot {
 				target = rc.senseEnemyHQLocation();
 			}
 			else {
-				int loc = rc.readBroadcast(Broadcast.soldierRallyCh);
-				target = new MapLocation(loc / 65536, loc % 65536);
+				int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
+				int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
+				target = new MapLocation(xLoc, yLoc);
 			}
 			
 			int dirint = DirectionHelper.directionToInt(rc.getLocation().directionTo(target));
