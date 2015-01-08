@@ -137,28 +137,9 @@ public abstract class Unit extends Robot {
 				int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
 				target = new MapLocation(xLoc, yLoc);
 			}
-			this.destinationPoint = target;
 			
+			this.destinationPoint = target;
 			Navigation.moveToDestinationPoint(rc, this);
-
-			// Below code block also does navigation
-			/**
-			MapLocation myLocation = rc.getLocation();
-			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(target));
-			int offsetIndex = 0;
-			int[] offsets = {0,1,-1,2,-2};
-			while (offsetIndex < 5 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
-				offsetIndex++;
-			}
-			Direction moveDirection = null;
-			if (offsetIndex < 5) {
-				moveDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
-			}
-			if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(target) <= myLocation.distanceSquaredTo(target)) {
-				rc.move(moveDirection);
-			}
-			**/
-			// End code block. Comment out in order to test navigation for group movement
 		} 
 		catch (GameActionException e) {
 			return;

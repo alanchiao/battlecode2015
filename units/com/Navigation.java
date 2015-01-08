@@ -12,6 +12,8 @@ import battlecode2015.utils.DirectionHelper;
 
 public class Navigation {
 	
+	public static final boolean USE_WALL_HUGGING = true;
+	
 	// check if the location is somewhere already occupied by something stationary
 	public static boolean isStationaryBlock(RobotController rc, MapLocation potentialObstacle) throws GameActionException{
 		return !rc.senseTerrainTile(potentialObstacle).isTraversable() || isBuilding(rc, potentialObstacle);
@@ -53,6 +55,13 @@ public class Navigation {
 	}
 		
 	public static void moveToDestinationPoint(RobotController rc, Unit unit) {
+		if (USE_WALL_HUGGING) {
+			wallHuggingToDestination(rc, unit);
+		} else {
+			randomizedMoveToDestination(rc, unit);
+		}
+	}
+	public static void wallHuggingToDestination(RobotController rc, Unit unit) {
 		try {
 			if (unit.origDirection != null) {
 				rc.setIndicatorString(0, unit.origDirection.toString());
@@ -142,23 +151,31 @@ public class Navigation {
 					unit.lastObstacle = rc.getLocation().add(directDirection);
 					unit.origDirection = directDirection;
 				} else {
-					MapLocation myLocation = rc.getLocation();
-					int dirint = DirectionHelper.directionToInt(myLocation.directionTo(unit.destinationPoint));
-					int offsetIndex = 0;
-					int[] offsets = {0,1,-1,2,-2};
-					while (offsetIndex < 5 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
-						offsetIndex++;
-					}
-					Direction moveDirection = null;
-					if (offsetIndex < 5) {
-						moveDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
-					}
-					if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(unit.destinationPoint) <= myLocation.distanceSquaredTo(unit.destinationPoint)) {
-						rc.move(moveDirection);
-					}
+					randomizedMoveToDestination(rc, unit);
 				}
 			}
 		// error
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void randomizedMoveToDestination(RobotController rc, Unit unit) {
+		try {
+			MapLocation myLocation = rc.getLocation();
+			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(unit.destinationPoint));
+			int offsetIndex = 0;
+			int[] offsets = {0,1,-1,2,-2};
+			while (offsetIndex < 5 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
+				offsetIndex++;
+			}
+			Direction moveDirection = null;
+			if (offsetIndex < 5) {
+				moveDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
+			}
+			if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(unit.destinationPoint) <= myLocation.distanceSquaredTo(unit.destinationPoint)) {
+				rc.move(moveDirection);
+			}
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
