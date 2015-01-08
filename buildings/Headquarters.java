@@ -7,8 +7,10 @@ import battlecode2015.utils.Broadcast;
 import java.util.*;
 
 public class Headquarters extends Building {
-	ArrayList<Integer> groupID = new ArrayList<Integer>();
+	public ArrayList<Integer> groupID = new ArrayList<Integer>();
+	
 	protected void actions() throws GameActionException {
+		
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
 		MapLocation myLocation = rc.getLocation();
 		int numSoldiers = 0;
@@ -19,8 +21,10 @@ public class Headquarters extends Building {
 		int numBarracks = 0;
 		int numMiners = 0;
 		int numMinerFactories = 0;
+		
 		int minBeaverDistance = 25; // Make sure that the closest beaver is actually close
 		int closestBeaver = 0;
+		
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
 			if (type == RobotType.SOLDIER) {

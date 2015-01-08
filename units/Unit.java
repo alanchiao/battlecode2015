@@ -120,6 +120,8 @@ public abstract class Unit extends Robot {
 				target = new MapLocation(xLoc, yLoc);
 			}
 			this.destinationPoint = target;
+			// TODO - should not be calling moveToDestination and doing the random moving
+			// at the same time. will cause delay. choose one or the other
 			Navigation.moveToDestinationPoint(rc, this);
 			
 			int dirint = DirectionHelper.directionToInt(rc.getLocation().directionTo(target));
