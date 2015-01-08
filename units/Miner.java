@@ -40,7 +40,7 @@ public class Miner extends Unit {
 					}
 				}
 
-				if (maxOre > 10 || (myOre == 0 && bestDirection != null)) {
+				if (maxOre >= 10 || (myOre == 0 && bestDirection != null) || (myOre <= 2.5 && maxOre >= 5)) {
 					int ore = rc.readBroadcast(Broadcast.minerOreCh);
 					rc.broadcast(Broadcast.minerOreCh, ore + (int)maxOre);
 					rc.move(bestDirection);

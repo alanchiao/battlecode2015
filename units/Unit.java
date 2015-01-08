@@ -78,12 +78,17 @@ public abstract class Unit extends Robot {
 		MapLocation target = null;
 		double maxPriority = 0;
 		for (RobotInfo r : enemies) {
-			if (1 / r.health > maxPriority) {
+			if (1 / r.health > maxPriority && r.type.attackPower > 0) {
 				maxPriority = 1 / r.health;
 				target = r.location;
 			}
 		}
-		return target;
+		if (target != null) {
+			return target;
+		}
+		else {
+			return enemies[0].location;
+		}
 	}
 	
 	protected Direction selectMoveDirectionMicro() {
@@ -142,7 +147,7 @@ public abstract class Unit extends Robot {
 			Navigation.moveToDestinationPoint(rc, this);
 
 			// Below code block also does navigation
-			/**
+			/*
 			MapLocation myLocation = rc.getLocation();
 			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(target));
 			int offsetIndex = 0;
@@ -157,7 +162,7 @@ public abstract class Unit extends Robot {
 			if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(target) <= myLocation.distanceSquaredTo(target)) {
 				rc.move(moveDirection);
 			}
-			**/
+			*/
 			// End code block. Comment out in order to test navigation for group movement
 		} 
 		catch (GameActionException e) {
