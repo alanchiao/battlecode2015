@@ -8,6 +8,7 @@ public class Miner extends Unit {
 	protected void actions() throws GameActionException {
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		MapLocation myLocation = rc.getLocation();
+		double myOre = rc.senseOre(myLocation);
 		RobotInfo[] enemies = rc.senseNearbyRobots(
 				rc.getType().attackRadiusSquared,
 				rc.getTeam().opponent()
@@ -24,7 +25,10 @@ public class Miner extends Unit {
 					rc.move(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8]);
 				}
 			}
-			else if (rc.senseOre(myLocation) == 0) {
+			else if (myOre >= 10) {
+				rc.mine();
+			}
+			else {
 				double maxOre = 0;
 				Direction bestDirection = null;
 				// looks around for an ore concentration that is bigger than its current location by a certain fraction
@@ -36,7 +40,13 @@ public class Miner extends Unit {
 					}
 				}
 
-				if (bestDirection == null) {
+				if (maxOre > 10 || (myOre == 0 && bestDirection != null)) {
+					int ore = rc.readBroadcast(Broadcast.minerOreCh);
+					rc.broadcast(Broadcast.minerOreCh, ore + (int)maxOre);
+					rc.move(bestDirection);
+					prevDirection = null;
+				}
+				else if (myOre == 0) {
 					int dirint;
 					if (prevDirection == null) {
 						dirint = rand.nextInt(8);
@@ -56,14 +66,8 @@ public class Miner extends Unit {
 					}
 				}
 				else {
-					int ore = rc.readBroadcast(Broadcast.minerOreCh);
-					rc.broadcast(Broadcast.minerOreCh, ore + (int)maxOre);
-					rc.move(bestDirection);
-					prevDirection = null;
+					rc.mine();
 				}
-			}
-			else {
-				rc.mine();
 			}
 		}
 		if (rc.isWeaponReady()) {

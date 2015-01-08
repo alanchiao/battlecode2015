@@ -30,8 +30,6 @@ public class Barracks extends Building {
 					offsetIndex++;
 				}
 			}
-			System.out.println("here");
-			System.out.println(rally);
 			rc.broadcast(Broadcast.soldierRallyXCh, rally.x);
 			rc.broadcast(Broadcast.soldierRallyYCh, rally.y);
 		}
