@@ -5,6 +5,7 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode2015.units.Unit;
 import battlecode2015.utils.DirectionHelper;
@@ -18,7 +19,11 @@ public class Navigation {
 	
 	// check if there is a building at a location
 	public static boolean isBuilding(RobotController rc, MapLocation potentialBuilding) throws GameActionException{
-		RobotType type = rc.senseRobotAtLocation(potentialBuilding).type;
+		RobotInfo robot = rc.senseRobotAtLocation(potentialBuilding);
+		if (robot == null) {
+			return false;
+		}
+		RobotType type = robot.type;
 		return type == RobotType.AEROSPACELAB || 
 			   type == RobotType.BARRACKS ||
 			   type == RobotType.HANDWASHSTATION ||
@@ -31,6 +36,20 @@ public class Navigation {
 			   type == RobotType.TOWER ||
 			   type == RobotType.TRAININGFIELD;
 			   
+	}
+	
+	// check if is unit that moves often
+	public static boolean isMobileUnit(RobotController rc, MapLocation potentialUnit) throws GameActionException{
+		RobotInfo robot = rc.senseRobotAtLocation(potentialUnit);
+		if (robot == null) {
+			return false;
+		}
+		RobotType type = robot.type;
+		return type == RobotType.BASHER ||
+			   type == RobotType.BEAVER ||
+			   type == RobotType.COMMANDER ||
+			   type == RobotType.DRONE ||
+			   type == RobotType.SOLDIER;
 	}
 		
 	public static void moveToDestinationPoint(RobotController rc, Unit unit) {
@@ -53,6 +72,12 @@ public class Navigation {
 					// should not be going back to old location, try other rotation direction
 					if(attemptedLocation == unit.lastLocation) {
 						break;	
+					}
+					
+					// if there is a unit there, do not move to prevent logic
+					// from messing up
+					if(isMobileUnit(rc, attemptedLocation)) {
+						return;
 					}
 					
 					// move in that direction. handle updating logic
@@ -86,7 +111,8 @@ public class Navigation {
 						if (bestObstacle != null) {
 							unit.lastObstacle = bestObstacle;
 						} else {
-							System.out.println("NO OBSTACLE?");
+							// TODO: situation when unit is next to tile with
+							// stationary thing : System.out.println("NO OBSTACLE? ERROR");
 						}
 						
 						// check if angle of direction to destination is between angle of movement of this turn and last turn
@@ -95,7 +121,6 @@ public class Navigation {
 							unit.isAvoidingObstacle = false;
 							unit.lastObstacle = null;
 							unit.lastDirectionMoved = null;
-							System.out.println("DONE: " + attemptedDir.toString());
 						}
 						
 						unit.lastDirectionMoved = attemptedDir;
