@@ -55,6 +55,45 @@ public abstract class Unit extends Robot {
 		return target;
 	}
 	
+	protected Direction selectMoveDirectionMicro() {
+		MapLocation myLocation = rc.getLocation();
+		int myRange = rc.getType().attackRadiusSquared;
+		RobotInfo[] enemies = rc.senseNearbyRobots(15, rc.getTeam().opponent());
+		int[] damages = new int[9]; // 9th slot for current position
+		int[] enemyInRange = new int[8];
+		if (enemies.length < 4) { // Only do computation if it won't take too long
+			for (RobotInfo r : enemies) {
+				for (int i = 0; i < 8; i++) {
+					int newLocationDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(r.location);
+					if (newLocationDistance <= r.type.attackRadiusSquared) {
+						damages[i] += r.type.attackPower / r.type.attackDelay;
+					}
+					if (newLocationDistance <= myRange) {
+						enemyInRange[i] += 1;
+					}
+				}
+				if (myLocation.distanceSquaredTo(r.location) <=
+						r.type.attackRadiusSquared) {
+					damages[8] += r.type.attackPower / r.type.attackDelay;
+				}
+			}
+		}
+		int bestDirection = 8;
+		int bestDamage = 999999;
+		for (int i = 0; i < 8; i++) {
+			if (damages[i] <= bestDamage && enemyInRange[i] > 0) {
+				bestDirection = i;
+				bestDamage = damages[i];
+			}
+		}
+		if (bestDamage < damages[8]) {
+			return DirectionHelper.directions[bestDirection];
+		}
+		else {
+			return null;
+		}
+	}
+	
 	public void moveByGroup(MapLocation location) {
 		try {
 			boolean toldToAttack = rc.readBroadcast(groupID) == 1;

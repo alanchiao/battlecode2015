@@ -11,11 +11,11 @@ public class Beaver extends Unit {
 		if (enemies.length > 0 && rc.isWeaponReady()) { 
 			if (rc.isWeaponReady()) {
 				if (enemies.length == 1) {
-					rc.attackLocation(enemies[0].location);	
+					rc.attackLocation(enemies[0].location);
 				}
 			}
 			else {
-				rc.move(myLocation.directionTo(enemies[0].location).opposite());	
+				rc.move(myLocation.directionTo(enemies[0].location).opposite());
 			}
 		}
 		
