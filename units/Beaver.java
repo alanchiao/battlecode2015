@@ -1,6 +1,7 @@
 package battlecode2015.units;
 
 import battlecode.common.*;
+import battlecode2015.units.com.Navigation;
 import battlecode2015.utils.*;
 
 public class Beaver extends Unit {
@@ -70,21 +71,14 @@ public class Beaver extends Unit {
 						maxOre = possibleOre;
 						bestDirection = dir;
 					}
-					if (rc.canMove(dir)) {
-						possibleDirection = dir;
-					}
 				}
-				if (maxOre > 1.5 * currentOre) {
+				if (maxOre > 1.5 * currentOre && bestDirection != null) {
 					rc.move(bestDirection);
-				}
-				else if (maxOre == -2) {
-					rc.move(possibleDirection);
 				}
 				else {
 					rc.mine();
 				}
 			}
 		}
-
 	}
 }

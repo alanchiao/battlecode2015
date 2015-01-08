@@ -4,11 +4,15 @@ import battlecode.common.*;
 import battlecode2015.utils.DirectionHelper;
 import battlecode2015.utils.Broadcast;
 
+import java.util.*;
+
 public class Headquarters extends Building {
+	ArrayList<Integer> groupID = new ArrayList<Integer>();
 	protected void actions() throws GameActionException {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
 		MapLocation myLocation = rc.getLocation();
 		int numSoldiers = 0;
+		int numSoldiers700 = 0;
 		int numBeavers = 0;
 		int numBarracks = 0;
 		int numMiners = 0;
@@ -19,6 +23,9 @@ public class Headquarters extends Building {
 			RobotType type = r.type;
 			if (type == RobotType.SOLDIER) {
 				numSoldiers++;
+				if (groupID.contains(r.ID)) {
+					numSoldiers700++;
+				}
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
 				int distanceSquared = r.location.distanceSquaredTo(myLocation);
@@ -34,6 +41,7 @@ public class Headquarters extends Building {
 				numMinerFactories++;
 			}
 		}
+		
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
 		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
 		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
@@ -52,7 +60,6 @@ public class Headquarters extends Building {
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
-			
 			// Spawn beavers
 			if (numBeavers < 2) {
 				int offsetIndex = 0;
@@ -69,7 +76,6 @@ public class Headquarters extends Building {
 					rc.spawn(buildDirection, RobotType.BEAVER);
 				}
 			}
-
 			// Broadcast to build structures
 			else if (numMinerFactories < 2) {
 				if (ore >= 500) {
@@ -80,13 +86,54 @@ public class Headquarters extends Building {
 				rc.broadcast(Broadcast.buildBarracksCh, closestBeaver);
 				// tell closest beaver to build barracks
 			}
+
 			
-			// soldier count high enough, tell them to move
-			if (numSoldiers > 25) {
-				rc.broadcast(Broadcast.soldierMarchCh, 1);
-			} else if (numSoldiers < 15) {
-				rc.broadcast(Broadcast.soldierMarchCh, 0);
+			if (numSoldiers700 > 25) {
+				//System.out.println(numSoldiers700);
+				rc.broadcast(700, 1);
+			} else if (numSoldiers700 <= 25) {
+				//System.out.println(numSoldiers700);
+				rc.broadcast(700, 0);
+				groupUnits(700, RobotType.SOLDIER);
 			}
+			
+			
+//			// soldier count high enough, tell them to move
+//			if (numSoldiers > 25) {
+//				rc.broadcast(Broadcast.soldierMarchCh, 1);
+//			} else if (numSoldiers < 15) {
+//				rc.broadcast(Broadcast.soldierMarchCh, 0);
+//			}
+		}
+	}
+	
+	public void groupUnits(int ID_Broadcast, RobotType rt) {
+		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
+		for (RobotInfo r : myRobots) {
+			RobotType type = r.type;
+			if (type == RobotType.SOLDIER) {
+				//System.out.println(r.ID);
+				groupID.add(r.ID);
+			}
+		}
+		int broadcastCh;
+		if (rt == RobotType.SOLDIER) {
+			broadcastCh = Broadcast.groupingSoldiersCh;
+		}
+		else if (rt == RobotType.DRONE) {
+			broadcastCh = Broadcast.groupingDronesCh;
+		}
+		else if (rt == RobotType.BASHER) {
+			broadcastCh = Broadcast.groupingBashersCh;
+		}
+		else {
+			broadcastCh = 9999;
+		}
+		try {
+			rc.broadcast(broadcastCh, ID_Broadcast);
+		}
+		catch (GameActionException e) {
+			return;
 		}
 	}
 }

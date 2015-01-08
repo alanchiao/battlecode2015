@@ -1,87 +1,126 @@
 package battlecode2015.units.com;
 
+
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
-import battlecode.common.TerrainTile;
+import battlecode.common.RobotType;
 import battlecode2015.units.Unit;
 import battlecode2015.utils.DirectionHelper;
 
 public class Navigation {
-	// move unit steadily towards destination
+	
+	// check if the location is somewhere already occupied by something stationary
+	public static boolean isStationaryBlock(RobotController rc, MapLocation potentialObstacle) throws GameActionException{
+		return !rc.senseTerrainTile(potentialObstacle).isTraversable() || isBuilding(rc, potentialObstacle);
+	}
+	
+	// check if there is a building at a location
+	public static boolean isBuilding(RobotController rc, MapLocation potentialBuilding) throws GameActionException{
+		RobotType type = rc.senseRobotAtLocation(potentialBuilding).type;
+		return type == RobotType.AEROSPACELAB || 
+			   type == RobotType.BARRACKS ||
+			   type == RobotType.HANDWASHSTATION ||
+			   type == RobotType.HELIPAD ||
+			   type == RobotType.HQ ||
+			   type == RobotType.MINERFACTORY ||
+			   type == RobotType.SUPPLYDEPOT ||
+			   type == RobotType.TANKFACTORY ||
+			   type == RobotType.TECHNOLOGYINSTITUTE ||
+			   type == RobotType.TOWER ||
+			   type == RobotType.TRAININGFIELD;
+			   
+	}
+		
 	public static void moveToDestinationPoint(RobotController rc, Unit unit) {
 		try {
-			Direction fastestDirection = rc.getLocation().directionTo(unit.destinationPoint);
-			// hug wall in counterclockwise motion
-			if(unit.avoidingObstacle) {
+			if (unit.origDirection != null) {
+				rc.setIndicatorString(0, unit.origDirection.toString());
+			}
+			Direction directDirection = rc.getLocation().directionTo(unit.destinationPoint);
+			
+			// then hug wall in counterclockwise motion
+			if(unit.isAvoidingObstacle) {
 				Direction dirToObstacle = rc.getLocation().directionTo(unit.lastObstacle);
+				Direction clockwiseDirections[] = DirectionHelper.getClockwiseDirections(dirToObstacle);
 				// find two possible moves that would relate to wall hugging
 				
 				// first way - unit to obstacle direction, rotate clockwise
-				for (int i = 1; i < 7; i++) {
-					int dirToObstacleValue = DirectionHelper.directionToInt(dirToObstacle);
-					Direction nextDir = DirectionHelper.directions[(dirToObstacleValue + i) % 8];
+				for (Direction attemptedDir: clockwiseDirections) {
+					MapLocation attemptedLocation = rc.getLocation().add(attemptedDir);
+					
 					// should not be going back to old location, try other rotation direction
-					if(rc.getLocation().add(nextDir) == unit.lastLocation) {
-						break;
+					if(attemptedLocation == unit.lastLocation) {
+						break;	
 					}
-					if (rc.canMove(nextDir)) {
-						unit.lastLocation = rc.getLocation();
-						// update obstacle square to monitor
-						MapLocation potentialNextObstacle = unit.lastObstacle.add(nextDir);
-						if (rc.senseTerrainTile(potentialNextObstacle) == TerrainTile.VOID) {
-							unit.lastObstacle = potentialNextObstacle;
+					
+					// move in that direction. handle updating logic
+					if (rc.canMove(attemptedDir)) {
+						// search for obstacles immediately next to new location
+						Direction obstacleSearch[] = {Direction.NORTH, Direction.EAST,	Direction.SOUTH, Direction.WEST};
+						MapLocation potNextObsts[] = new MapLocation[4];
+						int numObstacles = 0;
+						for (Direction dir: obstacleSearch) {
+							MapLocation potentialObstacle = attemptedLocation.add(dir);
+							// yourself
+							if (dir == attemptedDir.opposite()) {
+								continue;
+							}
+							if (isStationaryBlock(rc, potentialObstacle)) {
+								potNextObsts[numObstacles] = potentialObstacle;
+								numObstacles++;
+								rc.setIndicatorDot(potentialObstacle, 0, 0, 0);
+							}
 						}
-						// successfully moved to hug wall
-						int fastestDirectionValue = DirectionHelper.directionToInt(fastestDirection);
-						int lastDirectionValue = DirectionHelper.directionToInt(unit.lastDirectionMoved);
-						int nextDirValue = DirectionHelper.directionToInt(nextDir);
+						
+						// obstacle to monitor next is one that is farthest away from the current location
+						double maxDistanceSquared = -1;
+						MapLocation bestObstacle = null;
+						for (int j = 0; j < numObstacles; j++) {
+							double distanceSquared = (rc.getLocation().x - potNextObsts[j].x)^2 + (rc.getLocation().y - potNextObsts[j].y)^2;
+							if (distanceSquared > maxDistanceSquared) {
+								bestObstacle = potNextObsts[j];
+							}
+						}
+						if (bestObstacle != null) {
+							unit.lastObstacle = bestObstacle;
+						} else {
+							System.out.println("NO OBSTACLE?");
+						}
 						
 						// check if angle of direction to destination is between angle of movement of this turn and last turn
 						// obstacle avoided if that is the case
-						if(unit.lastDirectionMoved != null) {		
-							if(lastDirectionValue >= nextDirValue) {
-								if (nextDirValue <= fastestDirectionValue && fastestDirectionValue <= lastDirectionValue) {
-									unit.avoidingObstacle = false;
-								}
-							} else {
-								if (fastestDirectionValue <= lastDirectionValue || fastestDirectionValue >= nextDirValue) {
-									unit.avoidingObstacle = false;
-								}
-							}
+						if(attemptedDir == unit.origDirection) {
+							unit.isAvoidingObstacle = false;
+							unit.lastObstacle = null;
+							unit.lastDirectionMoved = null;
+							System.out.println("DONE: " + attemptedDir.toString());
 						}
-						unit.lastDirectionMoved = nextDir;
-						rc.move(nextDir);
-					}
-				}
-				
-				// second way - unit to obstacle direction, rotate counterclockwise
-				for (int i = 1; i < 7; i++) {
-					int dirInt = DirectionHelper.directionToInt(dirToObstacle);
-					Direction nextDir = DirectionHelper.directions[(dirInt - i + 8) % 8];
-					if (rc.canMove(nextDir)) {
+						
+						unit.lastDirectionMoved = attemptedDir;
 						unit.lastLocation = rc.getLocation();
-						// update obstacle square to monitor
-						MapLocation potentialNextObstacle = unit.lastObstacle.add(nextDir);
-						if (rc.senseTerrainTile(potentialNextObstacle) == TerrainTile.VOID) {
-							unit.lastObstacle = potentialNextObstacle;
-						}
-						rc.move(nextDir);
-						break;
+						rc.move(attemptedDir);
+						return;
 					}
 				}
 			}
-			else if(rc.canMove(fastestDirection)) {
-				rc.move(fastestDirection);
+			else if (rc.canMove(directDirection)) {
+				rc.move(directDirection);
 			// possibly found obstacle
 			} else {
-				unit.avoidingObstacle = true;
-				unit.lastObstacle = rc.getLocation().add(fastestDirection);
+				MapLocation blockade = rc.getLocation().add(directDirection);
+				// only treat as obstacle if stationary
+				// otherwise things get ugly in some cases
+				if (isStationaryBlock(rc, blockade)) {
+					unit.isAvoidingObstacle = true;
+					unit.lastObstacle = rc.getLocation().add(directDirection);
+					unit.origDirection = directDirection;
+				}
 			}
 		// error
 		} catch (GameActionException e) {
-			System.out.println("gg");
+			e.printStackTrace();
 		}
 	}
 }
