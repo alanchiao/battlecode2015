@@ -15,11 +15,11 @@ public abstract class Building extends Robot {
 			if (mySupply > 0) {
 				RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
 				for (RobotInfo r : friendlyRobots) {
-					if (r.type.supplyUpkeep == 0 && r.type == RobotType.TOWER && r.supplyLevel < mySupply) {
+					if (r.type == RobotType.TOWER && r.supplyLevel < mySupply) {
 						rc.transferSupplies(mySupply / 2, r.location);
 					}
-					else if (r.supplyLevel < r.type.supplyUpkeep * 50) {
-						rc.transferSupplies(Math.min(mySupply / 2, r.type.supplyUpkeep * 10 * (int)hqDistance), r.location);
+					else if (r.supplyLevel < r.type.supplyUpkeep * 10 * (int)hqDistance) {
+						rc.transferSupplies(r.type.supplyUpkeep * 15 * (int)hqDistance, r.location);
 					}
 				}
 			}

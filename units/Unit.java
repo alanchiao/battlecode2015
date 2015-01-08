@@ -23,15 +23,34 @@ public abstract class Unit extends Robot {
 	
 	public void move() {
 		try {
+			// Transfer supply stage
 			int mySupply = (int) rc.getSupplyLevel();
-			if (mySupply > rc.getType().supplyUpkeep * 100) {
-				RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
-				for (RobotInfo r : friendlyRobots) {
-					if (r.supplyLevel < r.type.supplyUpkeep * 50) {
-						rc.transferSupplies(Math.min(mySupply / 2, r.type.supplyUpkeep * 200), r.location);
+			RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
+			if (friendlyRobots.length > 0) {
+				if (rc.getHealth() < 9) {
+					
+					RobotInfo bestFriend = null;
+					double maxHealth = 0;
+					for (RobotInfo r : friendlyRobots) {
+						if (r.health > maxHealth) {
+							maxHealth = r.health;
+							bestFriend = r;
+						}
+					}
+					if (maxHealth > 8) {
+						rc.transferSupplies(mySupply, bestFriend.location);
+					}
+				}
+				else if (mySupply > rc.getType().supplyUpkeep * 100) {
+					for (RobotInfo r : friendlyRobots) {
+						if (r.supplyLevel < r.type.supplyUpkeep * 50) {
+							rc.transferSupplies(Math.min(mySupply / 2, r.type.supplyUpkeep * 200), r.location);
+						}
 					}
 				}
 			}
+			
+			// Grouping stage
 			int broadcastCh = -1;
 			if (rc.getType() == RobotType.SOLDIER) {
 				broadcastCh = Broadcast.groupingSoldiersCh;
@@ -45,6 +64,8 @@ public abstract class Unit extends Robot {
 			if (broadcastCh != -1 && rc.readBroadcast(700) !=1) {
 				groupID = rc.readBroadcast(broadcastCh);
 			}
+			
+			// Unit-specific actions
 			actions();
 		}
 		catch (Exception e) {
@@ -71,7 +92,7 @@ public abstract class Unit extends Robot {
 		RobotInfo[] enemies = rc.senseNearbyRobots(15, rc.getTeam().opponent());
 		int[] damages = new int[9]; // 9th slot for current position
 		int[] enemyInRange = new int[8];
-		if (enemies.length < 4) { // Only do computation if it won't take too long
+		if (enemies.length < 5) { // Only do computation if it won't take too long
 			for (RobotInfo r : enemies) {
 				for (int i = 0; i < 8; i++) {
 					int newLocationDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(r.location);
@@ -82,8 +103,7 @@ public abstract class Unit extends Robot {
 						enemyInRange[i] += 1;
 					}
 				}
-				if (myLocation.distanceSquaredTo(r.location) <=
-						r.type.attackRadiusSquared) {
+				if (myLocation.distanceSquaredTo(r.location) <= r.type.attackRadiusSquared) {
 					damages[8] += r.type.attackPower / r.type.attackDelay;
 				}
 			}
@@ -91,7 +111,7 @@ public abstract class Unit extends Robot {
 		int bestDirection = 8;
 		int bestDamage = 999999;
 		for (int i = 0; i < 8; i++) {
-			if (damages[i] <= bestDamage && enemyInRange[i] > 0) {
+			if (rc.canMove(DirectionHelper.directions[i]) && damages[i] <= bestDamage && enemyInRange[i] > 0) {
 				bestDirection = i;
 				bestDamage = damages[i];
 			}
@@ -107,8 +127,6 @@ public abstract class Unit extends Robot {
 	public void moveByGroup(MapLocation location) {
 		try {
 			boolean toldToAttack = rc.readBroadcast(groupID) == 1;
-//			System.out.println(groupID);
-//			System.out.println("toldToAttack = " + toldToAttack);
 			
 			MapLocation target;
 			if (toldToAttack) {
@@ -120,11 +138,12 @@ public abstract class Unit extends Robot {
 				target = new MapLocation(xLoc, yLoc);
 			}
 			this.destinationPoint = target;
-			// TODO - should not be calling moveToDestination and doing the random moving
-			// at the same time. will cause delay. choose one or the other
-			Navigation.moveToDestinationPoint(rc, this);
 			
-			int dirint = DirectionHelper.directionToInt(rc.getLocation().directionTo(target));
+			//Navigation.moveToDestinationPoint(rc, this);
+
+			// Below code block also does navigation
+			MapLocation myLocation = rc.getLocation();
+			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(target));
 			int offsetIndex = 0;
 			int[] offsets = {0,1,-1,2,-2};
 			while (offsetIndex < 5 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
@@ -134,9 +153,10 @@ public abstract class Unit extends Robot {
 			if (offsetIndex < 5) {
 				moveDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
 			}
-			if (moveDirection != null) {
+			if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(target) <= myLocation.distanceSquaredTo(target)) {
 				rc.move(moveDirection);
 			}
+			// End code block. Comment out in order to test navigation for group movement
 		} 
 		catch (GameActionException e) {
 			return;

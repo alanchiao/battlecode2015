@@ -12,6 +12,7 @@ public class Headquarters extends Building {
 	protected void actions() throws GameActionException {
 		
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
+		rc.setIndicatorString(1, Integer.toString(myRobots.length));
 		MapLocation myLocation = rc.getLocation();
 		int numSoldiers = 0;
 		int numSoldiers700 = 0;
