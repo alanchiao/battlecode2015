@@ -9,8 +9,6 @@ import battlecode2015.utils.DirectionHelper;
 public class Barracks extends Building {
 	protected void actions() throws GameActionException {
         // get information broadcasted by the HQ
-		int numSoldiers = rc.readBroadcast(1);
-
 		MapLocation myLocation = rc.getLocation();
 		MapLocation enemyHQ = rc.senseEnemyHQLocation();
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
