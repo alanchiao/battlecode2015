@@ -13,6 +13,8 @@ public class Headquarters extends Building {
 		MapLocation myLocation = rc.getLocation();
 		int numSoldiers = 0;
 		int numSoldiers700 = 0;
+		int numBashers = 0;
+		int numBashers701 = 0;
 		int numBeavers = 0;
 		int numBarracks = 0;
 		int numMiners = 0;
@@ -33,6 +35,11 @@ public class Headquarters extends Building {
 					closestBeaver = r.ID;
 					minBeaverDistance = r.location.distanceSquaredTo(myLocation);
 				}
+			} else if (type == RobotType.BASHER) {
+				numBashers++;
+				if (groupID.contains(r.ID)) {
+					numBashers701++;
+				}
 			} else if (type == RobotType.BARRACKS) {
 				numBarracks++;
 			} else if (type == RobotType.MINER) {
@@ -44,6 +51,7 @@ public class Headquarters extends Building {
 		
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
 		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
+		rc.broadcast(Broadcast.numBashersCh, numBashers);
 		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numMinersCh, numMiners);
 		rc.broadcast(Broadcast.numMinerFactoriesCh, numMinerFactories);
@@ -88,15 +96,23 @@ public class Headquarters extends Building {
 			}
 
 			
-			if (numSoldiers700 > 25) {
+			if (numSoldiers700 > 30) {
 				//System.out.println(numSoldiers700);
 				rc.broadcast(700, 1);
-			} else if (numSoldiers700 <= 25) {
+			} else if (numSoldiers700 <= 30) {
 				//System.out.println(numSoldiers700);
 				rc.broadcast(700, 0);
 				groupUnits(700, RobotType.SOLDIER);
 			}
 			
+//			if (numBashers701 > 50) {
+//				System.out.println(numBashers701);
+//				rc.broadcast(701, 1);
+//			} else if (numBashers701 <= 50) {
+//				//System.out.println(numBashers701);
+//				rc.broadcast(701, 0);
+//				groupUnits(701, RobotType.BASHER);
+//			}
 			
 //			// soldier count high enough, tell them to move
 //			if (numSoldiers > 25) {
@@ -115,6 +131,10 @@ public class Headquarters extends Building {
 				//System.out.println(r.ID);
 				groupID.add(r.ID);
 			}
+//			if (type == RobotType.BASHER) {
+//				//System.out.println(r.ID);
+//				groupID.add(r.ID);
+//			}
 		}
 		int broadcastCh;
 		if (rt == RobotType.SOLDIER) {

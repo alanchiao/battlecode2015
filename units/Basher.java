@@ -1,11 +1,10 @@
 package battlecode2015.units;
 
 import battlecode.common.*;
-import battlecode2015.units.com.Navigation;
 import battlecode2015.utils.DirectionHelper;
 import battlecode2015.utils.Broadcast;
 
-public class Soldier extends Unit {
+public class Basher extends Unit {
 	protected void actions() throws GameActionException {
 		RobotInfo[] enemies = rc.senseNearbyRobots(
 				rc.getType().attackRadiusSquared,
@@ -40,12 +39,7 @@ public class Soldier extends Unit {
 					int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
 					target = new MapLocation(xLoc, yLoc);
 				}
-				this.destinationPoint = target;
-				Navigation.moveToDestinationPoint(rc, this);
-				/**
-				* READD THIS BLOCK and remove call to Navigation.moveToDestinationPoint to restore
 				int dirint = DirectionHelper.directionToInt(rc.getLocation().directionTo(target));
-				
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2};
 				while (offsetIndex < 5 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
@@ -58,11 +52,13 @@ public class Soldier extends Unit {
 				if (moveDirection != null) {
 					rc.move(moveDirection);
 				}
-				**/
 			}
-			
 		}	
 	}
+	///////////////////////////////
+	// Navigation methods
+	
+	
 	//////////////////////////////
 	// Detection methods
 	

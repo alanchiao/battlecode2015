@@ -9,14 +9,14 @@ public class Beaver extends Unit {
 		MapLocation myLocation = rc.getLocation();
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
-		if (enemies.length >0 && rc.isWeaponReady()) { 
+		if (enemies.length > 0 && rc.isWeaponReady()) { 
 			if (rc.isWeaponReady()) {
 				if (enemies.length == 1) {
-					rc.attackLocation(enemies[0].location);	
+					rc.attackLocation(enemies[0].location);
 				}
 			}
 			else {
-				rc.move(myLocation.directionTo(enemies[0].location).opposite());	
+				rc.move(myLocation.directionTo(enemies[0].location).opposite());
 			}
 		}
 		
@@ -25,7 +25,7 @@ public class Beaver extends Unit {
 			if (rc.readBroadcast(Broadcast.buildMinerFactoriesCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildMinerFactoriesCh, 0);
 				int offsetIndex = 0;
-				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));
+				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(myLocation));
 				while (offsetIndex < 8 && !rc.canBuild(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.MINERFACTORY)) {
 					offsetIndex++;
 				}
@@ -44,7 +44,7 @@ public class Beaver extends Unit {
 			else if (rc.readBroadcast(Broadcast.buildBarracksCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildBarracksCh, 0);
 				int offsetIndex = 0;
-				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));
+				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(myLocation));
 				while (offsetIndex < 8 && !rc.canBuild(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BARRACKS)) {
 					offsetIndex++;
 				}
@@ -63,7 +63,6 @@ public class Beaver extends Unit {
 				double currentOre = rc.senseOre(myLocation);
 				double maxOre = -2;
 				Direction bestDirection = null;
-				Direction possibleDirection = null;
 				// looks around for an ore concentration that is bigger than its current location by a certain fraction
 				for (Direction dir: DirectionHelper.directions) {
 					double possibleOre = rc.senseOre(myLocation.add(dir));

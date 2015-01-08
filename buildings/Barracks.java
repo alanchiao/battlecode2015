@@ -12,12 +12,14 @@ public class Barracks extends Building {
 		int numSoldiers = rc.readBroadcast(1);
 
 		MapLocation myLocation = rc.getLocation();
+		MapLocation enemyHQ = rc.senseEnemyHQLocation();
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
-		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseEnemyHQLocation()));
-		if (rc.readBroadcast(Broadcast.soldierRallyCh) == 0) {
+		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
+		if (rc.readBroadcast(Broadcast.soldierRallyXCh) == 0) {
 			MapLocation rally = myLocation;
 			// Move 5 squares away
-			for (int i = 0; i < 5; i++) {
+			int rallyDistance = (int)hqDistance / 6;
+			for (int i = 0; i < rallyDistance; i++) {
 				int offsetIndex = 0;
 				while (offsetIndex < 8) {
 					MapLocation candidate = rally.add(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8]);
@@ -28,9 +30,12 @@ public class Barracks extends Building {
 					offsetIndex++;
 				}
 			}
-			rc.broadcast(Broadcast.soldierRallyCh, rally.x * 65536 + rally.y);
+			System.out.println("here");
+			System.out.println(rally);
+			rc.broadcast(Broadcast.soldierRallyXCh, rally.x);
+			rc.broadcast(Broadcast.soldierRallyYCh, rally.y);
 		}
-		if (rc.isCoreReady() && rc.getTeamOre() >= 60 && numSoldiers < 30) {
+		if (rc.isCoreReady() && rc.getTeamOre() >= 60) {
 			int offsetIndex = 0;
 			while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.SOLDIER)) {
 				offsetIndex++;
