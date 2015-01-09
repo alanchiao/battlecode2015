@@ -1,8 +1,8 @@
-package battlecode2015.units;
+package team158.units;
 
+import team158.utils.Broadcast;
+import team158.utils.DirectionHelper;
 import battlecode.common.*;
-import battlecode2015.utils.DirectionHelper;
-import battlecode2015.utils.Broadcast;
 
 public class Basher extends Unit {
 	protected void actions() throws GameActionException {
@@ -23,22 +23,12 @@ public class Basher extends Unit {
 
 			MapLocation target;
 			if (groupID != -1) {
+				moveByGroup();
+			}
+			else {
 				int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
 				int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
 				target = new MapLocation(xLoc, yLoc);
-				moveByGroup(target);
-			}
-			else {
-				boolean toldToAttack = rc.readBroadcast(Broadcast.soldierMarchCh) == 1;
-	
-				if (toldToAttack) {
-					target = rc.senseEnemyHQLocation();
-				}
-				else {
-					int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
-					int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
-					target = new MapLocation(xLoc, yLoc);
-				}
 				int dirint = DirectionHelper.directionToInt(rc.getLocation().directionTo(target));
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2};

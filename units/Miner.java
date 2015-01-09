@@ -1,7 +1,7 @@
-package battlecode2015.units;
+package team158.units;
 
+import team158.utils.*;
 import battlecode.common.*;
-import battlecode2015.utils.*;
 
 public class Miner extends Unit {
 	private Direction prevDirection = null;

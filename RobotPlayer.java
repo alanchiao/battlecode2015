@@ -1,14 +1,14 @@
-package battlecode2015;
+package team158;
 
+import team158.buildings.Barracks;
+import team158.buildings.Headquarters;
+import team158.buildings.MinerFactory;
+import team158.buildings.Tower;
+import team158.units.Basher;
+import team158.units.Beaver;
+import team158.units.Miner;
+import team158.units.Soldier;
 import battlecode.common.*;
-import battlecode2015.buildings.Barracks;
-import battlecode2015.buildings.Headquarters;
-import battlecode2015.buildings.MinerFactory;
-import battlecode2015.buildings.Tower;
-import battlecode2015.units.Basher;
-import battlecode2015.units.Beaver;
-import battlecode2015.units.Miner;
-import battlecode2015.units.Soldier;
 
 public class RobotPlayer {
 	private static RobotController rc;

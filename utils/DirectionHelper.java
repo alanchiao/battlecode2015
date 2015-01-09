@@ -1,4 +1,4 @@
-package battlecode2015.utils;
+package team158.utils;
 
 import battlecode.common.Direction;
 

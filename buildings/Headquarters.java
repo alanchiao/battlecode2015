@@ -1,10 +1,11 @@
-package battlecode2015.buildings;
+package team158.buildings;
 
 import battlecode.common.*;
-import battlecode2015.utils.DirectionHelper;
-import battlecode2015.utils.Broadcast;
 
 import java.util.*;
+
+import team158.utils.Broadcast;
+import team158.utils.DirectionHelper;
 
 public class Headquarters extends Building {
 	public HashSet<Integer> groupID = new HashSet<Integer>();

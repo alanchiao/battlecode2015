@@ -1,7 +1,7 @@
-package battlecode2015.buildings;
+package team158.buildings;
+import team158.Robot;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import battlecode2015.Robot;
 
 public abstract class Building extends Robot {
 	protected double hqDistance = 0;

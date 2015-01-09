@@ -1,9 +1,9 @@
-package battlecode2015.units;
+package team158.units;
 
+import team158.units.com.Navigation;
+import team158.utils.Broadcast;
+import team158.utils.DirectionHelper;
 import battlecode.common.*;
-import battlecode2015.units.com.Navigation;
-import battlecode2015.utils.DirectionHelper;
-import battlecode2015.utils.Broadcast;
 
 public class Soldier extends Unit {
 	protected void actions() throws GameActionException {

@@ -1,14 +1,14 @@
-package battlecode2015.units.com;
+package team158.units.com;
 
 
+import team158.units.Unit;
+import team158.utils.DirectionHelper;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import battlecode2015.units.Unit;
-import battlecode2015.utils.DirectionHelper;
 
 public class Navigation {
 	

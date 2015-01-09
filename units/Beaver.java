@@ -1,8 +1,8 @@
-package battlecode2015.units;
+package team158.units;
 
+import team158.units.com.Navigation;
+import team158.utils.*;
 import battlecode.common.*;
-import battlecode2015.units.com.Navigation;
-import battlecode2015.utils.*;
 
 public class Beaver extends Unit {
 	protected void actions() throws GameActionException {

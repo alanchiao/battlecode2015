@@ -1,10 +1,10 @@
-package battlecode2015.buildings;
+package team158.buildings;
 
+import team158.utils.Broadcast;
+import team158.utils.DirectionHelper;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotType;
-import battlecode2015.utils.Broadcast;
-import battlecode2015.utils.DirectionHelper;
 
 public class Barracks extends Building {
 	protected void actions() throws GameActionException {
