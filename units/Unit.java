@@ -18,6 +18,12 @@ public abstract class Unit extends Robot {
 	
 	// grouping information
 	public int groupID = -1;
+	/**
+	 * groupID:
+	 * -1 = ungrouped
+	 * 0 = retreating back
+	 * >0 = grouped  
+	 */
 	
 	public void move() {
 		try {
@@ -134,7 +140,10 @@ public abstract class Unit extends Robot {
 	public void moveByGroup() {
 		try {
 			boolean toldToAttack = rc.readBroadcast(groupID) == 1;
-			
+			//Broadcast = 0 means degroup;
+//			if (!toldToAttack) {
+//				groupID = -1;
+//			}
 			MapLocation target;
 			if (toldToAttack) {
 				target = rc.senseEnemyHQLocation();
