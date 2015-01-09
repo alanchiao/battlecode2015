@@ -33,29 +33,26 @@ public class Navigation {
 				for (Direction attemptedDir: clockwiseDirections) {
 					MapLocation attemptedLocation = rc.getLocation().add(attemptedDir);
 					
-					// if there is a unit there, do not move to prevent logic
-					// from messing up
+					// if there is a unit there blocking the hug path, pause movement
 					if(isMobileUnit(rc, attemptedLocation)) {
 						return;
 					}
 					
-					// move in that direction. handle updating logic
+					// move in that direction. newLocation = attemptedLocation. Handle updating logic
 					if (rc.canMove(attemptedDir)) {
-						// search for obstacles immediately next to new location
+						// search for next monitored obstacle, which is one of four directions from next location
 						Direction obstacleSearch[] = {Direction.NORTH, Direction.EAST,	Direction.SOUTH, Direction.WEST};
 						MapLocation potNextObsts[] = new MapLocation[4];
 						int numObstacles = 0;
 						for (Direction dir: obstacleSearch) {
 							MapLocation potentialObstacle = attemptedLocation.add(dir);
-							
-							// ignore yourself
+							// ignore yourself - not obstacle
 							if (dir == attemptedDir.opposite()) {
 								continue;
 							}
 							if (isStationaryBlock(rc, potentialObstacle)) { // then is obstacle
 								potNextObsts[numObstacles] = potentialObstacle;
 								numObstacles++;
-								rc.setIndicatorDot(potentialObstacle, 0, 0, 0);
 							}
 						}
 						
@@ -71,11 +68,11 @@ public class Navigation {
 						if (bestObstacle != null) {
 							unit.monitoredObstacle = bestObstacle;
 						} else {
-							// System.out.println("NO OBSTACLE? ERROR");
+							System.out.println("NO OBSTACLE? ERROR");
 						}
 						
-						// check if angle of direction to destination is between angle of movement of this turn and last turn
-						// obstacle avoided if that is the case
+						// have traversed past a part of the obstacle if
+						// going in the same direction again
 						if(attemptedDir == unit.origDirection) {
 							unit.isAvoidingObstacle = false;
 							unit.monitoredObstacle = null;
@@ -86,6 +83,7 @@ public class Navigation {
 					}
 				}
 			}
+			// not in state of avoiding obstacle
 			else if (rc.canMove(directDirection)) {
 				rc.move(directDirection);
 			// possibly found obstacle
@@ -101,7 +99,6 @@ public class Navigation {
 					randomizedMoveToDestination(rc, unit);
 				}
 			}
-		// error
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
