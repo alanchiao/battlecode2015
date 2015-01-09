@@ -21,11 +21,11 @@ public class Headquarters extends Building {
 		int numSoldiersG1 = 0;
 		int numSoldiersG2 = 0;
 		int numBashers = 0;
-		int numBashers701 = 0;
 		int numBeavers = 0;
 		int numBarracks = 0;
 		int numMiners = 0;
 		int numMinerFactories = 0;
+		int numSupplyDepots = 0;
 		
 		int minBeaverDistance = 25; // Make sure that the closest beaver is actually close
 		int closestBeaver = 0;
@@ -68,15 +68,18 @@ public class Headquarters extends Building {
 				numMiners++;
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
+			} else if (type == RobotType.SUPPLYDEPOT) {
+				numSupplyDepots++;
 			}
 		}
 		
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
 		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
 		rc.broadcast(Broadcast.numBashersCh, numBashers);
-		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numMinersCh, numMiners);
+		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numMinerFactoriesCh, numMinerFactories);
+		rc.broadcast(Broadcast.numSupplyDepotsCh, numSupplyDepots);
 		
 		if (rc.isWeaponReady()) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(
@@ -94,7 +97,7 @@ public class Headquarters extends Building {
 			if (numBeavers < 2) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
-				int dirint = rand.nextInt(8);
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseEnemyHQLocation()));
 				while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BEAVER)) {
 					offsetIndex++;
 				}
@@ -116,6 +119,9 @@ public class Headquarters extends Building {
 				rc.broadcast(Broadcast.buildBarracksCh, closestBeaver);
 				// tell closest beaver to build barracks
 			}
+			else if (numSupplyDepots < 3 && ore >= 500) {
+				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
+			}
 
 			//Only update soldiers if current group is dead
 //			if (numSoldiers700 == 0 && numSoldiers > 30) { 
@@ -132,11 +138,7 @@ public class Headquarters extends Building {
 //			}
 			int[] groupSize = {numSoldiersG1, numSoldiersG2};
 			int[] groupCh = {Broadcast.soldierGroup1Ch, Broadcast.soldierGroup2Ch};
-			if (numSoldiersG1 == 0 && numSoldiersG2==0 && numSoldiers >30) {
-				groupUnits(Broadcast.soldierGroup1Ch, RobotType.SOLDIER);
-			}
 
-			
 			if (groupSize[attackGroup]>30) {
 				System.out.println(groupCh[attackGroup] + "  " +groupSize[attackGroup]);
 				rc.broadcast(groupCh[attackGroup], 1);
