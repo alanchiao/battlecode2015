@@ -18,11 +18,11 @@ public class Headquarters extends Building {
 		int numSoldiers = 0;
 		int numSoldiers700 = 0;
 		int numBashers = 0;
-		int numBashers701 = 0;
 		int numBeavers = 0;
 		int numBarracks = 0;
 		int numMiners = 0;
 		int numMinerFactories = 0;
+		int numSupplyDepots = 0;
 		
 		int minBeaverDistance = 25; // Make sure that the closest beaver is actually close
 		int closestBeaver = 0;
@@ -43,24 +43,24 @@ public class Headquarters extends Building {
 				}
 			} else if (type == RobotType.BASHER) {
 				numBashers++;
-				if (groupID.contains(r.ID)) {
-					numBashers701++;
-				}
 			} else if (type == RobotType.BARRACKS) {
 				numBarracks++;
 			} else if (type == RobotType.MINER) {
 				numMiners++;
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
+			} else if (type == RobotType.SUPPLYDEPOT) {
+				numSupplyDepots++;
 			}
 		}
 		
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
 		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
 		rc.broadcast(Broadcast.numBashersCh, numBashers);
-		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numMinersCh, numMiners);
+		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numMinerFactoriesCh, numMinerFactories);
+		rc.broadcast(Broadcast.numSupplyDepotsCh, numSupplyDepots);
 		
 		if (rc.isWeaponReady()) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(
@@ -78,7 +78,7 @@ public class Headquarters extends Building {
 			if (numBeavers < 2) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
-				int dirint = rand.nextInt(8);
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseEnemyHQLocation()));
 				while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BEAVER)) {
 					offsetIndex++;
 				}
@@ -100,9 +100,12 @@ public class Headquarters extends Building {
 				rc.broadcast(Broadcast.buildBarracksCh, closestBeaver);
 				// tell closest beaver to build barracks
 			}
+			else if (numSupplyDepots < 3 && ore >= 500) {
+				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
+			}
 
 			
-			if (numSoldiers700 == 0 && numSoldiers > 30) {
+			if (numSoldiers700 < 5 && numSoldiers > 30) {
 				groupUnits(Broadcast.soldierGroupCh, RobotType.SOLDIER);
 				rc.broadcast(Broadcast.soldierGroupCh, 1);
 			}
