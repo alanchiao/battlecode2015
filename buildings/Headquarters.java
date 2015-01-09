@@ -145,8 +145,8 @@ public class Headquarters extends Building {
 				groupUnits(groupCh[defendGroup], RobotType.SOLDIER);
 			}
 			else if (rc.readBroadcast(groupCh[attackGroup])==1 && groupSize[attackGroup] < 20) {
-				System.out.println(groupSize[attackGroup]);
-				System.out.println(groupCh[attackGroup]);
+//				System.out.println(groupSize[attackGroup]);
+//				System.out.println(groupCh[attackGroup]);
 //				if (groupID.containsKey(groupCh[attackGroup])) {
 //					groupID.get(groupCh[attackGroup]).clear();
 //				}
