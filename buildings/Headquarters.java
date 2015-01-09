@@ -103,8 +103,8 @@ public class Headquarters extends Building {
 
 			
 			if (numSoldiers700 == 0 && numSoldiers > 30) {
-				groupUnits(700, RobotType.SOLDIER);
-				rc.broadcast(700, 1);
+				groupUnits(Broadcast.soldierGroupCh, RobotType.SOLDIER);
+				rc.broadcast(Broadcast.soldierGroupCh, 1);
 			}
 			else {
 				stopGroup(RobotType.SOLDIER);
