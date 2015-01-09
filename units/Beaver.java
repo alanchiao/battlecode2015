@@ -1,6 +1,5 @@
 package team158.units;
 
-import team158.units.com.Navigation;
 import team158.utils.*;
 import battlecode.common.*;
 

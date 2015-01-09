@@ -68,9 +68,14 @@ public abstract class Unit extends Robot {
 				}
 				if (broadcastCh != -1) {
 					int group = rc.readBroadcast(broadcastCh);
-					if (group != 0) {
+					if (group > 0) {
 						groupID = group;
 					}
+				}
+			}
+			else {
+				if (rc.readBroadcast(groupID) == -1) {
+					groupID = -1;
 				}
 			}
 			// Unit-specific actions
@@ -140,10 +145,6 @@ public abstract class Unit extends Robot {
 	public void moveByGroup() {
 		try {
 			boolean toldToAttack = rc.readBroadcast(groupID) == 1;
-			//Broadcast = 0 means degroup;
-//			if (!toldToAttack) {
-//				groupID = -1;
-//			}
 			MapLocation target;
 			if (toldToAttack) {
 				target = rc.senseEnemyHQLocation();
@@ -152,6 +153,11 @@ public abstract class Unit extends Robot {
 				int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
 				int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
 				target = new MapLocation(xLoc, yLoc);
+				// TODO: more robust way of determining when rally point has been reached
+				if (target.distanceSquaredTo(rc.getLocation()) <= 24) {
+					rc.broadcast(groupID, -1);
+					groupID = -1;
+				}
 			}
 			
 			if (this.destinationPoint != target) { // then no longer obstacle

@@ -58,8 +58,7 @@ public class RobotPlayer {
 
 		while(true) {
             try {
-                rc.setIndicatorString(0, "This is an indicator string.");
-                rc.setIndicatorString(1, "I am a " + rc.getType());
+                rc.setIndicatorString(0, "I am a " + rc.getType());
             } catch (Exception e) {
                 System.out.println("Unexpected exception");
                 e.printStackTrace();
