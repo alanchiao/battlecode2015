@@ -29,7 +29,6 @@ public class Navigation {
 			if(unit.isAvoidingObstacle) { // then hug wall in counterclockwise motion
 				Direction dirToObstacle = rc.getLocation().directionTo(unit.monitoredObstacle);
 				Direction clockwiseDirections[] = DirectionHelper.getClockwiseDirections(dirToObstacle);
-				
 				for (Direction attemptedDir: clockwiseDirections) {
 					MapLocation attemptedLocation = rc.getLocation().add(attemptedDir);
 					
@@ -60,8 +59,9 @@ public class Navigation {
 						double maxDistanceSquared = -1;
 						MapLocation bestObstacle = null;
 						for (int j = 0; j < numObstacles; j++) {
-							double distanceSquared = (rc.getLocation().x - potNextObsts[j].x)^2 + (rc.getLocation().y - potNextObsts[j].y)^2;
+							double distanceSquared = Math.pow(rc.getLocation().x - potNextObsts[j].x, 2) + Math.pow(rc.getLocation().y - potNextObsts[j].y, 2);
 							if (distanceSquared > maxDistanceSquared) {
+								maxDistanceSquared = distanceSquared;
 								bestObstacle = potNextObsts[j];
 							}
 						}
@@ -76,6 +76,7 @@ public class Navigation {
 						if(attemptedDir == unit.origDirection) {
 							unit.isAvoidingObstacle = false;
 							unit.monitoredObstacle = null;
+							unit.origDirection = null;
 						}
 						
 						rc.move(attemptedDir);
