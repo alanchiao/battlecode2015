@@ -28,22 +28,12 @@ public class Soldier extends Unit {
 			else {
 				MapLocation target;
 				if (groupID != -1) {
+					moveByGroup();
+				}
+				else {
 					int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
 					int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
 					target = new MapLocation(xLoc, yLoc);
-					moveByGroup(target);
-				}
-				else {
-					boolean toldToAttack = rc.readBroadcast(Broadcast.soldierMarchCh) == 1;
-		
-					if (toldToAttack) {
-						target = rc.senseEnemyHQLocation();
-					}
-					else {
-						int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
-						int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
-						target = new MapLocation(xLoc, yLoc);
-					}
 					this.destinationPoint = target;
 					Navigation.moveToDestinationPoint(rc, this);
 				}

@@ -129,7 +129,7 @@ public abstract class Unit extends Robot {
 		}
 	}
 	
-	public void moveByGroup(MapLocation location) {
+	public void moveByGroup() {
 		try {
 			boolean toldToAttack = rc.readBroadcast(groupID) == 1;
 			

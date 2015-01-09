@@ -29,7 +29,7 @@ public class Basher extends Unit {
 				moveByGroup(target);
 			}
 			else {
-				boolean toldToAttack = rc.readBroadcast(Broadcast.soldierMarchCh) == 1 ? true : false;
+				boolean toldToAttack = rc.readBroadcast(Broadcast.soldierMarchCh) == 1;
 	
 				if (toldToAttack) {
 					target = rc.senseEnemyHQLocation();

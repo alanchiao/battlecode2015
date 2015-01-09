@@ -7,7 +7,7 @@ import battlecode2015.utils.Broadcast;
 import java.util.*;
 
 public class Headquarters extends Building {
-	public ArrayList<Integer> groupID = new ArrayList<Integer>();
+	public HashSet<Integer> groupID = new HashSet<Integer>();
 	
 	protected void actions() throws GameActionException {
 		
@@ -104,7 +104,7 @@ public class Headquarters extends Building {
 			if (numSoldiers700 > 30) {
 				//System.out.println(numSoldiers700);
 				rc.broadcast(700, 1);
-			} else if (numSoldiers700 <= 30) {
+			} else if (numSoldiers700 <= 15) {
 				//System.out.println(numSoldiers700);
 				rc.broadcast(700, 0);
 				groupUnits(700, RobotType.SOLDIER);
@@ -117,13 +117,6 @@ public class Headquarters extends Building {
 //				//System.out.println(numBashers701);
 //				rc.broadcast(701, 0);
 //				groupUnits(701, RobotType.BASHER);
-//			}
-			
-//			// soldier count high enough, tell them to move
-//			if (numSoldiers > 25) {
-//				rc.broadcast(Broadcast.soldierMarchCh, 1);
-//			} else if (numSoldiers < 15) {
-//				rc.broadcast(Broadcast.soldierMarchCh, 0);
 //			}
 		}
 	}
