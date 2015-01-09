@@ -102,13 +102,12 @@ public class Headquarters extends Building {
 			}
 
 			
-			if (numSoldiers700 > 30) {
-				//System.out.println(numSoldiers700);
-				rc.broadcast(700, 1);
-			} else if (numSoldiers700 <= 15) {
-				//System.out.println(numSoldiers700);
-				rc.broadcast(700, 0);
-				groupUnits(700, RobotType.SOLDIER);
+			if (numSoldiers700 == 0 && numSoldiers > 30) {
+				groupUnits(Broadcast.soldierGroupCh, RobotType.SOLDIER);
+				rc.broadcast(Broadcast.soldierGroupCh, 1);
+			}
+			else {
+				stopGroup(RobotType.SOLDIER);
 			}
 			
 //			if (numBashers701 > 50) {
@@ -150,6 +149,28 @@ public class Headquarters extends Building {
 		}
 		try {
 			rc.broadcast(broadcastCh, ID_Broadcast);
+		}
+		catch (GameActionException e) {
+			return;
+		}
+	}
+	
+	public void stopGroup(RobotType rt) {
+		int broadcastCh;
+		if (rt == RobotType.SOLDIER) {
+			broadcastCh = Broadcast.groupingSoldiersCh;
+		}
+		else if (rt == RobotType.DRONE) {
+			broadcastCh = Broadcast.groupingDronesCh;
+		}
+		else if (rt == RobotType.BASHER) {
+			broadcastCh = Broadcast.groupingBashersCh;
+		}
+		else {
+			broadcastCh = 9999;
+		}
+		try {
+			rc.broadcast(broadcastCh, 0);
 		}
 		catch (GameActionException e) {
 			return;

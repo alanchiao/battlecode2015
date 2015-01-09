@@ -49,20 +49,24 @@ public abstract class Unit extends Robot {
 			}
 			
 			// Grouping stage
-			int broadcastCh = -1;
-			if (rc.getType() == RobotType.SOLDIER) {
-				broadcastCh = Broadcast.groupingSoldiersCh;
+			if (groupID == -1) {
+				int broadcastCh = -1;
+				if (rc.getType() == RobotType.SOLDIER) {
+					broadcastCh = Broadcast.groupingSoldiersCh;
+				}
+				else if (rc.getType() == RobotType.DRONE) {
+					broadcastCh = Broadcast.groupingDronesCh;
+				}
+				else if (rc.getType() == RobotType.BASHER) {
+					broadcastCh = Broadcast.groupingBashersCh;
+				}
+				if (broadcastCh != -1) {
+					int group = rc.readBroadcast(broadcastCh);
+					if (group != 0) {
+						groupID = group;
+					}
+				}
 			}
-			else if (rc.getType() == RobotType.DRONE) {
-				broadcastCh = Broadcast.groupingDronesCh;
-			}
-			else if (rc.getType() == RobotType.BASHER) {
-				broadcastCh = Broadcast.groupingBashersCh;
-			}
-			if (broadcastCh != -1 && rc.readBroadcast(700) !=1) {
-				groupID = rc.readBroadcast(broadcastCh);
-			}
-			
 			// Unit-specific actions
 			actions();
 		}

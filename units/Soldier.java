@@ -27,7 +27,7 @@ public class Soldier extends Unit {
 			}
 			else {
 				MapLocation target;
-				if (groupID != -1) {
+				if (groupID > 0) {
 					moveByGroup();
 				}
 				else {
