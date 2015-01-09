@@ -140,7 +140,7 @@ public class Headquarters extends Building {
 			int[] groupCh = {Broadcast.soldierGroup1Ch, Broadcast.soldierGroup2Ch};
 
 			if (groupSize[attackGroup]>30) {
-				System.out.println(groupCh[attackGroup] + "  " +groupSize[attackGroup]);
+				//System.out.println(groupCh[attackGroup] + "  " +groupSize[attackGroup]);
 				rc.broadcast(groupCh[attackGroup], 1);
 				groupUnits(groupCh[defendGroup], RobotType.SOLDIER);
 			}
