@@ -13,7 +13,7 @@ public class Headquarters extends Building {
 	int defendGroup = 0;
 	//public HashSet<Integer> groupID = new HashSet<Integer>();
 	//public HashMap<Integer, Integer> groupID = new HashMap <Integer, Integer> ();
-	public HashMap<Integer, HashSet<Integer>> groupID = new HashMap<Integer, HashSet<Integer>> ();
+	public HashMap<Integer, Integer> groupID = new HashMap<Integer, Integer> ();
 	protected void actions() throws GameActionException {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
 		rc.setIndicatorString(1, Integer.toString(myRobots.length));
@@ -36,24 +36,24 @@ public class Headquarters extends Building {
 			if (type == RobotType.SOLDIER) {
 				numSoldiers++;
 				//check if soldier is part of some group
-//				if (groupID.containsKey(r.ID)) {
-//					if (groupID.get(r.ID) == Broadcast.soldierGroup1Ch) {
-//						numSoldiersG1++;
-//					}					
-//					else if (groupID.get(r.ID) == Broadcast.soldierGroup2Ch) {
-//						numSoldiersG2++;
-//					}
-//				}
-				if(groupID.containsKey(Broadcast.soldierGroup1Ch)){
-					if(groupID.get(Broadcast.soldierGroup1Ch).contains(r.ID)) {
+				if (groupID.containsKey(r.ID)) {
+					if (groupID.get(r.ID) == Broadcast.soldierGroup1Ch) {
 						numSoldiersG1++;
-					}				
-				}
-				if(groupID.containsKey(Broadcast.soldierGroup2Ch)){
-					if(groupID.get(Broadcast.soldierGroup2Ch).contains(r.ID)) {
+					}					
+					else if (groupID.get(r.ID) == Broadcast.soldierGroup2Ch) {
 						numSoldiersG2++;
 					}
 				}
+//				if(groupID.containsKey(Broadcast.soldierGroup1Ch)){
+//					if(groupID.get(Broadcast.soldierGroup1Ch).contains(r.ID)) {
+//						numSoldiersG1++;
+//					}				
+//				}
+//				if(groupID.containsKey(Broadcast.soldierGroup2Ch)){
+//					if(groupID.get(Broadcast.soldierGroup2Ch).contains(r.ID)) {
+//						numSoldiersG2++;
+//					}
+//				}
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
 				int distanceSquared = r.location.distanceSquaredTo(myLocation);
@@ -144,10 +144,10 @@ public class Headquarters extends Building {
 				rc.broadcast(groupCh[attackGroup], 1);
 				groupUnits(groupCh[defendGroup], RobotType.SOLDIER);
 			}
-			if (beginning) {
+			if (rc.readBroadcast(groupCh[attackGroup])==0) {
 				groupUnits(groupCh[attackGroup], RobotType.SOLDIER);
 			}
-			else if (rc.readBroadcast(groupCh[attackGroup])==1 && groupSize[attackGroup] < 20) {
+			else if (rc.readBroadcast(groupCh[attackGroup])==1 && groupSize[attackGroup] < 15) {
 				System.out.println(groupSize[attackGroup]);
 				System.out.println(groupCh[attackGroup]);
 //				if (groupID.containsKey(groupCh[attackGroup])) {
@@ -176,13 +176,8 @@ public class Headquarters extends Building {
 			RobotType type = r.type;
 			if (type == RobotType.SOLDIER) {
 				//update hashmap with (id, group id) pair;
-				if (groupID.containsKey(ID_Broadcast)) {
-					groupID.get(ID_Broadcast).add(r.ID);
-				}
-				else {
-					HashSet<Integer> n = new HashSet<Integer> ();
-					n.add(r.ID);
-					groupID.put(ID_Broadcast,n);
+				if (!groupID.containsKey(r.ID)) {
+					groupID.put(r.ID,ID_Broadcast);
 				}
 			}
 //			if (type == RobotType.BASHER) {
