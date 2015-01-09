@@ -10,16 +10,14 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 
 public abstract class Unit extends Robot {
-	// stored information about reaching a destination
-	// for navigation
-	public int groupID = -1;
-	public MapLocation destinationPoint; // desired point to reach
+	// navigation information
 	public boolean isAvoidingObstacle = false; // whether in state of avoiding obstacle
-	public MapLocation lastObstacle; // obstacle tile to move relative to
-	public MapLocation lastLocation; // unit's location in previous step
-	public Direction lastDirectionMoved = null;
+	public MapLocation destinationPoint; // desired point to reach
 	public Direction origDirection = null; // original direction of collision of robot into obstacle
+	public MapLocation monitoredObstacle; // obstacle tile to move relative to
 	
+	// grouping information
+	public int groupID = -1;
 	
 	public void move() {
 		try {
@@ -143,6 +141,9 @@ public abstract class Unit extends Robot {
 				target = new MapLocation(xLoc, yLoc);
 			}
 			
+			if (this.destinationPoint != target) { // then no longer obstacle
+				this.isAvoidingObstacle = false;
+			}
 			this.destinationPoint = target;
 			Navigation.moveToDestinationPoint(rc, this);
 
