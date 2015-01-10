@@ -17,7 +17,7 @@ public class Headquarters extends Building {
 	private int defendGroup = 0;
 	
 	// 0 - undecided, 1 - ground, 2 - air
-	private int strategy = 1;
+	private int strategy = 2;
 	
 	
 	protected void actions() throws GameActionException {
@@ -66,7 +66,84 @@ public class Headquarters extends Building {
 	}
 	
 	protected void aerialGame() throws GameActionException {
-		// Do not fill in until groundGame has been optimized
+		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
+		MapLocation myLocation = rc.getLocation();
+		int numBeavers = 0;
+		int numMiners = 0;
+		int numMinerFactories = 0;
+		int numSupplyDepots = 0;
+		int numHelipads = 0;
+		
+		int minBeaverDistance = 25; // Make sure that the closest beaver is actually close
+		int closestBeaver = 0;
+		
+		for (RobotInfo r : myRobots) {
+			RobotType type = r.type;
+			if (type == RobotType.MINER) {
+				numMiners++;
+			} else if (type == RobotType.BEAVER) {
+				numBeavers++;
+				int distanceSquared = r.location.distanceSquaredTo(myLocation);
+				if (distanceSquared < minBeaverDistance) {
+					closestBeaver = r.ID;
+					minBeaverDistance = r.location.distanceSquaredTo(myLocation);
+				}
+			} else if (type == RobotType.MINERFACTORY) {
+				numMinerFactories++;
+			} else if (type == RobotType.SUPPLYDEPOT) {
+				numSupplyDepots++;
+			} else if (type == RobotType.HELIPAD) {
+				numHelipads++;
+			}
+		}
+		
+		if (rc.isWeaponReady()) {
+			RobotInfo[] enemies = rc.senseNearbyRobots(
+				rc.getType().attackRadiusSquared,
+				rc.getTeam().opponent()
+			);
+			if (enemies.length > 0) {
+				rc.attackLocation(enemies[0].location);
+			}
+		}
+
+		if (rc.isCoreReady()) {
+			double ore = rc.getTeamOre();
+			if (numBeavers < 2) {
+				int offsetIndex = 0;
+				int[] offsets = {0,1,-1,2,-2,3,-3,4};
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseEnemyHQLocation()));
+				while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BEAVER)) {
+					offsetIndex++;
+				}
+				Direction buildDirection = null;
+				if (offsetIndex < 8) {
+					buildDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
+				}
+				if (buildDirection != null && ore >= 100) {
+					rc.spawn(buildDirection, RobotType.BEAVER);
+				}
+			}
+			else if (numHelipads == 0) {
+				if (ore >= 300) {
+					rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
+				}
+			} else if (numMinerFactories == 0) {
+				if (ore >= 500) {
+					rc.broadcast(Broadcast.buildMinerFactoriesCh, closestBeaver);
+				}
+			} else if (numSupplyDepots == 0 && ore >= 100) {
+				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
+			}
+			else if (ore >= 300 + numHelipads * 200) {
+				rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
+				// tell closest beaver to build barracks
+			}
+			else if (numSupplyDepots < 3 && ore >= 500) {
+				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
+			} 
+		}
+		
 	}
 
 	protected void groundGame() throws GameActionException {

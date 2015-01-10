@@ -53,6 +53,24 @@ public class Beaver extends Unit {
 					rc.disintegrate();
 				}
 			}
+			else if (rc.readBroadcast(Broadcast.buildHelipadsCh) == rc.getID()) {
+				rc.broadcast(Broadcast.buildHelipadsCh, 0);
+				int offsetIndex = 0;
+				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(rc.senseEnemyHQLocation()));
+				while (offsetIndex < 8 && !rc.canBuild(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.HELIPAD)) {
+					offsetIndex++;
+				}
+				Direction buildDirection = null;
+				if (offsetIndex < 8) {
+					buildDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
+				}
+				if (buildDirection != null) {
+					rc.build(buildDirection, RobotType.HELIPAD);
+				}
+				else {
+					rc.disintegrate();
+				}
+			}
 			// HQ has given command for this particular beaver to build a supply depot
 			else if (rc.readBroadcast(Broadcast.buildSupplyCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildSupplyCh, 0);

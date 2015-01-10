@@ -2,6 +2,7 @@ package team158;
 
 import team158.buildings.Barracks;
 import team158.buildings.Headquarters;
+import team158.buildings.Helipad;
 import team158.buildings.MinerFactory;
 import team158.buildings.Tower;
 import team158.units.Beaver;
@@ -20,6 +21,7 @@ public class RobotPlayer {
 	private static Barracks barracks;
 	private static Miner miner;
 	private static MinerFactory minerfactory;
+	private static Helipad helipad;
 	
 	public static void run(RobotController r) {
 		rc = r;
@@ -55,6 +57,10 @@ public class RobotPlayer {
         	minerfactory = new MinerFactory();
 			minerfactory.setRC(rc);
 		}
+        if (rc.getType() == RobotType.HELIPAD) {
+        	helipad = new Helipad();
+        	helipad.setRC(rc);
+        }
 
 		while(true) {
             try {
@@ -87,6 +93,9 @@ public class RobotPlayer {
 			}
             if (rc.getType() == RobotType.MINERFACTORY) {
 				minerfactory.move();
+			}
+            if (rc.getType() == RobotType.HELIPAD) {
+				helipad.move();
 			}
 			
 			rc.yield();
