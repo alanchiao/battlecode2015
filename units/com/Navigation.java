@@ -16,6 +16,7 @@ public class Navigation {
 	
 	public static void moveToDestinationPoint(RobotController rc, Unit unit) {
 		rc.setIndicatorString(0, unit.destinationPoint.toString());
+		rc.setIndicatorString(1, Boolean.toString(unit.isAvoidingObstacle));
 		if (USE_WALL_HUGGING) {
 			wallHuggingToDestination(rc, unit);
 		} else {
@@ -26,6 +27,7 @@ public class Navigation {
 	public static void wallHuggingToDestination(RobotController rc, Unit unit) {
 		try {
 			Direction directDirection = rc.getLocation().directionTo(unit.destinationPoint);
+			MapLocation directLocation = rc.getLocation().add(directDirection);
 			
 			if(unit.isAvoidingObstacle) { // then hug wall in counterclockwise motion
 				Direction dirToObstacle = rc.getLocation().directionTo(unit.monitoredObstacle);
@@ -33,15 +35,14 @@ public class Navigation {
 				for (Direction attemptedDir: clockwiseDirections) {
 					MapLocation attemptedLocation = rc.getLocation().add(attemptedDir);
 					
-					// if there is a unit there blocking the hug path, pause movement
+					// if there is a unit there blocking the hug path, randomize movement
 					if(isMobileUnit(rc, attemptedLocation)) {
 						unit.isAvoidingObstacle = false;
 						randomizedMoveToDestination(rc, unit);
 						return;
 					}
-					
 					// move in that direction. newLocation = attemptedLocation. Handle updating logic
-					if (rc.canMove(attemptedDir)) {
+					else if (!isStationaryBlock(rc, attemptedLocation) && rc.canMove(attemptedDir)) {
 						// search for next monitored obstacle, which is one of four directions from next location
 						Direction obstacleSearch[] = {Direction.NORTH, Direction.EAST,	Direction.SOUTH, Direction.WEST};
 						MapLocation potNextObsts[] = new MapLocation[4];
@@ -62,12 +63,13 @@ public class Navigation {
 						double maxDistanceSquared = -1;
 						MapLocation bestObstacle = null;
 						for (int j = 0; j < numObstacles; j++) {
-							double distanceSquared = Math.pow(rc.getLocation().x - potNextObsts[j].x, 2) + Math.pow(rc.getLocation().y - potNextObsts[j].y, 2);
+							double distanceSquared = rc.getLocation().distanceSquaredTo(potNextObsts[j]);
 							if (distanceSquared > maxDistanceSquared) {
 								maxDistanceSquared = distanceSquared;
 								bestObstacle = potNextObsts[j];
 							}
 						}
+						
 						if (bestObstacle != null) {
 							unit.monitoredObstacle = bestObstacle;
 						} else {
@@ -88,14 +90,15 @@ public class Navigation {
 				}
 			}
 			// not in state of avoiding obstacle
-			else if (rc.canMove(directDirection)) {
+			else if (rc.canMove(directDirection) && !isNearMultipleEnemyTowers(rc, rc.getLocation().add(directDirection))) {
 				rc.move(directDirection);
 			// possibly found obstacle
 			} else {
 				MapLocation blockade = rc.getLocation().add(directDirection);
-				// only treat as obstacle if stationary
+				// only treat as obstacle if stationary or dangerous
 				// otherwise things get ugly in some cases
-				if (isStationaryBlock(rc, blockade) && !isBuilding(rc, blockade)) {
+				// if ((isStationaryBlock(rc, blockade) && !isBuilding(rc, blockade)) || isNearMultipleEnemyTowers(rc, blockade)) {
+				if (isStationaryBlock(rc, blockade)) {
 					unit.isAvoidingObstacle = true;
 					unit.monitoredObstacle = rc.getLocation().add(directDirection);
 					unit.origDirection = directDirection;
@@ -114,7 +117,8 @@ public class Navigation {
 			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(unit.destinationPoint));
 			int offsetIndex = 0;
 			int[] offsets = {0,1,-1,2,-2};
-			while (offsetIndex < 5 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
+			while (offsetIndex < 5 && (!rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])
+								   || isStationaryBlock(rc, rc.getLocation().add(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])))) {
 				offsetIndex++;
 			}
 			Direction moveDirection = null;
@@ -131,7 +135,7 @@ public class Navigation {
 	
 	// check if the location is somewhere already occupied by something stationary
 	public static boolean isStationaryBlock(RobotController rc, MapLocation potentialObstacle) throws GameActionException{
-		return !rc.senseTerrainTile(potentialObstacle).isTraversable() || isBuilding(rc, potentialObstacle);
+		return !rc.senseTerrainTile(potentialObstacle).isTraversable() || isBuilding(rc, potentialObstacle) || isNearMultipleEnemyTowers(rc, potentialObstacle);
 	}
 	
 	// check if there is a building at a location
@@ -152,7 +156,6 @@ public class Navigation {
 			   type == RobotType.TECHNOLOGYINSTITUTE ||
 			   type == RobotType.TOWER ||
 			   type == RobotType.TRAININGFIELD;
-			   
 	}
 	
 	// check if is unit that moves often
@@ -167,5 +170,20 @@ public class Navigation {
 			   type == RobotType.COMMANDER ||
 			   type == RobotType.DRONE ||
 			   type == RobotType.SOLDIER;
+	}
+	
+	// checks if location is near more than one tower
+	public static boolean isNearMultipleEnemyTowers(RobotController rc, MapLocation location) {
+		MapLocation[] enemyTowerLocs = rc.senseEnemyTowerLocations();
+		int numCloseEnemyTowers = 0;
+		for (MapLocation enemyTowerLo: enemyTowerLocs) {
+			if (enemyTowerLo.distanceSquaredTo(location) <= 35) {
+				numCloseEnemyTowers ++;
+				if (numCloseEnemyTowers >= 4) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

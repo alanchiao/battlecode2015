@@ -4,8 +4,8 @@ import team158.buildings.Barracks;
 import team158.buildings.Headquarters;
 import team158.buildings.MinerFactory;
 import team158.buildings.Tower;
-import team158.units.Basher;
 import team158.units.Beaver;
+import team158.units.Drone;
 import team158.units.Miner;
 import team158.units.Soldier;
 import battlecode.common.*;
@@ -16,7 +16,7 @@ public class RobotPlayer {
 	private static Tower tower;
 	private static Soldier soldier;
 	private static Beaver beaver;
-	private static Basher basher;
+	private static Drone drone;
 	private static Barracks barracks;
 	private static Miner miner;
 	private static MinerFactory minerfactory;
@@ -39,9 +39,9 @@ public class RobotPlayer {
 			beaver = new Beaver();
 			beaver.setRC(rc);
 		}
-		if (rc.getType() == RobotType.BASHER) {
-			basher = new Basher();
-			basher.setRC(rc);
+		if (rc.getType() == RobotType.DRONE) {
+			drone = new Drone();
+			drone.setRC(rc);
 		}
         if (rc.getType() == RobotType.BARRACKS) {
         	barracks = new Barracks();
@@ -76,8 +76,8 @@ public class RobotPlayer {
 			if (rc.getType() == RobotType.BEAVER) {
 				beaver.move();
 			}
-			if (rc.getType() == RobotType.BASHER) {
-				basher.move();
+			if (rc.getType() == RobotType.DRONE) {
+				drone.move();
 			}
             if (rc.getType() == RobotType.BARRACKS) {
 				barracks.move();

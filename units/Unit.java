@@ -63,9 +63,6 @@ public abstract class Unit extends Robot {
 				else if (rc.getType() == RobotType.DRONE) {
 					broadcastCh = Broadcast.groupingDronesCh;
 				}
-				else if (rc.getType() == RobotType.BASHER) {
-					broadcastCh = Broadcast.groupingBashersCh;
-				}
 				if (broadcastCh != -1) {
 					int group = rc.readBroadcast(broadcastCh);
 					if (group > 0) {
