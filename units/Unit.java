@@ -49,6 +49,7 @@ public abstract class Unit extends Robot {
 					for (RobotInfo r : friendlyRobots) {
 						if (r.supplyLevel < r.type.supplyUpkeep * 50) {
 							rc.transferSupplies(Math.min(mySupply / 2, r.type.supplyUpkeep * 200), r.location);
+							break;
 						}
 					}
 				}
