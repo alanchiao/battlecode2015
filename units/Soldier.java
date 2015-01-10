@@ -33,8 +33,7 @@ public class Soldier extends Unit {
 					int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
 					int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
 					target = new MapLocation(xLoc, yLoc);
-					
-					if (this.destinationPoint != target) { // then no longer obstacle
+					if (this.destinationPoint != null && (this.destinationPoint.x != target.x || this.destinationPoint.y != target.y)) { // then no longer obstacle
 						this.isAvoidingObstacle = false;
 					}
 					this.destinationPoint = target;

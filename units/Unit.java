@@ -159,8 +159,8 @@ public abstract class Unit extends Robot {
 					groupID = -1;
 				}
 			}
-			
-			if (this.destinationPoint != target) { // then no longer obstacle
+			// optimization. stop trying to traverse an obstacle once destination changes
+			if (this.destinationPoint != null &&  (this.destinationPoint.x != target.x || this.destinationPoint.y != target.y)) { // then no longer obstacle
 				this.isAvoidingObstacle = false;
 			}
 			this.destinationPoint = target;
