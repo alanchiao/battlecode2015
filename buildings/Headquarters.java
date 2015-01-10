@@ -6,19 +6,22 @@ import java.util.*;
 
 import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
+import team158.utils.Hashing;
 
 public class Headquarters extends Building {
 	int attackGroup = 1;
 	int defendGroup = 0;
-
-	public HashMap<Integer, Integer> groupID = new HashMap<Integer, Integer> ();
+	int[] groupID = new int[7919];
+	int[] groupA = new int[200];
+	int[] groupB = new int[200];
+	
 	protected void actions() throws GameActionException {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
 		MapLocation myLocation = rc.getLocation();
 		int numSoldiers = 0;
 		int numSoldiersG1 = 0;
 		int numSoldiersG2 = 0;
-		int numDrones = 0;
+		int numBashers = 0;
 		int numBeavers = 0;
 		int numBarracks = 0;
 		int numMiners = 0;
@@ -28,21 +31,27 @@ public class Headquarters extends Building {
 		int minBeaverDistance = 25; // Make sure that the closest beaver is actually close
 		int closestBeaver = 0;
 		int byteUsed = Clock.getBytecodeNum();
-		System.out.println("Before Looping = " + byteUsed);
+		//System.out.println("Before Looping = " + byteUsed);
 		
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
 			if (type == RobotType.SOLDIER) {
 				numSoldiers++;
 				//check if soldier is part of some group
-				if (groupID.containsKey(r.ID)) {
-					if (groupID.get(r.ID) == Broadcast.soldierGroup1Ch) {
-						numSoldiersG1++;
-					}					
-					else if (groupID.get(r.ID) == Broadcast.soldierGroup2Ch) {
-						numSoldiersG2++;
-					}
-				}
+//				if (groupID.containsKey(r.ID)) {
+//					if (groupID.get(r.ID) == Broadcast.soldierGroup1Ch) {
+//						numSoldiersG1++;
+//					}					
+//					else if (groupID.get(r.ID) == Broadcast.soldierGroup2Ch) {
+//						numSoldiersG2++;
+//					}
+//				}
+				if (Hashing.find(groupID, r.ID) == Broadcast.soldierGroup1Ch) {
+					numSoldiersG1++;
+				}							
+				else if (Hashing.find(groupID, r.ID)  == Broadcast.soldierGroup2Ch) {
+					numSoldiersG2++;
+				}			
 
 			} else if (type == RobotType.MINER) {
 				numMiners++;
@@ -53,8 +62,8 @@ public class Headquarters extends Building {
 					closestBeaver = r.ID;
 					minBeaverDistance = r.location.distanceSquaredTo(myLocation);
 				}
-			} else if (type == RobotType.DRONE) {
-				numDrones++;
+			} else if (type == RobotType.BASHER) {
+				numBashers++;
 			} else if (type == RobotType.BARRACKS) {
 				numBarracks++;
 			} else if (type == RobotType.MINERFACTORY) {
@@ -64,11 +73,10 @@ public class Headquarters extends Building {
 			}
 		}
 		
-		System.out.println("After looping = " + (Clock.getBytecodeNum()-byteUsed));
+		//System.out.println("After looping = " + (Clock.getBytecodeNum()-byteUsed));
 		
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
 		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
-		rc.broadcast(Broadcast.numDronesCh, numDrones);
 		rc.broadcast(Broadcast.numMinersCh, numMiners);
 		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numMinerFactoriesCh, numMinerFactories);
@@ -121,7 +129,6 @@ public class Headquarters extends Building {
 
 			int[] groupSize = {numSoldiersG1, numSoldiersG2};
 			int[] groupCh = {Broadcast.soldierGroup1Ch, Broadcast.soldierGroup2Ch};
-
 			if (numSoldiersG1 > 0 || numSoldiersG2 > 0) {
 				stopGroup(RobotType.SOLDIER);
 			}
@@ -144,21 +151,30 @@ public class Headquarters extends Building {
 	
 	public void groupUnits(int ID_Broadcast, RobotType rt) {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
+		int i = 0;
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
 			if (type == RobotType.SOLDIER) {
 				//update hashmap with (id, group id) pair;
-				if (!groupID.containsKey(r.ID)) {
-					groupID.put(r.ID, ID_Broadcast);
+				// if soldier is in the hashmap but not in a group
+				//System.out.println("Soldier without group = " + r.ID);
+				if (Hashing.find(groupID, ID_Broadcast) == 0) {
+					Hashing.put(groupID, r.ID, ID_Broadcast);
+					//update the corresponding broadcasted group
+					if (ID_Broadcast == Broadcast.soldierGroup1Ch) {
+						groupA[i] = r.ID;
+						i++;
+					}
+					else if (ID_Broadcast == Broadcast.soldierGroup2Ch) {
+						groupB[i] = r.ID;
+						i++;
+					}
 				}
 			}
 		}
 		int broadcastCh;
 		if (rt == RobotType.SOLDIER) {
 			broadcastCh = Broadcast.groupingSoldiersCh;
-		}
-		else if (rt == RobotType.DRONE) {
-			broadcastCh = Broadcast.groupingDronesCh;
 		}
 		else if (rt == RobotType.DRONE) {
 			broadcastCh = Broadcast.groupingDronesCh;
@@ -196,11 +212,34 @@ public class Headquarters extends Building {
 	public void unGroup(int ID_Broadcast) {
 		try {
 			rc.broadcast(ID_Broadcast, -1);
-			for (Iterator<Map.Entry<Integer, Integer>> i = groupID.entrySet().iterator(); i.hasNext();) {
-			    if (i.next().getValue() == ID_Broadcast) {
-			        i.remove();
-			    }
+
+			if (ID_Broadcast == Broadcast.soldierGroup1Ch) {
+				for (int i = 0; i < groupA.length; i++) {
+					if (groupA[i] == 0) {
+						break;
+					}
+					if (Hashing.find(groupID, groupA[i]) == ID_Broadcast) {
+						Hashing.put(groupID, groupA[i], 0);
+					}
+				}
+				groupA = new int[200];
 			}
+			else if (ID_Broadcast == Broadcast.soldierGroup2Ch) {
+				for (int i = 0; i < groupB.length; i++) {
+					if (groupB[i] == 0) {
+						break;
+					}
+					if (Hashing.find(groupID, groupB[i]) == ID_Broadcast) {
+						Hashing.put(groupID, groupB[i], 0);
+					}
+				}
+				groupB = new int[200];
+			}
+//			for (Iterator<Map.Entry<Integer, Integer>> i = groupID.entrySet().iterator(); i.hasNext();) {
+//			    if (i.next().getValue() == ID_Broadcast) {
+//			        i.remove();
+//			    }
+//			}
 		}
 		catch (GameActionException e) {
 			return;

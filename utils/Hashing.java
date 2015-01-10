@@ -2,28 +2,15 @@ package team158.utils;
 
 public class Hashing {
 	
-	public int hash(int key, int i) {
-		return key;
+	public static void put(int[] arr, int key, int value) {
+		int hashedKey = (key*(key+5))%arr.length;
+		arr[hashedKey] = value;
 	}
-	public boolean add(int[] arr, int key, int value) {
-		int i = 0;
-		int hashedKey = hash(key,i);
-		while (arr[hashedKey] != 0 && i < arr.length) {
-			hashedKey = hash(key,++i);
-		}
-		if (arr[hashedKey] == 0) {
-			arr[hashedKey] = value;
-			return true;
-		}
-		else return false;
-	}
-	public int find(int[] arr, int key) {
-		int i = 0;
-		int hashedKey = hash(key,i);
-		while (arr[hashedKey] == 0 && i < arr.length) {
-			hashedKey = hash(key,i++);
-		}
-		return 0;
+	public static int find(int[] arr, int key) {
+		//System.out.println("key = " + key);
+		int hashedKey = (key*(key+5))%arr.length;
+		//System.out.println("hashedKey = " + hashedKey);
+		return arr[hashedKey];
 	}
 	
 	
