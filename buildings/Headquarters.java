@@ -17,7 +17,7 @@ public class Headquarters extends Building {
 		int numSoldiers = 0;
 		int numSoldiersG1 = 0;
 		int numSoldiersG2 = 0;
-		int numBashers = 0;
+		int numDrones = 0;
 		int numBeavers = 0;
 		int numBarracks = 0;
 		int numMiners = 0;
@@ -47,8 +47,8 @@ public class Headquarters extends Building {
 					closestBeaver = r.ID;
 					minBeaverDistance = r.location.distanceSquaredTo(myLocation);
 				}
-			} else if (type == RobotType.BASHER) {
-				numBashers++;
+			} else if (type == RobotType.DRONE) {
+				numDrones++;
 			} else if (type == RobotType.BARRACKS) {
 				numBarracks++;
 			} else if (type == RobotType.MINER) {
@@ -62,7 +62,7 @@ public class Headquarters extends Building {
 		
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
 		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
-		rc.broadcast(Broadcast.numBashersCh, numBashers);
+		rc.broadcast(Broadcast.numDronesCh, numDrones);
 		rc.broadcast(Broadcast.numMinersCh, numMiners);
 		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numMinerFactoriesCh, numMinerFactories);
@@ -154,8 +154,8 @@ public class Headquarters extends Building {
 		else if (rt == RobotType.DRONE) {
 			broadcastCh = Broadcast.groupingDronesCh;
 		}
-		else if (rt == RobotType.BASHER) {
-			broadcastCh = Broadcast.groupingBashersCh;
+		else if (rt == RobotType.DRONE) {
+			broadcastCh = Broadcast.groupingDronesCh;
 		}
 		else {
 			broadcastCh = 9999;
@@ -175,9 +175,6 @@ public class Headquarters extends Building {
 		}
 		else if (rt == RobotType.DRONE) {
 			broadcastCh = Broadcast.groupingDronesCh;
-		}
-		else if (rt == RobotType.BASHER) {
-			broadcastCh = Broadcast.groupingBashersCh;
 		}
 		else {
 			broadcastCh = 9999;

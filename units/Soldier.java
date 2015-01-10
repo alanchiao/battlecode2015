@@ -42,15 +42,4 @@ public class Soldier extends Unit {
 			}
 		}	
 	}
-	//////////////////////////////
-	// Detection methods
-	
-	// count number of friend units next to you
-	public int countNearbyFriendlyUnits() {
-		RobotInfo[] allies = rc.senseNearbyRobots(
-				rc.getType().attackRadiusSquared,
-				rc.getTeam()
-			);
-		return allies.length;
-	}
 }
