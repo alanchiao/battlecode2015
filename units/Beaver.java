@@ -78,10 +78,13 @@ public class Beaver extends Unit {
 				Direction bestDirection = null;
 				// looks around for an ore concentration that is bigger than its current location by a certain fraction
 				for (Direction dir: DirectionHelper.directions) {
-					double possibleOre = rc.senseOre(myLocation.add(dir));
-					if (possibleOre > maxOre && rc.canMove(dir)) {
-						maxOre = possibleOre;
-						bestDirection = dir;
+					MapLocation possibleLocation = myLocation.add(dir);
+					if (possibleLocation.distanceSquaredTo(rc.senseHQLocation()) < 8) {
+						double possibleOre = rc.senseOre(possibleLocation);
+						if (possibleOre > maxOre && rc.canMove(dir)) {
+							maxOre = possibleOre;
+							bestDirection = dir;
+						}
 					}
 				}
 				if (maxOre > 1.5 * currentOre && bestDirection != null) {

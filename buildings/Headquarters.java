@@ -33,7 +33,36 @@ public class Headquarters extends Building {
 	}
 
 	protected void openingGame() throws GameActionException {
-		// TODO: Have a beaver scout and another beaver build. Switch on round ~300.
+		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
+		MapLocation myLocation = rc.getLocation();
+		double myOre = rc.getTeamOre();
+
+		int numBeavers = 0;
+		for (RobotInfo r : myRobots) {
+			if (r.type == RobotType.BEAVER) {
+				numBeavers++;
+			}
+		}
+		
+		if (rc.isCoreReady()) {
+			if (numBeavers == 0) {
+				int offsetIndex = 0;
+				int[] offsets = {0,1,-1,2,-2,3,-3,4};
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseEnemyHQLocation()));
+				while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BEAVER)) {
+					offsetIndex++;
+				}
+				Direction buildDirection = null;
+				if (offsetIndex < 8) {
+					buildDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
+				}
+				if (buildDirection != null && myOre >= 100) {
+					rc.spawn(buildDirection, RobotType.BEAVER);
+				}
+			}
+		}
+		RobotInfo[] enemyRobots = rc.senseNearbyRobots(999999, rc.getTeam().opponent());
+		
 	}
 	
 	protected void aerialGame() throws GameActionException {
@@ -52,9 +81,7 @@ public class Headquarters extends Building {
 		int numMinerFactories = 0;
 		int numSupplyDepots = 0;
 		
-		int minBeaverDistance = 25; // Make sure that the closest beaver is actually close
 		int closestBeaver = 0;
-		int byteUsed = Clock.getBytecodeNum();
 		
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
@@ -71,11 +98,7 @@ public class Headquarters extends Building {
 				numMiners++;
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
-				int distanceSquared = r.location.distanceSquaredTo(myLocation);
-				if (distanceSquared < minBeaverDistance) {
-					closestBeaver = r.ID;
-					minBeaverDistance = r.location.distanceSquaredTo(myLocation);
-				}
+				closestBeaver = r.ID;
 			} else if (type == RobotType.BARRACKS) {
 				numBarracks++;
 			} else if (type == RobotType.MINERFACTORY) {
@@ -105,7 +128,7 @@ public class Headquarters extends Building {
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
 			// Spawn beavers
-			if (numBeavers < 2) {
+			if (numBeavers == 0) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseEnemyHQLocation()));
@@ -121,7 +144,7 @@ public class Headquarters extends Building {
 				}
 			}
 			// Broadcast to build structures
-			else if (numMinerFactories < 2) {
+			else if (numMinerFactories == 0) {
 				if (ore >= 500) {
 					rc.broadcast(Broadcast.buildMinerFactoriesCh, closestBeaver);
 				}
