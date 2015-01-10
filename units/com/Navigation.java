@@ -15,6 +15,7 @@ public class Navigation {
 	public static final boolean USE_WALL_HUGGING = true;
 	
 	public static void moveToDestinationPoint(RobotController rc, Unit unit) {
+		rc.setIndicatorString(0, unit.destinationPoint.toString());
 		if (USE_WALL_HUGGING) {
 			wallHuggingToDestination(rc, unit);
 		} else {
@@ -34,6 +35,8 @@ public class Navigation {
 					
 					// if there is a unit there blocking the hug path, pause movement
 					if(isMobileUnit(rc, attemptedLocation)) {
+						unit.isAvoidingObstacle = false;
+						randomizedMoveToDestination(rc, unit);
 						return;
 					}
 					
