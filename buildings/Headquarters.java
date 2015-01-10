@@ -8,17 +8,41 @@ import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
 
 public class Headquarters extends Building {
-	int attackGroup = 1;
-	int defendGroup = 0;
 
+	private int attackGroup = 1;
+	private int defendGroup = 0;
+	
+	// 0 - undecided, 1 - ground, 2 - air
+	private int strategy = 1;
+	
 	public HashMap<Integer, Integer> groupID = new HashMap<Integer, Integer> ();
+	
 	protected void actions() throws GameActionException {
+		if (strategy == 1) {
+			groundGame();
+		}
+		else if (strategy == 2) {
+			aerialGame();
+		}
+		else {
+			openingGame();
+		}
+	}
+
+	protected void openingGame() throws GameActionException {
+		// TODO: Have a beaver scout and another beaver build. Switch on round ~300.
+	}
+	
+	protected void aerialGame() throws GameActionException {
+		// Do not fill in until groundGame has been optimized
+	}
+
+	protected void groundGame() throws GameActionException {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
 		MapLocation myLocation = rc.getLocation();
 		int numSoldiers = 0;
 		int numSoldiersG1 = 0;
 		int numSoldiersG2 = 0;
-		int numDrones = 0;
 		int numBeavers = 0;
 		int numBarracks = 0;
 		int numMiners = 0;
@@ -53,8 +77,6 @@ public class Headquarters extends Building {
 					closestBeaver = r.ID;
 					minBeaverDistance = r.location.distanceSquaredTo(myLocation);
 				}
-			} else if (type == RobotType.DRONE) {
-				numDrones++;
 			} else if (type == RobotType.BARRACKS) {
 				numBarracks++;
 			} else if (type == RobotType.MINERFACTORY) {
@@ -68,7 +90,6 @@ public class Headquarters extends Building {
 		
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
 		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
-		rc.broadcast(Broadcast.numDronesCh, numDrones);
 		rc.broadcast(Broadcast.numMinersCh, numMiners);
 		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numMinerFactoriesCh, numMinerFactories);
@@ -156,9 +177,6 @@ public class Headquarters extends Building {
 		int broadcastCh;
 		if (rt == RobotType.SOLDIER) {
 			broadcastCh = Broadcast.groupingSoldiersCh;
-		}
-		else if (rt == RobotType.DRONE) {
-			broadcastCh = Broadcast.groupingDronesCh;
 		}
 		else if (rt == RobotType.DRONE) {
 			broadcastCh = Broadcast.groupingDronesCh;
