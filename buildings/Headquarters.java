@@ -51,8 +51,6 @@ public class Headquarters extends Building {
 		
 		int minBeaverDistance = 25; // Make sure that the closest beaver is actually close
 		int closestBeaver = 0;
-		int byteUsed = Clock.getBytecodeNum();
-		System.out.println("Before Looping = " + byteUsed);
 		
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
@@ -85,8 +83,6 @@ public class Headquarters extends Building {
 				numSupplyDepots++;
 			}
 		}
-		
-		System.out.println("After looping = " + (Clock.getBytecodeNum()-byteUsed));
 		
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
 		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
