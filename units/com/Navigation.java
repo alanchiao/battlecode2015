@@ -13,6 +13,7 @@ import battlecode.common.RobotType;
 public class Navigation {
 	
 	public static final boolean USE_WALL_HUGGING = true;
+	public static final int MAX_TOWERS_IN_RANGE = 3;
 	
 	public static void moveToDestinationPoint(RobotController rc, Unit unit) {
 		rc.setIndicatorString(0, unit.destinationPoint.toString());
@@ -20,14 +21,14 @@ public class Navigation {
 		if (USE_WALL_HUGGING) {
 			wallHuggingToDestination(rc, unit);
 		} else {
-			randomizedMoveToDestination(rc, unit);
+			greedyMoveToDestination(rc, unit);
 		}
 	}
 	
+	// wall hugging!
 	public static void wallHuggingToDestination(RobotController rc, Unit unit) {
 		try {
 			Direction directDirection = rc.getLocation().directionTo(unit.destinationPoint);
-			MapLocation directLocation = rc.getLocation().add(directDirection);
 			
 			if(unit.isAvoidingObstacle) { // then hug wall in counterclockwise motion
 				Direction dirToObstacle = rc.getLocation().directionTo(unit.monitoredObstacle);
@@ -38,11 +39,11 @@ public class Navigation {
 					// if there is a unit there blocking the hug path, randomize movement
 					if(isMobileUnit(rc, attemptedLocation)) {
 						unit.isAvoidingObstacle = false;
-						randomizedMoveToDestination(rc, unit);
+						greedyMoveToDestination(rc, unit);
 						return;
 					}
 					// move in that direction. newLocation = attemptedLocation. Handle updating logic
-					else if (!isStationaryBlock(rc, attemptedLocation) && rc.canMove(attemptedDir)) {
+					else if (rc.canMove(attemptedDir) && !isNearMultipleEnemyTowers(rc, rc.getLocation().add(directDirection))) {
 						// search for next monitored obstacle, which is one of four directions from next location
 						Direction obstacleSearch[] = {Direction.NORTH, Direction.EAST,	Direction.SOUTH, Direction.WEST};
 						MapLocation potNextObsts[] = new MapLocation[4];
@@ -72,9 +73,7 @@ public class Navigation {
 						
 						if (bestObstacle != null) {
 							unit.monitoredObstacle = bestObstacle;
-						} else {
-							System.out.println("NO OBSTACLE? ERROR");
-						}
+						} 
 						
 						// have traversed past a part of the obstacle if
 						// going in the same direction again
@@ -95,15 +94,12 @@ public class Navigation {
 			// possibly found obstacle
 			} else {
 				MapLocation blockade = rc.getLocation().add(directDirection);
-				// only treat as obstacle if stationary or dangerous
-				// otherwise things get ugly in some cases
-				// if ((isStationaryBlock(rc, blockade) && !isBuilding(rc, blockade)) || isNearMultipleEnemyTowers(rc, blockade)) {
 				if (isStationaryBlock(rc, blockade)) {
 					unit.isAvoidingObstacle = true;
 					unit.monitoredObstacle = rc.getLocation().add(directDirection);
 					unit.origDirection = directDirection;
-				} else {
-					randomizedMoveToDestination(rc, unit);
+				} else { // otherwise, using bugging gets scary with moving obstacles
+					greedyMoveToDestination(rc, unit);
 				}
 			}
 		} catch (GameActionException e) {
@@ -111,7 +107,7 @@ public class Navigation {
 		}
 	}
 	
-	public static void randomizedMoveToDestination(RobotController rc, Unit unit) {
+	public static void greedyMoveToDestination(RobotController rc, Unit unit) {
 		try {
 			MapLocation myLocation = rc.getLocation();
 			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(unit.destinationPoint));
@@ -133,7 +129,7 @@ public class Navigation {
 		}
 	}
 	
-	// check if the location is somewhere already occupied by something stationary
+	// check if the location is somewhere a bot cannot go more or less for the entire game
 	public static boolean isStationaryBlock(RobotController rc, MapLocation potentialObstacle) throws GameActionException{
 		return !rc.senseTerrainTile(potentialObstacle).isTraversable() || isBuilding(rc, potentialObstacle) || isNearMultipleEnemyTowers(rc, potentialObstacle);
 	}
@@ -159,6 +155,7 @@ public class Navigation {
 	}
 	
 	// check if is unit that moves often
+	// MAY NEED TO EDIT
 	public static boolean isMobileUnit(RobotController rc, MapLocation potentialUnit) throws GameActionException{
 		RobotInfo robot = rc.senseRobotAtLocation(potentialUnit);
 		if (robot == null) {
@@ -172,14 +169,15 @@ public class Navigation {
 			   type == RobotType.SOLDIER;
 	}
 	
-	// checks if location is near more than one tower
+	// checks if location is a danger with respect to the number of towers
+	// that can attack a location
 	public static boolean isNearMultipleEnemyTowers(RobotController rc, MapLocation location) {
 		MapLocation[] enemyTowerLocs = rc.senseEnemyTowerLocations();
 		int numCloseEnemyTowers = 0;
 		for (MapLocation enemyTowerLo: enemyTowerLocs) {
 			if (enemyTowerLo.distanceSquaredTo(location) <= 35) {
 				numCloseEnemyTowers ++;
-				if (numCloseEnemyTowers >= 4) {
+				if (numCloseEnemyTowers > MAX_TOWERS_IN_RANGE) {
 					return true;
 				}
 			}

@@ -34,7 +34,7 @@ public class DirectionHelper {
 	// get directions going clockwise starting from one direction clockwise
 	// from initDir
 	public static Direction[] getClockwiseDirections(Direction initDir) {
-		Direction clockwiseDirections[] = new Direction[8];
+		Direction clockwiseDirections[] = new Direction[7];
 		for(int i = 1; i <= 7; i++) {
 			Direction nextDir = DirectionHelper.directions[(directionToInt(initDir) + i) % 8];
 			clockwiseDirections[i - 1] = nextDir;
