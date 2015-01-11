@@ -15,9 +15,17 @@ public class Navigation {
 	public static final boolean USE_WALL_HUGGING = true;
 	public static final int MAX_TOWERS_IN_RANGE = 3;
 	
-	public static void moveToDestinationPoint(RobotController rc, Unit unit) {
-		rc.setIndicatorString(0, unit.destinationPoint.toString());
+	public static void moveToDestination(RobotController rc, Unit unit, MapLocation destination) {
+		// optimization: stop avoiding current obstacle if destination changes
+		if (unit.destination != null &&  (unit.destination.x != destination.x || unit.destination.y != destination.y)) { // then no longer obstacle
+			unit.isAvoidingObstacle = false;
+		}
+		
+		// new destination
+		unit.destination = destination;
+		rc.setIndicatorString(0, unit.destination.toString());
 		rc.setIndicatorString(1, Boolean.toString(unit.isAvoidingObstacle));
+		
 		if (USE_WALL_HUGGING) {
 			wallHuggingToDestination(rc, unit);
 		} else {
@@ -28,7 +36,8 @@ public class Navigation {
 	// wall hugging!
 	public static void wallHuggingToDestination(RobotController rc, Unit unit) {
 		try {
-			Direction directDirection = rc.getLocation().directionTo(unit.destinationPoint);
+			Direction directDirection = rc.getLocation().directionTo(unit.destination);
+			MapLocation directLocation = rc.getLocation().add(directDirection);
 			
 			if(unit.isAvoidingObstacle) { // then hug wall in counterclockwise motion
 				Direction dirToObstacle = rc.getLocation().directionTo(unit.monitoredObstacle);
@@ -36,14 +45,15 @@ public class Navigation {
 				for (Direction attemptedDir: clockwiseDirections) {
 					MapLocation attemptedLocation = rc.getLocation().add(attemptedDir);
 					
-					// if there is a unit there blocking the hug path, randomize movement
+					// if there is a unit there blocking the hug path, move greedily
 					if(isMobileUnit(rc, attemptedLocation)) {
-						unit.isAvoidingObstacle = false;
+						stopObstacleTracking(unit);
 						greedyMoveToDestination(rc, unit);
 						return;
 					}
 					// move in that direction. newLocation = attemptedLocation. Handle updating logic
-					else if (rc.canMove(attemptedDir) && !isNearMultipleEnemyTowers(rc, rc.getLocation().add(directDirection))) {
+
+					else if (isPassable(rc, attemptedLocation, attemptedDir)) {
 						// search for next monitored obstacle, which is one of four directions from next location
 						Direction obstacleSearch[] = {Direction.NORTH, Direction.EAST,	Direction.SOUTH, Direction.WEST};
 						MapLocation potNextObsts[] = new MapLocation[4];
@@ -54,7 +64,7 @@ public class Navigation {
 							if (dir == attemptedDir.opposite()) {
 								continue;
 							}
-							if (isStationaryBlock(rc, potentialObstacle)) { // then is obstacle
+							if (isObstacle(rc, attemptedLocation)) { // then is obstacle
 								potNextObsts[numObstacles] = potentialObstacle;
 								numObstacles++;
 							}
@@ -78,9 +88,7 @@ public class Navigation {
 						// have traversed past a part of the obstacle if
 						// going in the same direction again
 						if(attemptedDir == unit.origDirection) {
-							unit.isAvoidingObstacle = false;
-							unit.monitoredObstacle = null;
-							unit.origDirection = null;
+							stopObstacleTracking(unit);
 						}
 						
 						rc.move(attemptedDir);
@@ -89,15 +97,13 @@ public class Navigation {
 				}
 			}
 			// not in state of avoiding obstacle
-			else if (rc.canMove(directDirection) && !isNearMultipleEnemyTowers(rc, rc.getLocation().add(directDirection))) {
+
+			else if (isPassable(rc, directLocation, directDirection)) {
 				rc.move(directDirection);
 			// possibly found obstacle
 			} else {
-				MapLocation blockade = rc.getLocation().add(directDirection);
-				if (isStationaryBlock(rc, blockade)) {
-					unit.isAvoidingObstacle = true;
-					unit.monitoredObstacle = rc.getLocation().add(directDirection);
-					unit.origDirection = directDirection;
+				if (isStationaryBlock(rc, directLocation)) {
+					startObstacleTracking(unit, directLocation, directDirection);
 				} else { // otherwise, using bugging gets scary with moving obstacles
 					greedyMoveToDestination(rc, unit);
 				}
@@ -107,10 +113,11 @@ public class Navigation {
 		}
 	}
 	
+	// greedy movement
 	public static void greedyMoveToDestination(RobotController rc, Unit unit) {
 		try {
 			MapLocation myLocation = rc.getLocation();
-			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(unit.destinationPoint));
+			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(unit.destination));
 			int offsetIndex = 0;
 			int[] offsets = {0,1,-1,2,-2};
 			while (offsetIndex < 5 && (!rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])
@@ -121,12 +128,39 @@ public class Navigation {
 			if (offsetIndex < 5) {
 				moveDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
 			}
-			if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(unit.destinationPoint) <= myLocation.distanceSquaredTo(unit.destinationPoint)) {
+			if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(unit.destination) <= myLocation.distanceSquaredTo(unit.destination)) {
 				rc.move(moveDirection);
 			}
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	////////////////////////////////////////////////////////////////////////////////////////
+	// Helper methods
+	public static void stopObstacleTracking(Unit unit) {
+		unit.isAvoidingObstacle = false;
+		unit.monitoredObstacle = null;
+		unit.origDirection = null;
+	}
+	
+	public static void startObstacleTracking(Unit unit, MapLocation obstacle, Direction collisionDirection) {
+		unit.isAvoidingObstacle = true;
+		unit.monitoredObstacle = obstacle;
+		unit.origDirection = collisionDirection;
+	}
+	
+	////////////////////////////////////////////////////////////////////////////////////////
+	// Location analysis methods
+	
+	// treat as passable or not
+	public static boolean isPassable(RobotController rc, MapLocation location, Direction movementDirection) {
+		return rc.canMove(movementDirection) && !isNearMultipleEnemyTowers(rc, location);
+	}
+	
+	// treat as obstacle or not to wall hug along
+	public static boolean isObstacle (RobotController rc, MapLocation location) throws GameActionException {
+		return isStationaryBlock(rc, location);
 	}
 	
 	// check if the location is somewhere a bot cannot go more or less for the entire game
