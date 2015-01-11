@@ -44,7 +44,7 @@ public class Navigation {
 			Direction directDirection = rc.getLocation().directionTo(unit.destination);
 			MapLocation directLocation = rc.getLocation().add(directDirection);
 			
-			if(unit.isAvoidingObstacle) { // then hug wall in counterclockwise motion
+			if (unit.isAvoidingObstacle) { // then hug wall in counterclockwise motion
 				Direction dirToObstacle = rc.getLocation().directionTo(unit.monitoredObstacle);
 				Direction clockwiseDirections[] = DirectionHelper.getClockwiseDirections(dirToObstacle);
 				for (Direction attemptedDir: clockwiseDirections) {
@@ -172,10 +172,9 @@ public class Navigation {
 	// treat as passable or not
 	public static boolean isPassable(RobotController rc, Unit unit, MapLocation location, Direction movementDirection) {
 		boolean isPassable = rc.canMove(movementDirection); 
-		if(unit.isAvoidAllAttack) {
+		if (unit.isAvoidAllAttack) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
-			boolean[] possibleMovesAvoidingEnemies = moveDirectionsAvoidingAttack(rc, enemies, 5);
-			if(!possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(movementDirection)]) {
+			if(!isAvoidingAttack(rc, enemies, 5, location)) {
 				return false;
 			}
 		} else {
@@ -201,20 +200,46 @@ public class Navigation {
 	// set range to infinity -> only avoid towers and HQ
 	// otherwise, also avoid units with attack range greater than rangeSquared
 	
+	public static boolean isAvoidingAttack(RobotController rc, RobotInfo[] enemies, int rangeSquared, MapLocation loc) {
+		// enemies
+		for (RobotInfo enemy : enemies) {
+			if (enemy.type.attackRadiusSquared > rangeSquared) {
+				if (loc.distanceSquaredTo(enemy.location) <= enemy.type.attackRadiusSquared) {
+					return false;
+				}
+			}
+		}
+		// towers
+		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+		for (MapLocation l : enemyTowers) {
+			if (loc.distanceSquaredTo(l) <= 24) {
+				return false;
+			}
+		}
+		// hq
+		MapLocation enemyHQ = rc.senseEnemyHQLocation();
+		int initDistance = loc.distanceSquaredTo(enemyHQ);
+		if (enemyTowers.length < 2) {
+			if (initDistance <= 24) {
+				return false;
+			}
+		}
+		else if (initDistance <= 35) {
+			return false;
+		}
+		return true;
+	}
+
 	public static boolean[] moveDirectionsAvoidingAttack(RobotController rc, RobotInfo[] enemies, int rangeSquared) {
 		boolean[] possibleMovesAvoidingEnemies = {true,true,true,true,true,true,true,true,true};
 		MapLocation myLocation = rc.getLocation();
+		possibleMovesAvoidingEnemies[8] = isAvoidingAttack(rc, enemies, rangeSquared, myLocation);
 		// enemies
-		if (enemies.length > 0) {
-			for (RobotInfo enemy : enemies) {
-				if (enemy.type.attackRadiusSquared > rangeSquared) {
-					if (myLocation.distanceSquaredTo(enemy.location) <= enemy.type.attackRadiusSquared) {
-						possibleMovesAvoidingEnemies[8] = false;
-					}
-					for (Direction d : DirectionHelper.directions) {
-						if (myLocation.add(d).distanceSquaredTo(enemy.location) <= enemy.type.attackRadiusSquared) {
-							possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-						}
+		for (RobotInfo enemy : enemies) {
+			if (enemy.type.attackRadiusSquared > rangeSquared) {
+				for (Direction d : DirectionHelper.directions) {
+					if (myLocation.add(d).distanceSquaredTo(enemy.location) <= enemy.type.attackRadiusSquared) {
+						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
 					}
 				}
 			}
@@ -224,9 +249,6 @@ public class Navigation {
 		for (MapLocation l : enemyTowers) {
 			int initDistance = myLocation.distanceSquaredTo(l);
 			if (initDistance <= 34) {
-				if (initDistance <= 24) {
-					possibleMovesAvoidingEnemies[8] = false;
-				}
 				for (Direction d : DirectionHelper.directions) {
 					if (myLocation.add(d).distanceSquaredTo(l) <= 24) {
 						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
@@ -239,9 +261,6 @@ public class Navigation {
 		int initDistance = myLocation.distanceSquaredTo(enemyHQ);
 		if (enemyTowers.length < 2) {
 			if (initDistance <= 34) {
-				if (initDistance <= 24) {
-					possibleMovesAvoidingEnemies[8] = false;
-				}
 				for (Direction d : DirectionHelper.directions) {
 					if (myLocation.add(d).distanceSquaredTo(enemyHQ) <= 24) {
 						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
@@ -251,11 +270,8 @@ public class Navigation {
 		}
 		else {
 			if (initDistance <= 52) {
-				if (initDistance <= 35) {
-					possibleMovesAvoidingEnemies[8] = false;
-				}
 				for (Direction d : DirectionHelper.directions) {
-					if (myLocation.add(d).distanceSquaredTo(enemyHQ) <= 24) {
+					if (myLocation.add(d).distanceSquaredTo(enemyHQ) <= 35) {
 						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
 					}
 				}
