@@ -17,7 +17,7 @@ public class Headquarters extends Building {
 	private int defendGroup = 0;
 	
 	// 0 - undecided, 1 - ground, 2 - air
-	private int strategy = 2;
+	private int strategy = 1;
 	
 	
 	protected void actions() throws GameActionException {

@@ -30,14 +30,10 @@ public class Soldier extends Unit {
 					moveByGroup();
 				}
 				else {
-					int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
-					int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
-					target = new MapLocation(xLoc, yLoc);
-					if (this.destinationPoint != null && (this.destinationPoint.x != target.x || this.destinationPoint.y != target.y)) { // then no longer obstacle
-						this.isAvoidingObstacle = false;
-					}
-					this.destinationPoint = target;
-					Navigation.moveToDestinationPoint(rc, this);
+					int targetXLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
+					int targetYLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
+					target = new MapLocation(targetXLoc, targetYLoc);
+					Navigation.moveToDestination(rc, this, target);
 				}
 			}
 		}	

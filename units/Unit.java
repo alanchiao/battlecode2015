@@ -12,7 +12,7 @@ import battlecode.common.RobotType;
 public abstract class Unit extends Robot {
 	// navigation information
 	public boolean isAvoidingObstacle = false; // whether in state of avoiding obstacle
-	public MapLocation destinationPoint; // desired point to reach
+	public MapLocation destination; // desired point to reach
 	public Direction origDirection = null; // original direction of collision of robot into obstacle
 	public MapLocation monitoredObstacle; // obstacle tile to move relative to
 	
@@ -157,12 +157,7 @@ public abstract class Unit extends Robot {
 					groupID = -1;
 				}
 			}
-			// optimization. stop trying to traverse an obstacle once destination changes
-			if (this.destinationPoint != null &&  (this.destinationPoint.x != target.x || this.destinationPoint.y != target.y)) { // then no longer obstacle
-				this.isAvoidingObstacle = false;
-			}
-			this.destinationPoint = target;
-			Navigation.moveToDestinationPoint(rc, this);
+			Navigation.moveToDestination(rc, this, target);
 
 		} 
 		catch (GameActionException e) {
