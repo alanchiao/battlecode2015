@@ -12,6 +12,9 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 
 public class Drone extends Unit {
+	
+	public static int TIME_UNTIL_COLLECT_SUPPLY = 1700; // in round #'s
+	public static int TIME_UNTIL_FULL_ATTACK = 1850;
 
 	protected void actions() throws GameActionException {
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
@@ -31,10 +34,10 @@ public class Drone extends Unit {
 					rc.move(d);
 				}
 			}
-			else if (Clock.getRoundNum() < 1700) {
+			else if (Clock.getRoundNum() < TIME_UNTIL_COLLECT_SUPPLY) {
 				MapLocation enemyHQ = rc.senseEnemyHQLocation();
 				Navigation.moveToDestination(rc, this, enemyHQ, true);
-			} else if (Clock.getRoundNum() < 1850) {
+			} else if (Clock.getRoundNum() < TIME_UNTIL_FULL_ATTACK) {
 				MapLocation myHQ = rc.senseHQLocation();
 				Navigation.moveToDestination(rc, this, myHQ, true);
 			} else {
