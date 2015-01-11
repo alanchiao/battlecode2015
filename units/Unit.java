@@ -112,7 +112,7 @@ public abstract class Unit extends Robot {
 		MapLocation myLocation = rc.getLocation();
 		int myRange = rc.getType().attackRadiusSquared;
 		Team opponent = rc.getTeam().opponent();
-		RobotInfo[] enemies = rc.senseNearbyRobots(24, opponent);
+		RobotInfo[] enemies = rc.senseNearbyRobots(24, opponent); // keep max sight range
 		
 		if (enemies.length == 0) {
 			return null;
@@ -137,6 +137,33 @@ public abstract class Unit extends Robot {
 		if (enemies.length < 6) { // Only do computation if it won't take too long
 			int[] damages = new int[9]; // 9th slot for current position
 			int[] enemyInRange = new int[8];
+			
+			MapLocation enemyHQ = rc.senseEnemyHQLocation();
+			int initDistance = myLocation.distanceSquaredTo(enemyHQ);
+			if (initDistance <= 52 && initDistance > 24) {
+				int enemyTowers = rc.senseEnemyTowerLocations().length;
+				int towerDamage = 0;
+				if (enemyTowers == 6) {
+					towerDamage = 240;
+				}
+				else if (enemyTowers >= 3) {
+					towerDamage = 36;
+				}
+				else if (enemyTowers == 2) { // Must have at least 2 towers to be missed with 24 sight range
+					towerDamage = 24;
+				}
+
+				if (towerDamage > 0) {
+					if (initDistance <= 35) {
+						damages[9] += towerDamage;
+					}
+					for (int i = 0; i < 8; i++) {
+						if (myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(enemyHQ) <= 35) {
+							damages[i] += towerDamage;
+						}
+					}
+				}
+			}
 			for (RobotInfo r : enemies) {
 				for (int i = 0; i < 8; i++) {
 					int newLocationDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(r.location);

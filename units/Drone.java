@@ -17,7 +17,7 @@ public class Drone extends Unit {
 	public static int TIME_UNTIL_FULL_ATTACK = 1850;
 
 	protected void actions() throws GameActionException {
-		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
+		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(RobotType.DRONE.attackRadiusSquared, rc.getTeam().opponent());
 
 		if (rc.isWeaponReady()) {
 			if (enemiesAttackable.length > 0) {
