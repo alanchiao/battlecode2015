@@ -18,9 +18,31 @@ public class Headquarters extends Building {
 	
 	// 0 - undecided, 1 - ground, 2 - air
 	private int strategy = 1;
+	private int numTowers = 6;
+	private boolean towerDied = false;
+	private MapLocation[] towerPriority = new MapLocation[6];
 	
-	
-	protected void actions() throws GameActionException {
+	protected void actions() throws GameActionException {	
+		boolean towerDied = false;	
+		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+		MapLocation myLocation = rc.getLocation();
+		if (enemyTowers.length != numTowers) {
+			towerDied = true;
+			numTowers = enemyTowers.length;
+		}
+		
+		MapLocation minTower;
+		int minDist = -1;
+		for (MapLocation tower : enemyTowers) {
+			int initDistance = myLocation.distanceSquaredTo(tower);
+			if (initDistance > minDist || minDist == -1) {
+				minDist = initDistance;
+				minTower = tower;
+			}
+		}
+		
+		
+
 		if (strategy == 1) {
 			groundGame();
 		}
