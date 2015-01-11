@@ -56,7 +56,7 @@ public class Beaver extends Unit {
 			else if (rc.readBroadcast(Broadcast.buildHelipadsCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildHelipadsCh, 0);
 				int offsetIndex = 0;
-				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(rc.senseEnemyHQLocation()));
+				int dirint = DirectionHelper.directionToInt(rc.senseEnemyHQLocation().directionTo(rc.senseHQLocation()));
 				while (offsetIndex < 8 && !rc.canBuild(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.HELIPAD)) {
 					offsetIndex++;
 				}

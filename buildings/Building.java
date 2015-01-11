@@ -17,7 +17,14 @@ public abstract class Building extends Robot {
 	
 				int distanceFactor = (int) hqDistance;
 				for (RobotInfo r : friendlyRobots) {
-					if (r.type == RobotType.MINER) {
+					if (r.type == RobotType.DRONE || r.type == RobotType.SOLDIER || r.type == RobotType.TANK) {
+						if (r.supplyLevel < r.type.supplyUpkeep * 10 * distanceFactor) {
+							rc.setIndicatorString(0, "transferring supply to attacking unit");
+							rc.transferSupplies(Math.max(r.type.supplyUpkeep * 15 * distanceFactor, mySupply / 4), r.location);
+							break;
+						}
+					}
+					else if (r.type == RobotType.MINER) {
 						if (r.supplyLevel < r.type.supplyUpkeep * 20 * distanceFactor) {
 							rc.setIndicatorString(0, "transferring supply to miner");
 							rc.transferSupplies(r.type.supplyUpkeep * 30 * distanceFactor, r.location);
@@ -37,11 +44,6 @@ public abstract class Building extends Robot {
 							rc.transferSupplies(r.type.supplyUpkeep * 10 * distanceFactor, r.location);
 							break;
 						}
-					}
-					else if (r.supplyLevel < r.type.supplyUpkeep * 10 * distanceFactor) {
-						rc.setIndicatorString(0, "transferring supply to other");
-						rc.transferSupplies(Math.max(r.type.supplyUpkeep * 15 * distanceFactor, mySupply / 4), r.location);
-						break;
 					}
 				}
 			}

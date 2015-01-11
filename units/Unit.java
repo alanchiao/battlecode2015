@@ -155,7 +155,7 @@ public abstract class Unit extends Robot {
 
 				if (towerDamage > 0) {
 					if (initDistance <= 35) {
-						damages[9] += towerDamage;
+						damages[8] += towerDamage;
 					}
 					for (int i = 0; i < 8; i++) {
 						if (myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(enemyHQ) <= 35) {

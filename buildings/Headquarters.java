@@ -72,7 +72,6 @@ public class Headquarters extends Building {
 		int numSupplyDepots = 0;
 		int numHelipads = 0;
 		
-		int minBeaverDistance = 25; // Make sure that the closest beaver is actually close
 		int closestBeaver = 0;
 		
 		for (RobotInfo r : myRobots) {
@@ -81,11 +80,7 @@ public class Headquarters extends Building {
 				numMiners++;
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
-				int distanceSquared = r.location.distanceSquaredTo(myLocation);
-				if (distanceSquared < minBeaverDistance) {
-					closestBeaver = r.ID;
-					minBeaverDistance = r.location.distanceSquaredTo(myLocation);
-				}
+				closestBeaver = r.ID;
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
 			} else if (type == RobotType.SUPPLYDEPOT) {
@@ -107,7 +102,7 @@ public class Headquarters extends Building {
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
-			if (numBeavers < 2) {
+			if (numBeavers == 0) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseEnemyHQLocation()));
@@ -126,11 +121,13 @@ public class Headquarters extends Building {
 				if (ore >= 300) {
 					rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
 				}
-			} else if (numMinerFactories == 0) {
+			}
+			else if (numMinerFactories == 0) {
 				if (ore >= 500) {
 					rc.broadcast(Broadcast.buildMinerFactoriesCh, closestBeaver);
 				}
-			} else if (numSupplyDepots == 0 && ore >= 100) {
+			}
+			else if (numSupplyDepots == 0 && ore >= 100) {
 				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 			}
 			else if (ore >= 300 + numHelipads * 200) {
