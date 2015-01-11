@@ -11,7 +11,7 @@ public class Miner extends Unit {
 		double myOre = rc.senseOre(myLocation);
 		
 		if (rc.isCoreReady()) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(20, rc.getTeam().opponent());
+			RobotInfo[] enemies = rc.senseNearbyRobots(24, rc.getTeam().opponent());
 			boolean[] possibleMovesAvoidingEnemies = moveDirectionsAvoidingAttack(enemies, 5);
 			for (int i = 0; i < 8; i++) {
 				if (!rc.canMove(DirectionHelper.directions[i])) {
@@ -20,8 +20,14 @@ public class Miner extends Unit {
 			}
 
 			if (!possibleMovesAvoidingEnemies[8]) {
+				int dirint;
+				if (enemies.length == 0) { // need to avoid hq which is not in enemies
+					dirint = DirectionHelper.directionToInt(rc.senseEnemyHQLocation().directionTo(myLocation));
+				}
+				else {
+					dirint = DirectionHelper.directionToInt(enemies[0].location.directionTo(myLocation));
+				}
 				int offsetIndex = 0;
-				int dirint = DirectionHelper.directionToInt(enemies[0].location.directionTo(myLocation));
 				while (offsetIndex < 8 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
 					offsetIndex++;
 				}
@@ -60,10 +66,10 @@ public class Miner extends Unit {
 					}
 					int offsetIndex = 0;
 					while (offsetIndex < 8) {
-						Direction candidateDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
-						if (rc.canMove(candidateDirection)) {
-							rc.move(candidateDirection);
-							prevDirection = candidateDirection;
+						int candidateDirection = (dirint+offsets[offsetIndex]+8)%8;
+						if (possibleMovesAvoidingEnemies[candidateDirection]) {
+							rc.move(DirectionHelper.directions[candidateDirection]);
+							prevDirection = DirectionHelper.directions[candidateDirection];
 							break;
 						}
 						offsetIndex++;

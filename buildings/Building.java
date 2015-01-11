@@ -19,23 +19,27 @@ public abstract class Building extends Robot {
 				for (RobotInfo r : friendlyRobots) {
 					if (r.type == RobotType.MINER) {
 						if (r.supplyLevel < r.type.supplyUpkeep * 20 * distanceFactor) {
+							rc.setIndicatorString(0, "transferring supply to miner");
 							rc.transferSupplies(r.type.supplyUpkeep * 30 * distanceFactor, r.location);
 							break;
 						}
 					}
 					else if (r.type == RobotType.TOWER) {
 						if (r.supplyLevel < mySupply) {
+							rc.setIndicatorString(0, "transferring supply to tower");
 							rc.transferSupplies(mySupply / 2, r.location);
 							break;
 						}
 					}
 					else if (r.type == RobotType.BEAVER) {
 						if (r.supplyLevel < r.type.supplyUpkeep * 6 * distanceFactor) {
+							rc.setIndicatorString(0, "transferring supply to beaver");
 							rc.transferSupplies(r.type.supplyUpkeep * 10 * distanceFactor, r.location);
 							break;
 						}
 					}
 					else if (r.supplyLevel < r.type.supplyUpkeep * 10 * distanceFactor) {
+						rc.setIndicatorString(0, "transferring supply to other");
 						rc.transferSupplies(Math.max(r.type.supplyUpkeep * 15 * distanceFactor, mySupply / 4), r.location);
 						break;
 					}

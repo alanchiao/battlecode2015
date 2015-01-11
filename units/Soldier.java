@@ -6,25 +6,26 @@ import battlecode.common.*;
 
 public class Soldier extends Unit {
 	protected void actions() throws GameActionException {
-		RobotInfo[] enemies = rc.senseNearbyRobots(
-				rc.getType().attackRadiusSquared,
-				rc.getTeam().opponent()
-			);
 
 		if (rc.isWeaponReady()) {
+			RobotInfo[] enemies = rc.senseNearbyRobots(5, rc.getTeam().opponent());
 			if (enemies.length > 0) {
 				rc.attackLocation(selectTarget(enemies));
 			}
         }
 
 		if (rc.isCoreReady()) {
+			RobotInfo[] enemies = rc.senseNearbyRobots(20, rc.getTeam().opponent());
 			if (enemies.length > 0) {
+				rc.setIndicatorString(0, "enemy detected");
 				Direction d = selectMoveDirectionMicro();
 				if (d != null) {
 					rc.move(d);
+					return;
 				}
 			}
-			else {
+			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(5, rc.getTeam().opponent());
+			if (attackableEnemies.length == 0) {
 				MapLocation target;
 				int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
 				int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);

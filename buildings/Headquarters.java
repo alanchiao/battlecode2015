@@ -2,8 +2,6 @@ package team158.buildings;
 
 import battlecode.common.*;
 
-import java.util.*;
-
 import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
 import team158.utils.Hashing;
@@ -141,27 +139,7 @@ public class Headquarters extends Building {
 			}
 			else if (numSupplyDepots < 3 && ore >= 500) {
 				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
-			} 
-			
-//			int[] groupSize = {numSoldiersG1, numSoldiersG2};
-//			int[] groupCh = {Broadcast.soldierGroup1Ch, Broadcast.soldierGroup2Ch};
-//			if (numSoldiersG1 > 0 || numSoldiersG2 > 0) {
-//				stopGroup(RobotType.SOLDIER);
-//			}
-//			rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
-//			rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
-//			if (numSoldiers - groupSize[defendGroup] > 30 && groupSize[attackGroup] == 0) {
-//				groupUnits(groupCh[attackGroup], RobotType.SOLDIER);
-//				rc.broadcast(groupCh[attackGroup], 1);
-//			}
-//			else if (rc.readBroadcast(groupCh[attackGroup]) == 1 && groupSize[attackGroup] < 15) {
-//				rc.broadcast(groupCh[attackGroup], 0);
-//				attackGroup = 1 - attackGroup;
-//				defendGroup = 1 - defendGroup;
-//			}
-//			else if (rc.readBroadcast(groupCh[defendGroup]) == -1) {
-//				unGroup(groupCh[defendGroup]);
-//			}			
+			}
 		}
 		
 	}
