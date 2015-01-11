@@ -7,6 +7,7 @@ import battlecode.common.RobotType;
 
 public class MinerFactory extends Building {
 
+	@Override
 	protected void actions() throws GameActionException {
 		int numMiners = rc.readBroadcast(Broadcast.numMinersCh);
 		int miners = rc.readBroadcast(Broadcast.minersProducedCh);

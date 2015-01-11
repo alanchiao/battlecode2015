@@ -4,21 +4,20 @@ import team158.units.com.Navigation;
 import team158.utils.Broadcast;
 import battlecode.common.*;
 
-public class Soldier extends Unit {
+public class Tank extends Unit {
 	
 	@Override
 	protected void actions() throws GameActionException {
 
 		if (rc.isWeaponReady()) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.SOLDIER.attackRadiusSquared, rc.getTeam().opponent());
+			RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.TANK.attackRadiusSquared, rc.getTeam().opponent());
 			if (enemies.length > 0) {
 				rc.attackLocation(selectTarget(enemies));
 			}
         }
 
 		if (rc.isCoreReady()) {
-			// 20 is how far away a drone can be for the soldier to have a risk of getting too close
-			RobotInfo[] enemies = rc.senseNearbyRobots(20, rc.getTeam().opponent());
+			RobotInfo[] enemies = rc.senseNearbyRobots(24, rc.getTeam().opponent());
 			if (enemies.length > 0) {
 				rc.setIndicatorString(0, "enemy detected");
 				Direction d = selectMoveDirectionMicro();
@@ -27,11 +26,11 @@ public class Soldier extends Unit {
 					return;
 				}
 			}
-			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(RobotType.SOLDIER.attackRadiusSquared, rc.getTeam().opponent());
+			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(RobotType.TANK.attackRadiusSquared, rc.getTeam().opponent());
 			if (attackableEnemies.length == 0) {
 				MapLocation target;
-				int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
-				int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
+				int xLoc = rc.readBroadcast(Broadcast.tankRallyXCh);
+				int yLoc = rc.readBroadcast(Broadcast.tankRallyYCh);
 				target = new MapLocation(xLoc, yLoc);
 				if (groupID > 0) {
 					moveToTargetByGroup(target);

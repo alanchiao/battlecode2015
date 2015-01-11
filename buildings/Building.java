@@ -5,6 +5,8 @@ import battlecode.common.RobotType;
 
 public abstract class Building extends Robot {
 	protected double hqDistance = 0;
+
+	@Override
 	public void move() {
 		try {
 			// Compute hqDistance

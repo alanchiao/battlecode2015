@@ -15,9 +15,9 @@ public class Headquarters extends Building {
 	private int defendGroup = 0;
 	
 	// 0 - undecided, 1 - ground, 2 - air
-	private int strategy = 2;
+	private int strategy = 1;
 	
-	
+	@Override
 	protected void actions() throws GameActionException {
 		if (strategy == 1) {
 			groundGame();
@@ -144,26 +144,27 @@ public class Headquarters extends Building {
 	protected void groundGame() throws GameActionException {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
 		MapLocation myLocation = rc.getLocation();
-		int numSoldiers = 0;
-		int numSoldiersG1 = 0;
-		int numSoldiersG2 = 0;
+		int numTanks = 0;
+		int numTanksG1 = 0;
+		int numTanksG2 = 0;
 		int numBeavers = 0;
 		int numBarracks = 0;
 		int numMiners = 0;
 		int numMinerFactories = 0;
 		int numSupplyDepots = 0;
+		int numTankFactories = 0;
 		
 		int closestBeaver = 0;
 		
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
-			if (type == RobotType.SOLDIER) {
-				numSoldiers++;
-				if (Hashing.find(groupID, r.ID) == Broadcast.soldierGroup1Ch) {
-					numSoldiersG1++;
+			if (type == RobotType.TANK) {
+				numTanks++;
+				if (Hashing.find(groupID, r.ID) == Broadcast.tankGroup1Ch) {
+					numTanksG1++;
 				}							
-				else if (Hashing.find(groupID, r.ID)  == Broadcast.soldierGroup2Ch) {
-					numSoldiersG2++;
+				else if (Hashing.find(groupID, r.ID)  == Broadcast.tankGroup2Ch) {
+					numTanksG2++;
 				}			
 
 			} else if (type == RobotType.MINER) {
@@ -171,7 +172,10 @@ public class Headquarters extends Building {
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
 				closestBeaver = r.ID;
-			} else if (type == RobotType.BARRACKS) {
+			} else if (type == RobotType.TANKFACTORY) {
+				numTankFactories++;
+			}
+			else if (type == RobotType.BARRACKS) {
 				numBarracks++;
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
@@ -181,19 +185,21 @@ public class Headquarters extends Building {
 		}
 		
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
-		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
+		rc.broadcast(Broadcast.numTanksCh, numTanks);
 		rc.broadcast(Broadcast.numMinersCh, numMiners);
 		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numMinerFactoriesCh, numMinerFactories);
 		rc.broadcast(Broadcast.numSupplyDepotsCh, numSupplyDepots);
+		rc.broadcast(Broadcast.numTankFactoriesCh, numTanks);
 		
 		if (rc.isWeaponReady()) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(
-				rc.getType().attackRadiusSquared,
-				rc.getTeam().opponent()
-			);
-			if (enemies.length > 0) {
-				rc.attackLocation(enemies[0].location);
+			RobotInfo[] enemies = rc.senseNearbyRobots(35, rc.getTeam().opponent());
+			int numTowers = rc.senseTowerLocations().length;
+			for (RobotInfo enemy : enemies) {
+				if (enemy.location.distanceSquaredTo(myLocation) <= 24 || numTowers >= 2) {
+					rc.attackLocation(enemy.location);
+					break;
+				}
 			}
 		}
 
@@ -224,26 +230,29 @@ public class Headquarters extends Building {
 			else if (numSupplyDepots == 0 && ore >= 100) {
 				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 			}
-			else if (ore >= 300 + numBarracks * 200) {
+			else if (numBarracks == 0) {
 				rc.broadcast(Broadcast.buildBarracksCh, closestBeaver);
 				// tell closest beaver to build barracks
+			}
+			else if (ore >= 500 + numTankFactories * 300) {
+				rc.broadcast(Broadcast.buildTankFactoriesCh, closestBeaver);
 			}
 			else if (numSupplyDepots < 3 && ore >= 500) {
 				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 			}
 
-			int[] groupSize = {numSoldiersG1, numSoldiersG2};
-			int[] groupCh = {Broadcast.soldierGroup1Ch, Broadcast.soldierGroup2Ch};
-			if (numSoldiersG1 > 0 || numSoldiersG2 > 0) {
-				stopGroup(RobotType.SOLDIER);
+			int[] groupSize = {numTanksG1, numTanksG2};
+			int[] groupCh = {Broadcast.tankGroup1Ch, Broadcast.tankGroup2Ch};
+			if (numTanksG1 > 0 || numTanksG2 > 0) {
+				stopGroup(RobotType.TANK);
 			}
 			rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
 			rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
-			if (numSoldiers - groupSize[defendGroup] > 30 && groupSize[attackGroup] == 0) {
-				groupUnits(groupCh[attackGroup], RobotType.SOLDIER);
+			if (numTanks - groupSize[defendGroup] > 20 && groupSize[attackGroup] == 0) {
+				groupUnits(groupCh[attackGroup], RobotType.TANK);
 				rc.broadcast(groupCh[attackGroup], 1);
 			}
-			else if (rc.readBroadcast(groupCh[attackGroup]) == 1 && groupSize[attackGroup] < 15) {
+			else if (rc.readBroadcast(groupCh[attackGroup]) == 1 && groupSize[attackGroup] < 10) {
 				rc.broadcast(groupCh[attackGroup], 0);
 				attackGroup = 1 - attackGroup;
 				defendGroup = 1 - defendGroup;
@@ -259,17 +268,17 @@ public class Headquarters extends Building {
 		int i = 0;
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
-			if (type == RobotType.SOLDIER) {
+			if (type == RobotType.TANK) {
 				//update hashmap with (id, group id) pair;
-				// if soldier is in the hashmap but not in a group
+				// if tank is in the hashmap but not in a group
 				if (Hashing.find(groupID, ID_Broadcast) == 0) {
 					Hashing.put(groupID, r.ID, ID_Broadcast);
 					//update the corresponding broadcasted group
-					if (ID_Broadcast == Broadcast.soldierGroup1Ch) {
+					if (ID_Broadcast == Broadcast.tankGroup1Ch) {
 						groupA[i] = r.ID;
 						i++;
 					}
-					else if (ID_Broadcast == Broadcast.soldierGroup2Ch) {
+					else if (ID_Broadcast == Broadcast.tankGroup2Ch) {
 						groupB[i] = r.ID;
 						i++;
 					}
@@ -277,8 +286,8 @@ public class Headquarters extends Building {
 			}
 		}
 		int broadcastCh;
-		if (rt == RobotType.SOLDIER) {
-			broadcastCh = Broadcast.groupingSoldiersCh;
+		if (rt == RobotType.TANK) {
+			broadcastCh = Broadcast.groupingTanksCh;
 		}
 		else if (rt == RobotType.DRONE) {
 			broadcastCh = Broadcast.groupingDronesCh;
@@ -296,8 +305,8 @@ public class Headquarters extends Building {
 	
 	public void stopGroup(RobotType rt) {
 		int broadcastCh;
-		if (rt == RobotType.SOLDIER) {
-			broadcastCh = Broadcast.groupingSoldiersCh;
+		if (rt == RobotType.TANK) {
+			broadcastCh = Broadcast.groupingTanksCh;
 		}
 		else if (rt == RobotType.DRONE) {
 			broadcastCh = Broadcast.groupingDronesCh;
@@ -317,7 +326,7 @@ public class Headquarters extends Building {
 		try {
 			rc.broadcast(ID_Broadcast, -1);
 
-			if (ID_Broadcast == Broadcast.soldierGroup1Ch) {
+			if (ID_Broadcast == Broadcast.tankGroup1Ch) {
 				int i = 0;
 				while (groupA[i] != 0) {
 					Hashing.put(groupID, groupA[i], 0);
@@ -325,7 +334,7 @@ public class Headquarters extends Building {
 					i++;
 				}
 			}
-			else if (ID_Broadcast == Broadcast.soldierGroup2Ch) {
+			else if (ID_Broadcast == Broadcast.tankGroup2Ch) {
 				int i = 0;
 				while (groupB[i] != 0) {
 					Hashing.put(groupID, groupB[i], 0);

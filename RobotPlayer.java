@@ -4,100 +4,61 @@ import team158.buildings.Barracks;
 import team158.buildings.Headquarters;
 import team158.buildings.Helipad;
 import team158.buildings.MinerFactory;
+import team158.buildings.SupplyDepot;
+import team158.buildings.TankFactory;
 import team158.buildings.Tower;
 import team158.units.Beaver;
 import team158.units.Drone;
 import team158.units.Miner;
 import team158.units.Soldier;
+import team158.units.Tank;
 import battlecode.common.*;
 
 public class RobotPlayer {
 	private static RobotController rc;
-	private static Headquarters headquarters;
-	private static Tower tower;
-	private static Soldier soldier;
-	private static Beaver beaver;
-	private static Drone drone;
-	private static Barracks barracks;
-	private static Miner miner;
-	private static MinerFactory minerfactory;
-	private static Helipad helipad;
+	private static Robot robot;
 	
 	public static void run(RobotController r) {
 		rc = r;
 		if (rc.getType() == RobotType.HQ) {
-			headquarters = new Headquarters();
-			headquarters.setRC(rc);
+			robot = new Headquarters();
 		}
-        if (rc.getType() == RobotType.TOWER) {
-        	tower = new Tower();
-        	tower.setRC(rc);
+		else if (rc.getType() == RobotType.TOWER) {
+        	robot = new Tower();
         }
-        if (rc.getType() == RobotType.SOLDIER) {
-        	soldier = new Soldier();
-            soldier.setRC(rc);
+		else if (rc.getType() == RobotType.SOLDIER) {
+        	robot = new Soldier();
         }
-		if (rc.getType() == RobotType.BEAVER) {
-			beaver = new Beaver();
-			beaver.setRC(rc);
+		else if (rc.getType() == RobotType.BEAVER) {
+			robot = new Beaver();
 		}
-		if (rc.getType() == RobotType.DRONE) {
-			drone = new Drone();
-			drone.setRC(rc);
+		else if (rc.getType() == RobotType.DRONE) {
+			robot = new Drone();
 		}
-        if (rc.getType() == RobotType.BARRACKS) {
-        	barracks = new Barracks();
-			barracks.setRC(rc);
+		else if (rc.getType() == RobotType.BARRACKS) {
+        	robot = new Barracks();
 		}
-        if (rc.getType() == RobotType.MINER) {
-        	miner = new Miner();
-			miner.setRC(rc);
+		else if (rc.getType() == RobotType.MINER) {
+        	robot = new Miner();
 		}
-        if (rc.getType() == RobotType.MINERFACTORY) {
-        	minerfactory = new MinerFactory();
-			minerfactory.setRC(rc);
+		else if (rc.getType() == RobotType.MINERFACTORY) {
+        	robot = new MinerFactory();
 		}
-        if (rc.getType() == RobotType.HELIPAD) {
-        	helipad = new Helipad();
-        	helipad.setRC(rc);
+		else if (rc.getType() == RobotType.HELIPAD) {
+        	robot = new Helipad();
         }
-
-		while(true) {
-            try {
-                rc.setIndicatorString(0, "I am a " + rc.getType());
-            } catch (Exception e) {
-                System.out.println("Unexpected exception");
-                e.printStackTrace();
-            }
-
-			if (rc.getType() == RobotType.HQ) {
-				headquarters.move();
-			}
-            if (rc.getType() == RobotType.TOWER) {
-            	tower.move();
-            }
-            if (rc.getType() == RobotType.SOLDIER) {
-                soldier.move();
-            }
-			if (rc.getType() == RobotType.BEAVER) {
-				beaver.move();
-			}
-			if (rc.getType() == RobotType.DRONE) {
-				drone.move();
-			}
-            if (rc.getType() == RobotType.BARRACKS) {
-				barracks.move();
-			}
-            if (rc.getType() == RobotType.MINER) {
-				miner.move();
-			}
-            if (rc.getType() == RobotType.MINERFACTORY) {
-				minerfactory.move();
-			}
-            if (rc.getType() == RobotType.HELIPAD) {
-				helipad.move();
-			}
-			
+		else if (rc.getType() == RobotType.TANK) {
+        	robot = new Tank();
+        }
+		else if (rc.getType() == RobotType.TANKFACTORY) {
+        	robot = new TankFactory();
+        }
+		else if (rc.getType() == RobotType.SUPPLYDEPOT) {
+			robot = new SupplyDepot();
+		}
+		robot.setRC(rc);
+		while (true) {
+			robot.move();
 			rc.yield();
 		}
 	}

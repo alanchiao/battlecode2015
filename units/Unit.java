@@ -29,6 +29,7 @@ public abstract class Unit extends Robot {
 	
 	private double prevHealth = 0;
 	
+	@Override
 	public void move() {
 		try {
 			// Transfer supply stage
@@ -68,6 +69,9 @@ public abstract class Unit extends Robot {
 				}
 				else if (rc.getType() == RobotType.DRONE) {
 					broadcastCh = Broadcast.groupingDronesCh;
+				}
+				else if (rc.getType() == RobotType.TANK) {
+					broadcastCh = Broadcast.groupingTanksCh;
 				}
 				if (broadcastCh != -1) {
 					int group = rc.readBroadcast(broadcastCh);
