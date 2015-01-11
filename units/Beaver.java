@@ -1,4 +1,5 @@
 package team158.units;
+import team158.units.com.Navigation;
 import team158.utils.*;
 import battlecode.common.*;
 
@@ -93,7 +94,7 @@ public class Beaver extends Unit {
 				double currentOre = rc.senseOre(myLocation);
 				double maxOre = -2;
 				Direction bestDirection = null;
-				boolean[] avoidMoves = moveDirectionsAvoidingAttack(rc.senseNearbyRobots(24, rc.getTeam().opponent()), 5);
+				boolean[] avoidMoves = Navigation.moveDirectionsAvoidingAttack(rc, rc.senseNearbyRobots(24, rc.getTeam().opponent()), 5);
 				// looks around for an ore concentration that is bigger than its current location by a certain fraction
 				for (Direction dir: DirectionHelper.directions) {
 					MapLocation possibleLocation = myLocation.add(dir);

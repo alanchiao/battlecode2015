@@ -34,11 +34,7 @@ public class Soldier extends Unit {
 					moveToTargetByGroup(target);
 				}
 				else {
-					if (this.destination != null && (this.destination.x != target.x || this.destination.y != target.y)) { // then no longer obstacle
-						this.isAvoidingObstacle = false;
-					}
-					this.destination = target;
-					Navigation.moveToDestination(rc, this, target);
+					Navigation.moveToDestination(rc, this, target, false);
 				}
 			}
 		}	

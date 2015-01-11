@@ -16,6 +16,7 @@ public abstract class Unit extends Robot {
 	public MapLocation destination; // desired point to reach
 	public Direction origDirection = null; // original direction of collision of robot into obstacle
 	public MapLocation monitoredObstacle; // obstacle tile to move relative to
+	public boolean isAvoidAllAttack = false;
 	
 	// grouping information
 	protected int groupID = -1;
@@ -184,7 +185,7 @@ public abstract class Unit extends Robot {
 				this.isAvoidingObstacle = false;
 			}
 			this.destination = target;
-			Navigation.moveToDestination(rc, this, target);
+			Navigation.moveToDestination(rc, this, target, false);
 
 		} 
 		catch (GameActionException e) {
@@ -192,66 +193,4 @@ public abstract class Unit extends Robot {
 		}
 	}
 	
-	protected boolean[] moveDirectionsAvoidingAttack(RobotInfo[] enemies, int rangeSquared) {
-		boolean[] possibleMovesAvoidingEnemies = {true,true,true,true,true,true,true,true,true};
-		MapLocation myLocation = rc.getLocation();
-		// enemies
-		if (enemies.length > 0) {
-			for (RobotInfo enemy : enemies) {
-				if (enemy.type.attackRadiusSquared > rangeSquared) {
-					if (myLocation.distanceSquaredTo(enemy.location) <= enemy.type.attackRadiusSquared) {
-						possibleMovesAvoidingEnemies[8] = false;
-					}
-					for (Direction d : DirectionHelper.directions) {
-						if (myLocation.add(d).distanceSquaredTo(enemy.location) <= enemy.type.attackRadiusSquared) {
-							possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-						}
-					}
-				}
-			}
-		}
-		// towers
-		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-		for (MapLocation l : enemyTowers) {
-			int initDistance = myLocation.distanceSquaredTo(l);
-			if (initDistance <= 34) {
-				if (initDistance <= 24) {
-					possibleMovesAvoidingEnemies[8] = false;
-				}
-				for (Direction d : DirectionHelper.directions) {
-					if (myLocation.add(d).distanceSquaredTo(l) <= 24) {
-						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-					}
-				}
-			}
-		}
-		// hq
-		MapLocation enemyHQ = rc.senseEnemyHQLocation();
-		int initDistance = myLocation.distanceSquaredTo(enemyHQ);
-		if (enemyTowers.length < 2) {
-			if (initDistance <= 34) {
-				if (initDistance <= 24) {
-					possibleMovesAvoidingEnemies[8] = false;
-				}
-				for (Direction d : DirectionHelper.directions) {
-					if (myLocation.add(d).distanceSquaredTo(enemyHQ) <= 24) {
-						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-					}
-				}
-			}
-		}
-		else {
-			if (initDistance <= 52) {
-				if (initDistance <= 35) {
-					possibleMovesAvoidingEnemies[8] = false;
-				}
-				for (Direction d : DirectionHelper.directions) {
-					if (myLocation.add(d).distanceSquaredTo(enemyHQ) <= 24) {
-						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-					}
-				}
-			}
-		}
-		return possibleMovesAvoidingEnemies;
-	}
 }

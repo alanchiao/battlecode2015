@@ -7,15 +7,17 @@ import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 
 public class Drone extends Unit {
+	
+	public static int TIME_UNTIL_COLLECT_SUPPLY = 1700; // in round #'s
+	public static int TIME_UNTIL_FULL_ATTACK = 1850;
 
 	protected void actions() throws GameActionException {
-		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(
-				rc.getType().attackRadiusSquared,
-				rc.getTeam().opponent()
-			);
+		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
 
 		if (rc.isWeaponReady()) {
 			if (enemiesAttackable.length > 0) {
@@ -23,73 +25,24 @@ public class Drone extends Unit {
 			}
         }
 		
-		RobotInfo[] enemiesSeen = rc.senseNearbyRobots(
-				24,
-				rc.getTeam().opponent()
-			);
-
 		// Move
 		if (rc.isCoreReady()) {
 			if (enemiesAttackable.length > 0) {
 				Direction d = selectMoveDirectionMicro();
+				Navigation.stopObstacleTracking(this);
 				if (d != null) {
 					rc.move(d);
 				}
 			}
-			else if (Clock.getRoundNum() < 1700) {
-			MapLocation myLocation = rc.getLocation();
-			MapLocation enemyHQ = rc.senseEnemyHQLocation();
-			DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
-			boolean safeDirections[] = moveDirectionsAvoidingAttack(enemiesSeen, 10);
-			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
-			int offsetIndex = 0;
-			int[] offsets = {0,1,-1,2,-2};
-			while (offsetIndex < 5 && (!rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8]) || !safeDirections[(dirint+offsets[offsetIndex]+8)%8])) {
-				offsetIndex++;
-			}
-			Direction moveDirection = null;
-			if (offsetIndex < 5) {
-				moveDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
-			}
-			if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(enemyHQ) <= myLocation.distanceSquaredTo(enemyHQ)) {
-				rc.move(moveDirection);
-			}
-			} else if (Clock.getRoundNum() < 1850) {
-				MapLocation myLocation = rc.getLocation();
-				MapLocation myHQ = rc.senseHQLocation();
-				boolean safeDirections[] = moveDirectionsAvoidingAttack(enemiesSeen, 10);
-				DirectionHelper.directionToInt(myLocation.directionTo(myHQ));
-				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(myHQ));
-				int offsetIndex = 0;
-				int[] offsets = {0,1,-1,2,-2};
-				while (offsetIndex < 5 && (!rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8]) || !safeDirections[(dirint+offsets[offsetIndex]+8)%8])) {
-					offsetIndex++;
-				}
-				Direction moveDirection = null;
-				if (offsetIndex < 5) {
-					moveDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
-				}
-				if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(myHQ) <= myLocation.distanceSquaredTo(myHQ)) {
-					rc.move(moveDirection);
-				}
-				
-			} else {
-				MapLocation myLocation = rc.getLocation();
+			else if (Clock.getRoundNum() < TIME_UNTIL_COLLECT_SUPPLY) {
 				MapLocation enemyHQ = rc.senseEnemyHQLocation();
-				DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
-				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
-				int offsetIndex = 0;
-				int[] offsets = {0,1,-1,2,-2};
-				while (offsetIndex < 5 && (!rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8]))) {
-					offsetIndex++;
-				}
-				Direction moveDirection = null;
-				if (offsetIndex < 5) {
-					moveDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
-				}
-				if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(enemyHQ) <= myLocation.distanceSquaredTo(enemyHQ)) {
-					rc.move(moveDirection);
-				}
+				Navigation.moveToDestination(rc, this, enemyHQ, true);
+			} else if (Clock.getRoundNum() < TIME_UNTIL_FULL_ATTACK) {
+				MapLocation myHQ = rc.senseHQLocation();
+				Navigation.moveToDestination(rc, this, myHQ, true);
+			} else {
+				MapLocation enemyHQ = rc.senseEnemyHQLocation();
+				Navigation.moveToDestination(rc, this, enemyHQ, false);
 			}
 		}
 	}
