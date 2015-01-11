@@ -6,6 +6,8 @@ import battlecode.common.*;
 
 public class Miner extends Unit {
 	private Direction prevDirection = null;
+	
+	@Override
 	protected void actions() throws GameActionException {
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		MapLocation myLocation = rc.getLocation();
