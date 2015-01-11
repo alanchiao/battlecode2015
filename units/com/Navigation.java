@@ -282,10 +282,16 @@ public class Navigation {
 	
 	// check if the location is somewhere a bot cannot go more or less for the entire game
 	public static boolean isStationaryBlock(RobotController rc, Unit unit, MapLocation potentialObstacle) throws GameActionException{
-		if (unit.isAvoidAllAttack) {
-			return !rc.senseTerrainTile(potentialObstacle).isTraversable() || isBuilding(rc, potentialObstacle);
+		boolean isStationaryBlock;
+		if (rc.getType() != RobotType.DRONE) {
+			isStationaryBlock = !rc.senseTerrainTile(potentialObstacle).isTraversable();
 		} else {
-			return !rc.senseTerrainTile(potentialObstacle).isTraversable() || isBuilding(rc, potentialObstacle) || isNearMultipleEnemyTowers(rc, potentialObstacle);
+			isStationaryBlock = false;
+		}
+		if (unit.isAvoidAllAttack) {
+			return isStationaryBlock || isBuilding(rc, potentialObstacle);
+		} else {
+			return isStationaryBlock || isBuilding(rc, potentialObstacle) || isNearMultipleEnemyTowers(rc, potentialObstacle);
 		}
 	}
 	
