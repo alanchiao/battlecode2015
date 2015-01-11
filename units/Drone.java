@@ -10,8 +10,8 @@ import battlecode.common.RobotType;
 
 public class Drone extends Unit {
 	
-	public static int TIME_UNTIL_COLLECT_SUPPLY = 1700; // in round #'s
-	public static int TIME_UNTIL_FULL_ATTACK = 1850;
+	public static int TIME_UNTIL_COLLECT_SUPPLY = 1650; // in round #'s
+	public static int TIME_UNTIL_FULL_ATTACK = 1800;
 
 	protected void actions() throws GameActionException {
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(RobotType.DRONE.attackRadiusSquared, rc.getTeam().opponent());

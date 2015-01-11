@@ -18,7 +18,13 @@ public class Navigation {
 	public static void moveToDestination(RobotController rc, Unit unit, MapLocation destination, boolean isAvoidAllAttack) {
 		// optimization: stop avoiding current obstacle if destination changes
 		if (unit.destination != null && !unit.destination.equals(destination)) { // then no longer obstacle
-			unit.isAvoidingObstacle = false;
+			stopObstacleTracking(unit);
+			unit.lastLocation = null;
+		}
+		
+		// let it change its behavior if it hasn't moved for some time.
+		if (unit.timeSinceLastMove > 8) {
+			unit.lastLocation = null;
 		}
 		
 		// new destination
@@ -30,6 +36,11 @@ public class Navigation {
 		
 		rc.setIndicatorString(0, unit.destination.toString());
 		rc.setIndicatorString(1, Boolean.toString(unit.isAvoidingObstacle));
+		if (unit.lastLocation != null) {
+			rc.setIndicatorString(2, unit.lastLocation.toString());
+		} else {
+			rc.setIndicatorString(2, "lastLocation:null");
+		}
 		
 		if (USE_WALL_HUGGING) {
 			wallHuggingToDestination(rc, unit);
@@ -44,11 +55,31 @@ public class Navigation {
 			Direction directDirection = rc.getLocation().directionTo(unit.destination);
 			MapLocation directLocation = rc.getLocation().add(directDirection);
 			
+			
 			if (unit.isAvoidingObstacle) { // then hug wall in counterclockwise motion
 				Direction dirToObstacle = rc.getLocation().directionTo(unit.monitoredObstacle);
-				Direction clockwiseDirections[] = DirectionHelper.getClockwiseDirections(dirToObstacle);
-				for (Direction attemptedDir: clockwiseDirections) {
+				boolean isClockwise = Math.random() < 0.5;
+				Direction clockwiseDirections[];
+				if (isClockwise) {
+					clockwiseDirections = DirectionHelper.getClockwiseDirections(dirToObstacle);
+				} else {
+					clockwiseDirections = DirectionHelper.getCounterClockwiseDirections(dirToObstacle);
+				}
+				
+				for (int i = 0; i < clockwiseDirections.length; i++) {
+					Direction attemptedDir = clockwiseDirections[i];
 					MapLocation attemptedLocation = rc.getLocation().add(attemptedDir);
+					
+					// wrong direction - go other way to stay consistent
+					if (unit.lastLocation != null && attemptedLocation.equals(unit.lastLocation)) {
+						if (isClockwise) {
+							clockwiseDirections = DirectionHelper.getCounterClockwiseDirections(dirToObstacle);
+						} else {
+							clockwiseDirections = DirectionHelper.getClockwiseDirections(dirToObstacle);
+						}	
+						i = -1;
+						continue;
+					}
 					
 					// if there is a unit there blocking the hug path, move greedily
 					if(isMobileUnit(rc, attemptedLocation)) {
@@ -72,6 +103,7 @@ public class Navigation {
 							if (isObstacle(rc, unit, attemptedLocation, attemptedDir)) { // then is obstacle
 								potNextObsts[numObstacles] = potentialObstacle;
 								numObstacles++;
+								rc.setIndicatorDot(potentialObstacle, 100, 100, 100);
 							}
 						}
 						
@@ -88,6 +120,7 @@ public class Navigation {
 						
 						if (bestObstacle != null) {
 							unit.monitoredObstacle = bestObstacle;
+							rc.setIndicatorDot(unit.monitoredObstacle, 0, 0, 0);
 						} 
 						
 						// have traversed past a part of the obstacle if
@@ -96,20 +129,26 @@ public class Navigation {
 							stopObstacleTracking(unit);
 						}
 						if (rc.canMove(attemptedDir)) {
+							unit.lastLocation = rc.getLocation();
 							rc.move(attemptedDir);
+							unit.timeSinceLastMove = 0;
 						}
 						return;
 					}
+					
 				}
+				System.out.println("NO DIRECTIONS TO GO");
 			}
 			// not in state of avoiding obstacle
 
 			else if (isPassable(rc, unit, directLocation, directDirection)) {
+				unit.lastLocation = rc.getLocation();
 				rc.move(directDirection);
 			// possibly found obstacle
 			} else {
 				if (isObstacle(rc, unit, directLocation, directDirection)) {
 					startObstacleTracking(unit, directLocation, directDirection);
+					unit.timeSinceLastMove++;
 				} else { // otherwise, using bugging gets scary with moving obstacles
 					greedyMoveToDestination(rc, unit);
 				}
@@ -143,8 +182,12 @@ public class Navigation {
 			}
 			if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(unit.destination) <= myLocation.distanceSquaredTo(unit.destination)) {
 				if (rc.canMove(moveDirection)) {
+					unit.lastLocation = rc.getLocation();
 					rc.move(moveDirection);
+					unit.timeSinceLastMove = 0;
 				}
+			} else {
+				unit.timeSinceLastMove++;
 			}
 		} catch (GameActionException e) {
 			e.printStackTrace();

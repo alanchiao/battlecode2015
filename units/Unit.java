@@ -13,10 +13,14 @@ import battlecode.common.Team;
 public abstract class Unit extends Robot {
 	// navigation information
 	public boolean isAvoidingObstacle = false; // whether in state of avoiding obstacle
+	public boolean isAvoidAllAttack = false;
+	
 	public MapLocation destination; // desired point to reach
 	public Direction origDirection = null; // original direction of collision of robot into obstacle
+	
 	public MapLocation monitoredObstacle; // obstacle tile to move relative to
-	public boolean isAvoidAllAttack = false;
+	public MapLocation lastLocation = null;
+	public int timeSinceLastMove = 0;
 	
 	// grouping information
 	protected int groupID = -1;

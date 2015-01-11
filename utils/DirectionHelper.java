@@ -41,4 +41,13 @@ public class DirectionHelper {
 		}
 		return clockwiseDirections;
 	}
+	
+	public static Direction[] getCounterClockwiseDirections(Direction initDir) {
+		Direction clockwiseDirections[] = new Direction[7];
+		for(int i = 1; i <= 7; i++) {
+			Direction nextDir = DirectionHelper.directions[(directionToInt(initDir) - i + 8) % 8];
+			clockwiseDirections[i - 1] = nextDir;
+		}
+		return clockwiseDirections;
+	}
 }
