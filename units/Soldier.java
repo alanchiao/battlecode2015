@@ -37,7 +37,7 @@ public class Soldier extends Unit {
 						this.isAvoidingObstacle = false;
 					}
 					this.destination = target;
-					Navigation.moveToDestination(rc, this, target);
+					Navigation.moveToDestination(rc, this, target, false);
 				}
 			}
 		}	
