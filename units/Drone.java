@@ -1,19 +1,23 @@
 package team158.units;
 
+import team158.buildings.Headquarters;
 import team158.units.com.Navigation;
 import team158.utils.Broadcast;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 
 public class Drone extends Unit {
-	
-	public static int TIME_UNTIL_COLLECT_SUPPLY = 1700; // in round #'s
-	public static int TIME_UNTIL_FULL_ATTACK = 1850;
 
+	public Drone(RobotController newRC) {
+		super(newRC);
+	}
+
+	@Override
 	protected void actions() throws GameActionException {
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(RobotType.DRONE.attackRadiusSquared, rc.getTeam().opponent());
 
@@ -32,10 +36,9 @@ public class Drone extends Unit {
 					rc.move(d);
 				}
 			}
-			else if (Clock.getRoundNum() < TIME_UNTIL_COLLECT_SUPPLY) {
-				MapLocation enemyHQ = rc.senseEnemyHQLocation();
+			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
 				Navigation.moveToDestination(rc, this, enemyHQ, true);
-			} else if (Clock.getRoundNum() < TIME_UNTIL_FULL_ATTACK) {
+			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
 				MapLocation myHQ = rc.senseHQLocation();
 				Navigation.moveToDestination(rc, this, myHQ, true);
 			} else {
@@ -45,7 +48,6 @@ public class Drone extends Unit {
 					moveToTargetByGroup(new MapLocation(towerX,towerY));
 				}
 				else {
-					MapLocation enemyHQ = rc.senseEnemyHQLocation();
 					Navigation.moveToDestination(rc, this, enemyHQ, false);
 				}
 			}

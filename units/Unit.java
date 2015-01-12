@@ -1,4 +1,6 @@
 package team158.units;
+import java.util.Random;
+
 import team158.Robot;
 import team158.units.com.Navigation;
 import team158.utils.Broadcast;
@@ -6,6 +8,7 @@ import team158.utils.DirectionHelper;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
@@ -13,10 +16,14 @@ import battlecode.common.Team;
 public abstract class Unit extends Robot {
 	// navigation information
 	public boolean isAvoidingObstacle = false; // whether in state of avoiding obstacle
+	public boolean isAvoidAllAttack = false;
+	
 	public MapLocation destination; // desired point to reach
 	public Direction origDirection = null; // original direction of collision of robot into obstacle
+	
 	public MapLocation monitoredObstacle; // obstacle tile to move relative to
-	public boolean isAvoidAllAttack = false;
+	public MapLocation lastLocation = null;
+	public int timeSinceLastMove = 0;
 	
 	// grouping information
 	protected int groupID = -1;
@@ -29,6 +36,13 @@ public abstract class Unit extends Robot {
 	
 	private double prevHealth = 0;
 	
+	public Unit (RobotController newRC) {
+		rc = newRC;
+		rand = new Random(rc.getID());
+		enemyHQ = rc.senseEnemyHQLocation();
+	}
+
+	@Override
 	public void move() {
 		try {
 			// Transfer supply stage
@@ -50,10 +64,20 @@ public abstract class Unit extends Robot {
 						rc.transferSupplies(mySupply, bestFriend.location);
 					}
 				}
+				// Get rid of excess supply
+				else if (mySupply > rc.getType().supplyUpkeep * 250) {
+					for (RobotInfo r : friendlyRobots) {
+						if (r.supplyLevel < r.type.supplyUpkeep * 150) {
+							rc.transferSupplies(mySupply - rc.getType().supplyUpkeep * 250, r.location);
+							break;
+						}
+					}
+				}
+				// Give supply to robots that really need it
 				else if (mySupply > rc.getType().supplyUpkeep * 100) {
 					for (RobotInfo r : friendlyRobots) {
 						if (r.supplyLevel < r.type.supplyUpkeep * 50) {
-							rc.transferSupplies(Math.min(mySupply / 2, r.type.supplyUpkeep * 200), r.location);
+							rc.transferSupplies((int)(mySupply - r.supplyLevel) / 2, r.location);
 							break;
 						}
 					}
@@ -68,6 +92,9 @@ public abstract class Unit extends Robot {
 				}
 				else if (rc.getType() == RobotType.DRONE) {
 					broadcastCh = Broadcast.groupingDronesCh;
+				}
+				else if (rc.getType() == RobotType.TANK) {
+					broadcastCh = Broadcast.groupingTanksCh;
 				}
 				if (broadcastCh != -1) {
 					int group = rc.readBroadcast(broadcastCh);
@@ -138,7 +165,6 @@ public abstract class Unit extends Robot {
 			int[] damages = new int[9]; // 9th slot for current position
 			int[] enemyInRange = new int[8];
 			
-			MapLocation enemyHQ = rc.senseEnemyHQLocation();
 			int initDistance = myLocation.distanceSquaredTo(enemyHQ);
 			if (initDistance <= 52 && initDistance > 24) {
 				int enemyTowers = rc.senseEnemyTowerLocations().length;
@@ -197,10 +223,21 @@ public abstract class Unit extends Robot {
 	protected void moveToTargetByGroup(MapLocation target) {
 		try {
 			boolean toldToAttack = rc.readBroadcast(groupID) == 1;
-			if (toldToAttack) {
-				target = rc.senseEnemyHQLocation();
-			}
-			else {
+			if (!toldToAttack) {
+				int xLoc, yLoc;
+				if (rc.getType() == RobotType.DRONE) {
+					xLoc = rc.readBroadcast(Broadcast.dronesRallyXCh);
+					yLoc = rc.readBroadcast(Broadcast.dronesRallyYCh);
+					target = new MapLocation(xLoc, yLoc);
+				} else if (rc.getType() == RobotType.SOLDIER) {
+					xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
+					yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
+					target = new MapLocation(xLoc, yLoc);
+				} else if (rc.getType() == RobotType.TANK) {
+					xLoc = rc.readBroadcast(Broadcast.tankRallyXCh);
+					yLoc = rc.readBroadcast(Broadcast.tankRallyYCh);
+					target = new MapLocation(xLoc, yLoc);
+				} 
 				// TODO: more robust way of determining when rally point has been reached
 				if (target.distanceSquaredTo(rc.getLocation()) <= 24) {
 					rc.broadcast(groupID, -1);

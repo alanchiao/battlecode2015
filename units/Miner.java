@@ -5,7 +5,14 @@ import team158.utils.*;
 import battlecode.common.*;
 
 public class Miner extends Unit {
+	
+	public Miner(RobotController newRC) {
+		super(newRC);
+	}
+
 	private Direction prevDirection = null;
+	
+	@Override
 	protected void actions() throws GameActionException {
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		MapLocation myLocation = rc.getLocation();
@@ -23,7 +30,7 @@ public class Miner extends Unit {
 			if (!possibleMovesAvoidingEnemies[8]) {
 				int dirint;
 				if (enemies.length == 0) { // need to avoid hq which is not in enemies
-					dirint = DirectionHelper.directionToInt(rc.senseEnemyHQLocation().directionTo(myLocation));
+					dirint = DirectionHelper.directionToInt(enemyHQ.directionTo(myLocation));
 				}
 				else {
 					dirint = DirectionHelper.directionToInt(enemies[0].location.directionTo(myLocation));

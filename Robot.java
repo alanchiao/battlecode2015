@@ -6,11 +6,7 @@ import battlecode.common.*;
 public abstract class Robot {
 	protected Random rand;
 	protected RobotController rc;
-
-	public void setRC(RobotController newRC) {
-		rc = newRC;
-		rand = new Random(rc.getID());
-	}
+	public MapLocation enemyHQ;
 	
 	public abstract void move();
 	

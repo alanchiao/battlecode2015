@@ -2,15 +2,17 @@ package team158.buildings;
 
 import team158.utils.DirectionHelper;
 import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 
 public class Helipad extends Building {
 
+	public Helipad(RobotController newRC) {
+		super(newRC);
+	}
+
 	@Override
 	protected void actions() throws GameActionException {
-		MapLocation myLocation = rc.getLocation();
-		MapLocation enemyHQ = rc.senseEnemyHQLocation();
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
 		

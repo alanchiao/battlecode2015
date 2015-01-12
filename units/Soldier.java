@@ -5,16 +5,23 @@ import team158.utils.Broadcast;
 import battlecode.common.*;
 
 public class Soldier extends Unit {
+	
+	public Soldier(RobotController newRC) {
+		super(newRC);
+	}
+
+	@Override
 	protected void actions() throws GameActionException {
 
 		if (rc.isWeaponReady()) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(5, rc.getTeam().opponent());
+			RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.SOLDIER.attackRadiusSquared, rc.getTeam().opponent());
 			if (enemies.length > 0) {
 				rc.attackLocation(selectTarget(enemies));
 			}
         }
 
 		if (rc.isCoreReady()) {
+			// 20 is how far away a drone can be for the soldier to have a risk of getting too close
 			RobotInfo[] enemies = rc.senseNearbyRobots(20, rc.getTeam().opponent());
 			if (enemies.length > 0) {
 				rc.setIndicatorString(0, "enemy detected");
@@ -24,7 +31,7 @@ public class Soldier extends Unit {
 					return;
 				}
 			}
-			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(5, rc.getTeam().opponent());
+			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(RobotType.SOLDIER.attackRadiusSquared, rc.getTeam().opponent());
 			if (attackableEnemies.length == 0) {
 				MapLocation target;
 				int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);

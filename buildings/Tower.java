@@ -3,6 +3,12 @@ package team158.buildings;
 import battlecode.common.*;
 
 public class Tower extends Building {
+
+	public Tower(RobotController newRC) {
+		super(newRC);
+	}
+
+	@Override
 	protected void actions() throws GameActionException {
 		if (rc.isWeaponReady()) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(
