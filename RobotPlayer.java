@@ -1,5 +1,6 @@
 package team158;
 
+import team158.buildings.AerospaceLab;
 import team158.buildings.Barracks;
 import team158.buildings.Headquarters;
 import team158.buildings.Helipad;
@@ -9,7 +10,9 @@ import team158.buildings.TankFactory;
 import team158.buildings.Tower;
 import team158.units.Beaver;
 import team158.units.Drone;
+import team158.units.Launcher;
 import team158.units.Miner;
+import team158.units.Missile;
 import team158.units.Soldier;
 import team158.units.Tank;
 import battlecode.common.*;
@@ -55,6 +58,15 @@ public class RobotPlayer {
         }
 		else if (rc.getType() == RobotType.SUPPLYDEPOT) {
 			robot = new SupplyDepot(rc);
+		}
+		else if (rc.getType() == RobotType.AEROSPACELAB) {
+			robot = new AerospaceLab(rc);
+		}
+		else if (rc.getType() == RobotType.LAUNCHER) {
+			robot = new Launcher(rc);
+		}
+		else if (rc.getType() == RobotType.MISSILE) {
+			robot = new Missile(rc);
 		}
 		while (true) {
 			robot.move();
