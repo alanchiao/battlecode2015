@@ -15,9 +15,10 @@ public class Navigation {
 	
 	public RobotController rc;
 	
+	// states
 	public boolean isAvoidingObstacle; // whether in state of avoiding obstacle
 	public boolean isAvoidAllAttack;
-
+	
 	public MapLocation destination; // desired point to reach
 	public Direction origDirection; // original direction of collision of robot into obstacle
 	
@@ -26,6 +27,8 @@ public class Navigation {
 	public int timeSinceLastMove;
 	
 	public MapLocation enemyHQ;
+	// precomputation per turn
+	public boolean[] possibleMovesAvoidingEnemies;
 	
 	public Navigation(RobotController r) {
 		rc = r;
@@ -38,6 +41,7 @@ public class Navigation {
 		monitoredObstacle = null;
 		lastLocation = null;
 		timeSinceLastMove = 0;
+		possibleMovesAvoidingEnemies = null;
 	}
 	
 	public void moveToDestination(MapLocation nextDestination, boolean isAvoidAllAttack) {
@@ -58,14 +62,7 @@ public class Navigation {
 			return;
 		}
 		this.isAvoidAllAttack = isAvoidAllAttack;
-		
-		rc.setIndicatorString(0, destination.toString());
-		rc.setIndicatorString(1, Boolean.toString(isAvoidingObstacle));
-		if (lastLocation != null) {
-			rc.setIndicatorString(2, lastLocation.toString());
-		} else {
-			rc.setIndicatorString(2, "lastLocation:null");
-		}
+		possibleMovesAvoidingEnemies = null;
 		
 		if (USE_WALL_HUGGING) {
 			wallHuggingToDestination();
@@ -80,7 +77,6 @@ public class Navigation {
 			Direction directDirection = rc.getLocation().directionTo(destination);
 			MapLocation directLocation = rc.getLocation().add(directDirection);
 			
-			
 			if (isAvoidingObstacle) { // then hug wall in counterclockwise motion
 				Direction dirToObstacle = rc.getLocation().directionTo(monitoredObstacle);
 				boolean isClockwise = Math.random() < 0.5;
@@ -90,7 +86,6 @@ public class Navigation {
 				} else {
 					clockwiseDirections = DirectionHelper.getCounterClockwiseDirections(dirToObstacle);
 				}
-				
 				for (int i = 0; i < clockwiseDirections.length; i++) {
 					Direction attemptedDir = clockwiseDirections[i];
 					MapLocation attemptedLocation = rc.getLocation().add(attemptedDir);
@@ -128,7 +123,6 @@ public class Navigation {
 							if (isObstacle(attemptedLocation, attemptedDir)) { // then is obstacle
 								potNextObsts[numObstacles] = potentialObstacle;
 								numObstacles++;
-								rc.setIndicatorDot(potentialObstacle, 100, 100, 100);
 							}
 						}
 						
@@ -145,7 +139,6 @@ public class Navigation {
 						
 						if (bestObstacle != null) {
 							monitoredObstacle = bestObstacle;
-							rc.setIndicatorDot(monitoredObstacle, 0, 0, 0);
 						} 
 						
 						// have traversed past a part of the obstacle if
@@ -162,7 +155,6 @@ public class Navigation {
 					}
 					
 				}
-				System.out.println("NO DIRECTIONS TO GO");
 			}
 			// not in state of avoiding obstacle
 
@@ -188,10 +180,6 @@ public class Navigation {
 		try {
 			MapLocation myLocation = rc.getLocation();
 			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(destination));
-			if (dirint == -1) {
-				System.out.println(myLocation);
-				System.out.println(destination);
-			}
 			int offsetIndex = 0;
 			int[] offsets = {0,1,-1,2,-2};
 			Direction direction = DirectionHelper.directions[dirint];
@@ -254,8 +242,10 @@ public class Navigation {
 	// treat as obstacle or not to wall hug along
 	public boolean isObstacle (MapLocation location, Direction movementDirection) throws GameActionException {
 		if (isAvoidAllAttack) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
-			boolean[] possibleMovesAvoidingEnemies = moveDirectionsAvoidingAttack(enemies, 5);
+			if (possibleMovesAvoidingEnemies == null) {
+				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
+				possibleMovesAvoidingEnemies = moveDirectionsAvoidingAttack(enemies, 5);
+			} 
 			if (!possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(movementDirection)]) {
 				return true;
 			}
@@ -370,7 +360,7 @@ public class Navigation {
 		MapLocation[] enemyTowerLocs = rc.senseEnemyTowerLocations();
 		int numCloseEnemyTowers = 0;
 		for (MapLocation enemyTowerLo: enemyTowerLocs) {
-			if (enemyTowerLo.distanceSquaredTo(location) <= 35) {
+			if (enemyTowerLo.distanceSquaredTo(location) <= 24) {
 				numCloseEnemyTowers++;
 				if (numCloseEnemyTowers > MAX_TOWERS_IN_RANGE) {
 					return true;

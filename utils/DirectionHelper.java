@@ -35,19 +35,43 @@ public class DirectionHelper {
 	// from initDir
 	public static Direction[] getClockwiseDirections(Direction initDir) {
 		Direction clockwiseDirections[] = new Direction[7];
-		for(int i = 1; i <= 7; i++) {
-			Direction nextDir = DirectionHelper.directions[(directionToInt(initDir) + i) % 8];
-			clockwiseDirections[i - 1] = nextDir;
+		int directionInt = directionToInt(initDir);
+		int index = 0;
+		
+		// directions from initDir to end of directions array
+		for(int i = directionInt + 1; i <= 7; i++) {
+			Direction nextDir = DirectionHelper.directions[i];
+			clockwiseDirections[index] = nextDir;
+			index++;
+		}
+		
+		// directions from start of directions array to initDir
+		for (int i = 0; i < directionInt; i++) {
+			Direction nextDir = DirectionHelper.directions[i];
+			clockwiseDirections[index] = nextDir;
+			index++;
 		}
 		return clockwiseDirections;
 	}
 	
+	// get directions going counter-clockwise starting from one direction counter-clockwise
+	// from initDir
 	public static Direction[] getCounterClockwiseDirections(Direction initDir) {
-		Direction clockwiseDirections[] = new Direction[7];
-		for(int i = 1; i <= 7; i++) {
-			Direction nextDir = DirectionHelper.directions[(directionToInt(initDir) - i + 8) % 8];
-			clockwiseDirections[i - 1] = nextDir;
+		Direction counterClockwiseDirections[] = new Direction[7];
+		int directionInt = directionToInt(initDir);
+		int index = 0;
+		// directions from initDir to start of directions array
+		for(int i = directionInt - 1; i >= 0; i--) {
+			Direction nextDir = DirectionHelper.directions[i];
+			counterClockwiseDirections[index] = nextDir;
+			index++;
 		}
-		return clockwiseDirections;
+		// directions from end of directions array to initDir
+		for (int i = 7; i > directionInt; i--) {
+			Direction nextDir = DirectionHelper.directions[i];
+			counterClockwiseDirections[index] = nextDir;
+			index++;
+		}
+		return counterClockwiseDirections;
 	}
 }
