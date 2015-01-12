@@ -38,12 +38,14 @@ public class Broadcast {
 	public static final int groupingSoldiersCh = 501;
 	public static final int groupingTanksCh = 502;
 	public static final int groupingDronesCh = 503;
+	public static final int launcherGroupCh = 504;
 	
 	// Channels for signaling
 	public static final int enemyRushCh = 600;
 	public static final int enemyThreatCh = 601;
 	public static final int scoutEnemyHQCh = 603;
 	public static final int slowMinerProductionCh = 604;
+	public static final int buildBuildingsCloseCh = 605;
 	
 	// Channels 700-799 are used for grouping
 	public static final int soldierGroup1Ch = 700;

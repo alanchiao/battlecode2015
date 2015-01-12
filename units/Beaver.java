@@ -8,17 +8,23 @@ public class Beaver extends Unit {
 	boolean stayNearHQ;
 	// for building the first few buildings
 	boolean needMove;
+	boolean buildBuildingsClose;
 
 	public Beaver(RobotController newRC) {
 		super(newRC);
 		stepsUntilEnemyHQ = 0;
 		stayNearHQ = true;
 		needMove = false;
+		try {
+			buildBuildingsClose = rc.readBroadcast(Broadcast.buildBuildingsCloseCh) == 1;
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private final int[] offsets = {0,1,-1,2,-2,3,-3,4};
 	private void tryBuildInDirection(int dirint, RobotType robotType, int numBuildings) throws GameActionException {
-		if (numBuildings >= 4) {
+		if (!buildBuildingsClose || numBuildings >= 4) {
 			int offsetIndex = 0;
 			Direction buildDirection = null;
 			int numBuildLocations = 0;
@@ -111,7 +117,7 @@ public class Beaver extends Unit {
 					stayNearHQ = false;
 				}
 			}
-			else if (!stayNearHQ || buildings >= 4) {
+			else if (!buildBuildingsClose || !stayNearHQ || buildings >= 4) {
 				double currentOre = rc.senseOre(myLocation);
 				double maxOre = -2;
 				Direction bestDirection = null;
