@@ -6,33 +6,48 @@ public class Beaver extends Unit {
 	
 	int stepsUntilEnemyHQ;
 	boolean stayNearHQ;
+	// for building the first few buildings
+	boolean needMove;
 
 	public Beaver(RobotController newRC) {
 		super(newRC);
 		stepsUntilEnemyHQ = 0;
 		stayNearHQ = true;
+		needMove = false;
 	}
 
 	private final int[] offsets = {0,1,-1,2,-2,3,-3,4};
-	private void tryBuildInDirection(int dirint, RobotType robotType) throws GameActionException {
-		int offsetIndex = 0;
-		Direction buildDirection = null;
-		int numBuildLocations = 0;
-		while (offsetIndex < 8) {
-			if (rc.canBuild(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], robotType)) {
-				numBuildLocations++;
-				if (buildDirection == null) {
-					buildDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
+	private void tryBuildInDirection(int dirint, RobotType robotType, int numBuildings) throws GameActionException {
+		if (numBuildings >= 4) {
+			int offsetIndex = 0;
+			Direction buildDirection = null;
+			int numBuildLocations = 0;
+			while (offsetIndex < 8) {
+				if (rc.canBuild(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], robotType)) {
+					numBuildLocations++;
+					if (buildDirection == null) {
+						buildDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
+					}
 				}
+				offsetIndex++;
 			}
-			offsetIndex++;
+			if (numBuildLocations > 1) {
+				rc.build(buildDirection, robotType);
+			}
+			// avoid getting trapped
+			else if (numBuildLocations == 1) {
+				rc.move(buildDirection);
+			}
 		}
-		if (numBuildLocations > 1) {
-			rc.build(buildDirection, robotType);
-		}
-		// avoid getting trapped
-		else if (numBuildLocations == 1) {
-			rc.move(buildDirection);
+		else {
+			Direction buildDirection = DirectionHelper.directions[2 * numBuildings];
+			if (rc.canBuild(buildDirection, robotType)) {
+				rc.build(buildDirection, robotType);
+				needMove = true;
+			}
+			else {
+				rc.mine();
+			}
 		}
 	}
 	
@@ -47,40 +62,45 @@ public class Beaver extends Unit {
 		}
 		
 		if (rc.isCoreReady()) {
-			if (rc.readBroadcast(Broadcast.buildHelipadsCh) == rc.getID()) {
+			int buildings = rc.readBroadcast(Broadcast.numBuildingsCh);
+			if (needMove) {
+				rc.move(DirectionHelper.directions[(3 + buildings * 2) % 8]);
+				needMove = false;
+			}
+			else if (rc.readBroadcast(Broadcast.buildHelipadsCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildHelipadsCh, 0);
 				int dirint = DirectionHelper.directionToInt(enemyHQ.directionTo(rc.senseHQLocation()));
-				tryBuildInDirection(dirint, RobotType.HELIPAD);
+				tryBuildInDirection(dirint, RobotType.HELIPAD, buildings);
 			}
 			else if (rc.readBroadcast(Broadcast.buildTankFactoriesCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildTankFactoriesCh, 0);
 				int dirint = DirectionHelper.directionToInt(enemyHQ.directionTo(rc.senseHQLocation()));
-				tryBuildInDirection(dirint, RobotType.TANKFACTORY);
+				tryBuildInDirection(dirint, RobotType.TANKFACTORY, buildings);
 			}
 			// HQ has given command to build a supply depot
 			else if (rc.readBroadcast(Broadcast.buildSupplyCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildSupplyCh, 0);
 				int dirint = DirectionHelper.directionToInt(enemyHQ.directionTo(rc.senseHQLocation()));
-				tryBuildInDirection(dirint, RobotType.SUPPLYDEPOT);
+				tryBuildInDirection(dirint, RobotType.SUPPLYDEPOT, buildings);
 			}
 			// HQ has given command to build a miner factory
 			else if (rc.readBroadcast(Broadcast.buildMinerFactoriesCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildMinerFactoriesCh, 0);
 				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));
-				tryBuildInDirection(dirint, RobotType.MINERFACTORY);
+				tryBuildInDirection(dirint, RobotType.MINERFACTORY, buildings);
 			}
 			// HQ has given command to build a barracks
 			else if (rc.readBroadcast(Broadcast.buildBarracksCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildBarracksCh, 0);
 				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(enemyHQ));
-				tryBuildInDirection(dirint, RobotType.BARRACKS);
+				tryBuildInDirection(dirint, RobotType.BARRACKS, buildings);
 			}
 			else if (rc.readBroadcast(Broadcast.buildAerospaceLabsCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildAerospaceLabsCh, 0);
 				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(enemyHQ));
-				tryBuildInDirection(dirint, RobotType.AEROSPACELAB);
+				tryBuildInDirection(dirint, RobotType.AEROSPACELAB, buildings);
 			}
-			else if (rc.readBroadcast(Broadcast.scoutEnemyHQCh) == rc.getID()){
+			else if (rc.readBroadcast(Broadcast.scoutEnemyHQCh) == rc.getID()) {
 				navigation.moveToDestination(enemyHQ, true);
 				stepsUntilEnemyHQ++;
 				// uses symmetrical properties of map. doubles distance it had to travel
@@ -90,7 +110,8 @@ public class Beaver extends Unit {
 					rc.broadcast(Broadcast.scoutEnemyHQCh, stepsUntilEnemyHQ * 2);
 					stayNearHQ = false;
 				}
-			} else {
+			}
+			else if (!stayNearHQ || buildings >= 4) {
 				double currentOre = rc.senseOre(myLocation);
 				double maxOre = -2;
 				Direction bestDirection = null;
@@ -112,6 +133,9 @@ public class Beaver extends Unit {
 				else {
 					rc.mine();
 				}
+			}
+			else {
+				rc.mine();
 			}
 		}
 	}

@@ -230,12 +230,12 @@ public class Headquarters extends Building {
 				}		
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
-				if (closestBeaver == 0) {
-					closestBeaver = r.ID;
-				}
-				else if (scoutBeaver == 0 && r.ID != closestBeaver) {
+				if (scoutBeaver == 0 && closestBeaver != 0 && r.ID != closestBeaver) {
 					scoutBeaver = r.ID;
 					rc.broadcast(Broadcast.scoutEnemyHQCh, scoutBeaver);
+				}
+				else if (r.ID != scoutBeaver) {
+					closestBeaver = r.ID;
 				}
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
@@ -255,6 +255,7 @@ public class Headquarters extends Building {
 		rc.broadcast(Broadcast.numMinersCh, numMiners);
 		rc.broadcast(Broadcast.numDronesCh, numDrones);
 		rc.broadcast(Broadcast.numLaunchersCh, numLaunchers);
+		rc.broadcast(Broadcast.numBuildingsCh, numMinerFactories + numSupplyDepots + numHelipads + numAerospaceLabs);
 		
 		if (!enemyRush && Clock.getRoundNum() < 500) {
 			RobotInfo[] enemyRobots = rc.senseNearbyRobots(99, rc.getTeam().opponent());
@@ -286,7 +287,7 @@ public class Headquarters extends Building {
 			if (numBeavers == 0 || scoutBeaver == 0) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
-				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
+				int dirint = DirectionHelper.directionToInt(Direction.EAST);
 				while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BEAVER)) {
 					offsetIndex++;
 				}

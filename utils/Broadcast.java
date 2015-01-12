@@ -9,6 +9,7 @@ public class Broadcast {
 	public static final int numTanksCh = 4;
 	public static final int numLaunchersCh = 5;
 
+	public static final int numBuildingsCh = 100;
 	public static final int numBarracksCh = 101;
 	public static final int numMinerFactoriesCh = 102;
 	public static final int numSupplyDepotsCh = 103;
