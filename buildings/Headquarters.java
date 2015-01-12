@@ -262,7 +262,7 @@ public class Headquarters extends Building {
 			for (RobotInfo r : enemyRobots) {
 				if (r.type == RobotType.DRONE) {
 					enemyRush = true;
-					return;
+					break;
 				}
 			}
 		}
