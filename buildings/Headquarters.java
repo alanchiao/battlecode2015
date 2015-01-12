@@ -20,6 +20,9 @@ public class Headquarters extends Building {
 	// 0 - undecided, 1 - ground, 2 - air
 	private int strategy = 2;
 	
+	int closestBeaver;
+	int scoutBeaver;
+	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
 	}
@@ -154,16 +157,19 @@ public class Headquarters extends Building {
 		int numMinerFactories = 0;
 		int numSupplyDepots = 0;
 		int numHelipads = 0;
-		
-		int closestBeaver = 0;
-		
+			
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
 			if (type == RobotType.MINER) {
 				numMiners++;
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
-				closestBeaver = r.ID;
+				if (closestBeaver == 0 && numBeavers == 2) {
+					closestBeaver = r.ID;
+				}
+				if (scoutBeaver == 0 && numBeavers == 1) {
+					scoutBeaver = r.ID;
+				}
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
 			} else if (type == RobotType.SUPPLYDEPOT) {
@@ -175,7 +181,7 @@ public class Headquarters extends Building {
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
-			if (numBeavers == 0) {
+			if (numBeavers <= 1) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
@@ -209,6 +215,10 @@ public class Headquarters extends Building {
 			}
 			else if (numSupplyDepots < 3 && ore >= 500) {
 				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
+			}
+			
+			if (scoutBeaver != 0 && rc.readBroadcast(Broadcast.scoutEnemyHQCh) != -1) {
+				rc.broadcast(Broadcast.scoutEnemyHQCh, scoutBeaver);
 			}
 		}
 		

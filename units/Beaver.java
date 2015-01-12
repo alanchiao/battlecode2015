@@ -3,9 +3,12 @@ import team158.utils.*;
 import battlecode.common.*;
 
 public class Beaver extends Unit {
+	
+	int stepsUntilEnemyHQ;
 
 	public Beaver(RobotController newRC) {
 		super(newRC);
+		stepsUntilEnemyHQ = 0;
 	}
 
 	private final int[] offsets = {0,1,-1,2,-2,3,-3,4};
@@ -65,7 +68,18 @@ public class Beaver extends Unit {
 				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(enemyHQ));
 				tryBuildInDirection(dirint, RobotType.BARRACKS);
 			}
-			else {
+			else if (rc.readBroadcast(Broadcast.scoutEnemyHQCh) == rc.getID()){
+				navigation.moveToDestination(enemyHQ, true);
+				stepsUntilEnemyHQ++;
+				// uses symmetrical properties of map. doubles distance it had to travel
+				// to get there. May be delayed by enemy units, but shouldn't be much
+				// since early game
+				if (rc.getLocation().distanceSquaredTo(enemyHQ) <= distanceBetweenHQ/4) {
+					System.out.println("REACHABLE IN " + Integer.toString(stepsUntilEnemyHQ * 2));
+					rc.broadcast(Broadcast.scoutEnemyHQCh, -1);
+					rc.disintegrate();
+				}
+			} else {
 				double currentOre = rc.senseOre(myLocation);
 				double maxOre = -2;
 				Direction bestDirection = null;

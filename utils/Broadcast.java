@@ -18,6 +18,7 @@ public class Broadcast {
 	public static final int buildSupplyCh = 203;
 	public static final int buildHelipadsCh = 204;
 	public static final int buildTankFactoriesCh = 205;
+	public static final int scoutEnemyHQCh = 206;
 	
 	public static final int minerOreCh = 301;
 	public static final int minersProducedCh = 302;
