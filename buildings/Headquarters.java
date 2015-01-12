@@ -262,7 +262,7 @@ public class Headquarters extends Building {
 			for (RobotInfo r : enemyRobots) {
 				if (r.type == RobotType.DRONE) {
 					enemyRush = true;
-					return;
+					break;
 				}
 			}
 		}
@@ -285,6 +285,15 @@ public class Headquarters extends Building {
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
 			if (numBeavers == 0 || scoutBeaver == 0) {
+				if (numTowers < 2) {
+					rc.broadcast(Broadcast.buildBuildingsCloseCh, 1);
+				}
+				for (RobotInfo r : rc.senseNearbyRobots(2)) {
+					if (r.type == RobotType.TOWER) {
+						rc.broadcast(Broadcast.buildBuildingsCloseCh, 0);
+						return;
+					}
+				}
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(Direction.EAST);
