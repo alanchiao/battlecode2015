@@ -55,10 +55,20 @@ public abstract class Unit extends Robot {
 						rc.transferSupplies(mySupply, bestFriend.location);
 					}
 				}
+				// Get rid of excess supply
+				else if (mySupply > rc.getType().supplyUpkeep * 250) {
+					for (RobotInfo r : friendlyRobots) {
+						if (r.supplyLevel < r.type.supplyUpkeep * 150) {
+							rc.transferSupplies(mySupply - rc.getType().supplyUpkeep * 250, r.location);
+							break;
+						}
+					}
+				}
+				// Give supply to robots that really need it
 				else if (mySupply > rc.getType().supplyUpkeep * 100) {
 					for (RobotInfo r : friendlyRobots) {
 						if (r.supplyLevel < r.type.supplyUpkeep * 50) {
-							rc.transferSupplies(Math.min(mySupply / 2, r.type.supplyUpkeep * 200), r.location);
+							rc.transferSupplies((int)(mySupply - r.supplyLevel) / 2, r.location);
 							break;
 						}
 					}

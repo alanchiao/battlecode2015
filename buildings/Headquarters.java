@@ -1,7 +1,6 @@
 package team158.buildings;
 
 import battlecode.common.*;
-
 import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
 import team158.utils.Hashing;
@@ -10,15 +9,56 @@ public class Headquarters extends Building {
 	int[] groupID = new int[7919];
 	int[] groupA = new int[200];
 	int[] groupB = new int[200];
+	
+	public static int TIME_UNTIL_COLLECT_SUPPLY = 1650; // in round #'s
+	public static int TIME_UNTIL_FULL_ATTACK = 1800;
 
 	private int attackGroup = 1;
 	private int defendGroup = 0;
 	
 	// 0 - undecided, 1 - ground, 2 - air
-	private int strategy = 1;
+	private int strategy = 2;
 	
 	@Override
 	protected void actions() throws GameActionException {
+
+		int mySupply = (int) rc.getSupplyLevel();
+		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
+
+		if (Clock.getRoundNum() < TIME_UNTIL_COLLECT_SUPPLY) {
+			int distanceFactor = (int) hqDistance;
+			for (RobotInfo r : friendlyRobots) {
+				if (r.type == RobotType.DRONE || r.type == RobotType.SOLDIER || r.type == RobotType.TANK) {
+					if (r.supplyLevel < r.type.supplyUpkeep * 10 * distanceFactor) {
+						rc.setIndicatorString(0, "transferring supply to attacking unit");
+						rc.transferSupplies(Math.max(r.type.supplyUpkeep * 15 * distanceFactor, mySupply / 4), r.location);
+						break;
+					}
+				}
+				else if (r.type == RobotType.MINER) {
+					if (r.supplyLevel < r.type.supplyUpkeep * 20 * distanceFactor) {
+						rc.setIndicatorString(0, "transferring supply to miner");
+						rc.transferSupplies(r.type.supplyUpkeep * 30 * distanceFactor, r.location);
+						break;
+					}
+				}
+				else if (r.type == RobotType.BEAVER) {
+					if (r.supplyLevel < r.type.supplyUpkeep * 6 * distanceFactor) {
+						rc.setIndicatorString(0, "transferring supply to beaver");
+						rc.transferSupplies(r.type.supplyUpkeep * 10 * distanceFactor, r.location);
+						break;
+					}
+				}
+			}
+		}
+		else {
+			for (RobotInfo r : friendlyRobots) {
+				if (r.type == RobotType.DRONE || r.type == RobotType.SOLDIER || r.type == RobotType.TANK) {
+					rc.transferSupplies(mySupply, r.location);
+					break;
+				}
+			}
+		}
 		if (strategy == 1) {
 			groundGame();
 		}
