@@ -94,6 +94,9 @@ public abstract class Unit extends Robot {
 				else if (rc.getType() == RobotType.TANK) {
 					broadcastCh = Broadcast.groupingTanksCh;
 				}
+				else if (rc.getType() == RobotType.LAUNCHER) {
+					broadcastCh = Broadcast.groupingLaunchersCh;
+				}
 				if (broadcastCh != -1) {
 					int group = rc.readBroadcast(broadcastCh);
 					if (group > 0) {

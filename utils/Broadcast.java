@@ -38,6 +38,7 @@ public class Broadcast {
 	public static final int groupingSoldiersCh = 501;
 	public static final int groupingTanksCh = 502;
 	public static final int groupingDronesCh = 503;
+	public static final int groupingLaunchersCh = 504;
 	
 	// Channels for signaling
 	public static final int enemyRushCh = 600;
