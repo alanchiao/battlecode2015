@@ -1,7 +1,6 @@
 package team158.units;
 
 import team158.buildings.Headquarters;
-import team158.units.com.Navigation;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -30,18 +29,18 @@ public class Drone extends Unit {
 		if (rc.isCoreReady()) {
 			if (enemiesAttackable.length > 0) {
 				Direction d = selectMoveDirectionMicro();
-				Navigation.stopObstacleTracking(this);
+				navigation.stopObstacleTracking();
 				if (d != null) {
 					rc.move(d);
 				}
 			}
 			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
-				Navigation.moveToDestination(rc, this, enemyHQ, true);
+				navigation.moveToDestination(enemyHQ, true);
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
 				MapLocation myHQ = rc.senseHQLocation();
-				Navigation.moveToDestination(rc, this, myHQ, true);
+				navigation.moveToDestination(myHQ, true);
 			} else {
-				Navigation.moveToDestination(rc, this, enemyHQ, false);
+				navigation.moveToDestination(enemyHQ, false);
 			}
 		}
 	}

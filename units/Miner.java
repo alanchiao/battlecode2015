@@ -1,6 +1,5 @@
 package team158.units;
 
-import team158.units.com.Navigation;
 import team158.utils.*;
 import battlecode.common.*;
 
@@ -20,7 +19,7 @@ public class Miner extends Unit {
 		
 		if (rc.isCoreReady()) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(24, rc.getTeam().opponent());
-			boolean[] possibleMovesAvoidingEnemies = Navigation.moveDirectionsAvoidingAttack(rc, enemies, 5);
+			boolean[] possibleMovesAvoidingEnemies = navigation.moveDirectionsAvoidingAttack(enemies, 5);
 			for (int i = 0; i < 8; i++) {
 				if (!rc.canMove(DirectionHelper.directions[i])) {
 					possibleMovesAvoidingEnemies[i] = false;

@@ -1,6 +1,5 @@
 package team158.units;
 
-import team158.units.com.Navigation;
 import team158.utils.Broadcast;
 import battlecode.common.*;
 
@@ -41,7 +40,7 @@ public class Soldier extends Unit {
 					moveToTargetByGroup(target);
 				}
 				else {
-					Navigation.moveToDestination(rc, this, target, false);
+					navigation.moveToDestination(target, false);
 				}
 			}
 		}	

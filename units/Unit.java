@@ -14,19 +14,10 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 
 public abstract class Unit extends Robot {
-	// navigation information
-	public boolean isAvoidingObstacle = false; // whether in state of avoiding obstacle
-	public boolean isAvoidAllAttack = false;
-	
-	public MapLocation destination; // desired point to reach
-	public Direction origDirection = null; // original direction of collision of robot into obstacle
-	
-	public MapLocation monitoredObstacle; // obstacle tile to move relative to
-	public MapLocation lastLocation = null;
-	public int timeSinceLastMove = 0;
 	
 	// grouping information
-	protected int groupID = -1;
+	public int groupID;
+	
 	/**
 	 * groupID:
 	 * -1 = ungrouped
@@ -34,12 +25,17 @@ public abstract class Unit extends Robot {
 	 * >0 = grouped  
 	 */
 	
-	private double prevHealth = 0;
+	protected Navigation navigation;
+	protected double prevHealth;
 	
 	public Unit (RobotController newRC) {
 		rc = newRC;
 		rand = new Random(rc.getID());
-		enemyHQ = rc.senseEnemyHQLocation();
+		enemyHQ = rc.senseEnemyHQLocation();	
+		navigation = new Navigation(rc);
+
+		groupID = -1;
+		prevHealth = 0;
 	}
 
 	@Override
@@ -233,12 +229,7 @@ public abstract class Unit extends Robot {
 					groupID = -1;
 				}
 			}
-			// optimization. stop trying to traverse an obstacle once destination changes
-			if (this.destination != null &&  (this.destination.x != target.x || this.destination.y != target.y)) { // then no longer obstacle
-				this.isAvoidingObstacle = false;
-			}
-			this.destination = target;
-			Navigation.moveToDestination(rc, this, target, false);
+			navigation.moveToDestination(target, false);
 
 		} 
 		catch (GameActionException e) {
