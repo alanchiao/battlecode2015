@@ -38,6 +38,7 @@ public class Broadcast {
 	public static final int enemyThreatCh = 601;
 	// Launcher to drone ratio, times 100
 	public static final int L2DX100Ch = 602;
+	public static final int scoutEnemyHQCh = 603;
 	
 	// Channels 700-799 are used for grouping
 	public static final int soldierGroup1Ch = 700;

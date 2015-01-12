@@ -1,5 +1,7 @@
 package team158.units.com;
 
+import java.util.Random;
+
 import team158.utils.DirectionHelper;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -14,6 +16,7 @@ public class Navigation {
 	public final int MAX_TOWERS_IN_RANGE = 3; // 3 towers that can attack you at once in some maps we win on
 	
 	public RobotController rc;
+	public Random rand;
 	
 	// states
 	public boolean isAvoidingObstacle; // whether in state of avoiding obstacle
@@ -30,9 +33,10 @@ public class Navigation {
 	// precomputation per turn
 	public boolean[] possibleMovesAvoidingEnemies;
 	
-	public Navigation(RobotController r) {
+	public Navigation(RobotController r, Random rand) {
 		rc = r;
 		enemyHQ = rc.senseEnemyHQLocation();
+		this.rand = rand;
 		
 		isAvoidingObstacle = false;
 		isAvoidAllAttack = false;
@@ -50,7 +54,7 @@ public class Navigation {
 			stopObstacleTracking();
 			lastLocation = null;
 		}
-		
+	
 		// let it change its behavior if it hasn't moved for some time.
 		if (timeSinceLastMove >= 8) {
 			lastLocation = null;
@@ -79,7 +83,7 @@ public class Navigation {
 			
 			if (isAvoidingObstacle) { // then hug wall in counterclockwise motion
 				Direction dirToObstacle = rc.getLocation().directionTo(monitoredObstacle);
-				boolean isClockwise = Math.random() < 0.5;
+				boolean isClockwise = rand.nextInt(2) == 1;
 				Direction clockwiseDirections[];
 				if (isClockwise) {
 					clockwiseDirections = DirectionHelper.getClockwiseDirections(dirToObstacle);
@@ -120,12 +124,11 @@ public class Navigation {
 							if (dir == attemptedDir.opposite()) {
 								continue;
 							}
-							if (isObstacle(attemptedLocation, attemptedDir)) { // then is obstacle
+							if (isObstacle(potentialObstacle, attemptedDir)) { // then is obstacle
 								potNextObsts[numObstacles] = potentialObstacle;
 								numObstacles++;
 							}
 						}
-						
 						// obstacle to monitor next is one that is farthest away from the current location
 						double maxDistanceSquared = -1;
 						MapLocation bestObstacle = null;
@@ -139,7 +142,7 @@ public class Navigation {
 						
 						if (bestObstacle != null) {
 							monitoredObstacle = bestObstacle;
-						} 
+						}
 						
 						// have traversed past a part of the obstacle if
 						// going in the same direction again

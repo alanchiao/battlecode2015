@@ -31,8 +31,10 @@ public abstract class Unit extends Robot {
 	public Unit (RobotController newRC) {
 		rc = newRC;
 		rand = new Random(rc.getID());
+		ownHQ = rc.senseHQLocation();
 		enemyHQ = rc.senseEnemyHQLocation();	
-		navigation = new Navigation(rc);
+		distanceBetweenHQ = ownHQ.distanceSquaredTo(enemyHQ);
+		navigation = new Navigation(rc, rand);
 
 		groupID = -1;
 		prevHealth = 0;
