@@ -8,8 +8,10 @@ import team158.utils.Hashing;
 public class Headquarters extends Building {
 
 	int[] groupID = new int[7919];
-	int[] groupA = new int[200];
-	int[] groupB = new int[200];
+	int[] groupA = new int[1000];
+	int ptA = 0;
+	int[] groupB = new int[1000];
+	int ptB = 0;
 	
 	public static int TIME_UNTIL_COLLECT_SUPPLY = 1650; // in round #'s
 	public static int TIME_UNTIL_FULL_ATTACK = 1800;
@@ -18,7 +20,7 @@ public class Headquarters extends Building {
 	private int defendGroup = 0;
 	
 	// 0 - undecided, 1 - ground, 2 - air
-	private int strategy = 1;
+	private int strategy = 2;
 	private int numTowers = 6;
 	private boolean towerDied = true;
 	MapLocation targetTower;
@@ -32,19 +34,38 @@ public class Headquarters extends Building {
 		//check if attackable tower exists and broadcasts location
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 		//MapLocation myLocation = rc.getLocation();
-		boolean towerExists = false;
-		if (enemyTowers.length != numTowers) {
+		int numTowersRemaining = enemyTowers.length;
+
+		if (numTowersRemaining != numTowers) {
 			towerDied = true;
-			numTowers = enemyTowers.length;
+			numTowers = numTowersRemaining;
+			targetTower = enemyHQ;
 		}
-		
+
+
 		if (towerDied && numTowers > 3) {
+			boolean towerExists = false;
+			//reset tower died status
 			towerDied = false;
+			//counter for not approachable towers
+			int count = 0;
 			
-			for (MapLocation tower : enemyTowers) {
+			while (count < numTowersRemaining) {
+				int id = 0;
+				for (int i = 0; i < numTowersRemaining; i++) {
+					int minDistance = -1;
+					int towerDistance = myLocation.distanceSquaredTo(enemyTowers[i]);
+					System.out.println(enemyTowers[i].x + " " + enemyTowers[i].y + " " + towerDistance);
+					if (towerDistance > minDistance || minDistance == -1) {
+						minDistance = towerDistance;
+						targetTower = enemyTowers[i];
+						id = i;
+					}
+				}
 				int numNearbyTowers = 0;
-				for (MapLocation tower2: enemyTowers) {
-					if (tower != tower2 && tower.distanceSquaredTo(tower2) >= 24) {
+				for (int j = 0; j < numTowersRemaining; j++) {
+					if (targetTower != enemyTowers[j] && targetTower.distanceSquaredTo(enemyTowers[j]) <= 24) {
+						System.out.println(enemyTowers[j] + " " +targetTower.distanceSquaredTo(enemyTowers[j]));
 						numNearbyTowers++;
 					}
 				}
@@ -52,16 +73,26 @@ public class Headquarters extends Building {
 					towerExists = true;
 					break;
 				}
+				else {
+					//update unapproachable tower list
+					System.out.println(targetTower);
+					targetTower = null;
+					enemyTowers[id] = null;
+					count++;
+				}
 			}
-		}
-		if (!towerExists) {
-			targetTower = rc.senseEnemyHQLocation();
+			if (!towerExists) {
+				targetTower = enemyHQ;
+			}
 		}
 		
 		
 		rc.broadcast(Broadcast.groupingTargetLocationXCh, targetTower.x);
 		rc.broadcast(Broadcast.groupingTargetLocationYCh, targetTower.y);
-
+		
+		rc.setIndicatorString(0, targetTower.x + " " + targetTower.y);
+		//System.out.println(targetTower.x + " " + targetTower.y);
+		
 		int mySupply = (int) rc.getSupplyLevel();
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
 
@@ -190,6 +221,8 @@ public class Headquarters extends Building {
 		int numSupplyDepots = 0;
 		int numHelipads = 0;
 		int numDrones = 0;
+		int numDronesG1 = 0;
+		int numDronesG2 = 0;
 		
 		int closestBeaver = 0;
 		
@@ -197,6 +230,14 @@ public class Headquarters extends Building {
 			RobotType type = r.type;
 			if (type == RobotType.MINER) {
 				numMiners++;
+			} else if (type == RobotType.DRONE) {
+				numDrones++;
+				if (Hashing.find(groupID, r.ID) == Broadcast.droneGroup1Ch) {
+					numDronesG1++;
+				}							
+				else if (Hashing.find(groupID, r.ID)  == Broadcast.droneGroup2Ch) {
+					numDronesG2++;
+				}		
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
 				closestBeaver = r.ID;
@@ -206,9 +247,7 @@ public class Headquarters extends Building {
 				numSupplyDepots++;
 			} else if (type == RobotType.HELIPAD) {
 				numHelipads++;
-			} else if (type == RobotType.DRONE) {
-				numDrones++;
-			}
+			} 
 		}
 
 		if (rc.isCoreReady()) {
@@ -248,7 +287,28 @@ public class Headquarters extends Building {
 			else if (numSupplyDepots < 3 && ore >= 500) {
 				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 			}
-
+			
+			rc.setIndicatorString(1, Integer.toString(numDronesG1));
+			rc.setIndicatorString(2, Integer.toString(numDronesG2));
+			System.out.println(numDronesG1 + " " + numDronesG2);
+			if (numDronesG1 < 15) {
+				rc.broadcast(Broadcast.droneGroup1Ch, 1);
+				groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
+			}
+			else {
+				if (numDronesG2 > 20) {
+					rc.broadcast(Broadcast.droneGroup2Ch, 1);
+					groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
+				}
+				else if (numDronesG2 > 10 && rc.readBroadcast(Broadcast.droneGroup2Ch) == 1) {
+					groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
+				}
+				else {
+					rc.broadcast(Broadcast.droneGroup2Ch, 0);
+					groupUnits(Broadcast.droneGroup2Ch, RobotType.DRONE);
+				}
+				
+			}
 		}
 		
 	}
@@ -366,25 +426,49 @@ public class Headquarters extends Building {
 	public void groupUnits(int ID_Broadcast, RobotType rt) {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
 		int i = 0;
-		for (RobotInfo r : myRobots) {
-			RobotType type = r.type;
-			if (type == RobotType.TANK) {
-				//update hashmap with (id, group id) pair;
-				// if tank is in the hashmap but not in a group
-				if (Hashing.find(groupID, ID_Broadcast) == 0) {
-					Hashing.put(groupID, r.ID, ID_Broadcast);
-					//update the corresponding broadcasted group
-					if (ID_Broadcast == Broadcast.tankGroup1Ch) {
-						groupA[i] = r.ID;
-						i++;
+		if (strategy == 1) {
+			for (RobotInfo r : myRobots) {
+				RobotType type = r.type;
+				if (type == RobotType.TANK) {
+					//update hashmap with (id, group id) pair;
+					// if tank is in the hashmap but not in a group
+					if (Hashing.find(groupID, r.ID) == 0) {
+						Hashing.put(groupID, r.ID, ID_Broadcast);
+						//update the corresponding broadcasted group
+						if (ID_Broadcast == Broadcast.tankGroup1Ch) {
+							groupA[i] = r.ID;
+							i++;
+						}
+						else if (ID_Broadcast == Broadcast.tankGroup2Ch) {
+							groupB[i] = r.ID;
+							i++;
+						}
 					}
-					else if (ID_Broadcast == Broadcast.tankGroup2Ch) {
-						groupB[i] = r.ID;
-						i++;
+				} 
+			}
+		} 
+		else if (strategy == 2) {
+			for (RobotInfo r : myRobots) {
+				RobotType type = r.type;
+				if (type == RobotType.DRONE) {
+					//update hashmap with (id, group id) pair;
+					// if tank is in the hashmap but not in a group
+					if (Hashing.find(groupID, r.ID) == 0) {
+						Hashing.put(groupID, r.ID, ID_Broadcast);
+						//update the corresponding broadcasted group
+						if (ID_Broadcast == Broadcast.droneGroup1Ch) {
+							groupA[ptA] = r.ID;
+							ptA++;
+						}
+						else if (ID_Broadcast == Broadcast.droneGroup2Ch) {
+							groupB[ptB] = r.ID;
+							ptB++;
+						}
 					}
 				}
 			}
 		}
+		
 		int broadcastCh;
 		if (rt == RobotType.TANK) {
 			broadcastCh = Broadcast.groupingTanksCh;

@@ -1,7 +1,6 @@
 package team158.units;
 
 import team158.buildings.Headquarters;
-import team158.units.com.Navigation;
 import team158.utils.Broadcast;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
@@ -31,25 +30,30 @@ public class Drone extends Unit {
 		if (rc.isCoreReady()) {
 			if (enemiesAttackable.length > 0) {
 				Direction d = selectMoveDirectionMicro();
-				Navigation.stopObstacleTracking(this);
+				navigation.stopObstacleTracking();
 				if (d != null) {
 					rc.move(d);
 				}
 			}
 			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
-				Navigation.moveToDestination(rc, this, enemyHQ, true);
-			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
-				MapLocation myHQ = rc.senseHQLocation();
-				Navigation.moveToDestination(rc, this, myHQ, true);
-			} else {
-				if (groupID > 0) {		
+				System.out.println(groupID);
+				if (groupID == Broadcast.droneGroup2Ch) {
 					int towerX = rc.readBroadcast(Broadcast.groupingTargetLocationXCh);
 					int towerY = rc.readBroadcast(Broadcast.groupingTargetLocationYCh);
-					moveToTargetByGroup(new MapLocation(towerX,towerY));
+					//System.out.println(towerX + " " + towerY);
+					MapLocation target = new MapLocation(towerX,towerY);
+					rc.setIndicatorString(0,String.valueOf(towerX + " " + towerY));
+					moveToTargetByGroup(target);
 				}
 				else {
-					Navigation.moveToDestination(rc, this, enemyHQ, false);
+					rc.setIndicatorString(0,String.valueOf(enemyHQ.x + " " + enemyHQ.y));
+					navigation.moveToDestination(enemyHQ, true);
 				}
+			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
+				MapLocation myHQ = rc.senseHQLocation();
+				navigation.moveToDestination(myHQ, true);
+			} else {
+				navigation.moveToDestination(enemyHQ, false);
 			}
 		}
 	}

@@ -1,6 +1,5 @@
 package team158.units;
 
-import team158.units.com.Navigation;
 import team158.utils.Broadcast;
 import battlecode.common.*;
 
@@ -43,7 +42,7 @@ public class Tank extends Unit {
 					int xLoc = rc.readBroadcast(Broadcast.tankRallyXCh);
 					int yLoc = rc.readBroadcast(Broadcast.tankRallyYCh);
 					rally = new MapLocation(xLoc, yLoc);
-					Navigation.moveToDestination(rc, this, rally, false);
+					navigation.moveToDestination(rally, false);
 				}
 			}
 		}	
