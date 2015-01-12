@@ -44,17 +44,17 @@ public class Headquarters extends Building {
 		if (Clock.getRoundNum() < TIME_UNTIL_COLLECT_SUPPLY) {
 			int distanceFactor = (int) hqDistance;
 			for (RobotInfo r : friendlyRobots) {
-				if (r.type == RobotType.DRONE || r.type == RobotType.SOLDIER || r.type == RobotType.TANK) {
-					if (r.supplyLevel < r.type.supplyUpkeep * 10 * distanceFactor) {
-						rc.setIndicatorString(0, "transferring supply to attacking unit");
-						rc.transferSupplies(Math.max(r.type.supplyUpkeep * 15 * distanceFactor, mySupply / 4), r.location);
+				if (r.type == RobotType.LAUNCHER || r.type == RobotType.MINER) {
+					if (r.supplyLevel < r.type.supplyUpkeep * 20 * distanceFactor) {
+						rc.setIndicatorString(0, "transferring supply to miner/launcher");
+						rc.transferSupplies(r.type.supplyUpkeep * 30 * distanceFactor, r.location);
 						break;
 					}
 				}
-				else if (r.type == RobotType.MINER) {
-					if (r.supplyLevel < r.type.supplyUpkeep * 20 * distanceFactor) {
-						rc.setIndicatorString(0, "transferring supply to miner");
-						rc.transferSupplies(r.type.supplyUpkeep * 30 * distanceFactor, r.location);
+				else if (r.type == RobotType.DRONE) {
+					if (r.supplyLevel < r.type.supplyUpkeep * 10 * distanceFactor) {
+						rc.setIndicatorString(0, "transferring supply to attacking unit");
+						rc.transferSupplies(Math.max(r.type.supplyUpkeep * 15 * distanceFactor, mySupply / 4), r.location);
 						break;
 					}
 				}
@@ -162,7 +162,7 @@ public class Headquarters extends Building {
 		rc.broadcast(Broadcast.numDronesCh, numDrones);
 		rc.broadcast(Broadcast.numLaunchersCh, numLaunchers);
 		
-		if (!enemyRush && Clock.getRoundNum() < 300) {
+		if (!enemyRush && Clock.getRoundNum() < 500) {
 			RobotInfo[] enemyRobots = rc.senseNearbyRobots(99, rc.getTeam().opponent());
 			int enemyDrones = 0;
 			for (RobotInfo r : enemyRobots) {

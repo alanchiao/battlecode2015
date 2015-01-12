@@ -72,7 +72,7 @@ public abstract class Unit extends Robot {
 				// Give supply to robots that really need it
 				else if (mySupply > rc.getType().supplyUpkeep * 100) {
 					for (RobotInfo r : friendlyRobots) {
-						if (r.supplyLevel < r.type.supplyUpkeep * 50) {
+						if (r.supplyLevel < r.type.supplyUpkeep * 50 && mySupply > r.supplyLevel) {
 							rc.transferSupplies((int)(mySupply - r.supplyLevel) / 2, r.location);
 							break;
 						}
@@ -133,7 +133,8 @@ public abstract class Unit extends Robot {
 	
 	protected Direction selectMoveDirectionMicro() {
 		MapLocation myLocation = rc.getLocation();
-		int myRange = rc.getType().attackRadiusSquared;
+		// set range arbitrarily if robot is a launcher
+		int myRange = rc.getType() != RobotType.LAUNCHER ? rc.getType().attackRadiusSquared : 24;
 		Team opponent = rc.getTeam().opponent();
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, opponent);
 		

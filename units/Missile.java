@@ -12,6 +12,16 @@ public class Missile extends Robot {
 
 	@Override
 	public void move() {
+		try {
+			if (rc.getSupplyLevel() > 0) {
+				System.out.println("Missiles shouldn't have supply");
+			}
+			rc.explode();
+		}
+		catch (Exception e) {
+			System.out.println(rc.getType());
+            e.printStackTrace();
+		}
 	}
 
 	@Override

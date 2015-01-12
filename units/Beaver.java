@@ -32,7 +32,7 @@ public class Beaver extends Unit {
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
 		if (enemies.length > 0 && rc.isWeaponReady()) { 
 			if (rc.isWeaponReady()) {
-				rc.attackLocation(enemies[0].location);
+				rc.attackLocation(selectTarget(enemies));
 			}
 		}
 		
@@ -64,6 +64,11 @@ public class Beaver extends Unit {
 				rc.broadcast(Broadcast.buildBarracksCh, 0);
 				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(enemyHQ));
 				tryBuildInDirection(dirint, RobotType.BARRACKS);
+			}
+			else if (rc.readBroadcast(Broadcast.buildAerospaceLabsCh) == rc.getID()) {
+				rc.broadcast(Broadcast.buildAerospaceLabsCh, 0);
+				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(enemyHQ));
+				tryBuildInDirection(dirint, RobotType.AEROSPACELAB);
 			}
 			else {
 				double currentOre = rc.senseOre(myLocation);
