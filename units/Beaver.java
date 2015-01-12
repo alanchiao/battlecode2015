@@ -16,18 +16,23 @@ public class Beaver extends Unit {
 	private final int[] offsets = {0,1,-1,2,-2,3,-3,4};
 	private void tryBuildInDirection(int dirint, RobotType robotType) throws GameActionException {
 		int offsetIndex = 0;
-		while (offsetIndex < 8 && !rc.canBuild(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], robotType)) {
+		Direction buildDirection = null;
+		int numBuildLocations = 0;
+		while (offsetIndex < 8) {
+			if (rc.canBuild(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], robotType)) {
+				numBuildLocations++;
+				if (buildDirection == null) {
+					buildDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
+				}
+			}
 			offsetIndex++;
 		}
-		Direction buildDirection = null;
-		if (offsetIndex < 8) {
-			buildDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
-		}
-		if (buildDirection != null) {
+		if (numBuildLocations > 1) {
 			rc.build(buildDirection, robotType);
 		}
-		else {
-			rc.disintegrate();
+		// avoid getting trapped
+		else if (numBuildLocations == 1) {
+			rc.move(buildDirection);
 		}
 	}
 	
@@ -61,7 +66,7 @@ public class Beaver extends Unit {
 			// HQ has given command to build a miner factory
 			else if (rc.readBroadcast(Broadcast.buildMinerFactoriesCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildMinerFactoriesCh, 0);
-				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(myLocation));
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));
 				tryBuildInDirection(dirint, RobotType.MINERFACTORY);
 			}
 			// HQ has given command to build a barracks
@@ -93,7 +98,7 @@ public class Beaver extends Unit {
 				// looks around for an ore concentration that is bigger than its current location by a certain fraction
 				for (Direction dir: DirectionHelper.directions) {
 					MapLocation possibleLocation = myLocation.add(dir);
-					if (!stayNearHQ || possibleLocation.distanceSquaredTo(rc.senseHQLocation()) < 8) {
+					if (!stayNearHQ || possibleLocation.distanceSquaredTo(rc.senseHQLocation()) < 15) {
 						double possibleOre = rc.senseOre(possibleLocation);
 						if (possibleOre > maxOre && rc.canMove(dir) && avoidMoves[DirectionHelper.directionToInt(dir)]) {
 							maxOre = possibleOre;

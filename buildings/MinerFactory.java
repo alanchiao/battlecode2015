@@ -16,9 +16,11 @@ public class MinerFactory extends Building {
 	protected void actions() throws GameActionException {
 		int numMiners = rc.readBroadcast(Broadcast.numMinersCh);
 		int miners = rc.readBroadcast(Broadcast.minersProducedCh);
-		int ore = rc.readBroadcast(Broadcast.minerOreCh);
+		int oreX100 = rc.readBroadcast(Broadcast.minerOreX100Ch);
+		boolean slowDownMining = rc.readBroadcast(Broadcast.slowMinerProductionCh) == 1;
 		double myOre = rc.getTeamOre();
-		if (rc.isCoreReady() && myOre >= 50 && (numMiners < 10 || (ore / miners > 50 && numMiners < hqDistance / 2))) {
+		if (rc.isCoreReady() && myOre >= 50 && ((numMiners < 10 && !slowDownMining)
+				|| (oreX100 / miners > 5000 && numMiners < hqDistance / 2))) {
 			int[] offsets = {0,1,-1,2,-2,3,-3,4};
 			int offsetIndex = 0;
 			int dirint = rand.nextInt(8);

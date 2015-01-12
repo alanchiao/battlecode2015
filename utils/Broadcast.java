@@ -21,7 +21,7 @@ public class Broadcast {
 	public static final int buildTankFactoriesCh = 205;
 	public static final int buildAerospaceLabsCh = 206;
 	
-	public static final int minerOreCh = 301;
+	public static final int minerOreX100Ch = 301;
 	public static final int minersProducedCh = 302;
 	
 	public static final int tankRallyXCh = 400;
@@ -41,9 +41,8 @@ public class Broadcast {
 	// Channels for signaling
 	public static final int enemyRushCh = 600;
 	public static final int enemyThreatCh = 601;
-	// Launcher to drone ratio, times 100
-	public static final int L2DX100Ch = 602;
 	public static final int scoutEnemyHQCh = 603;
+	public static final int slowMinerProductionCh = 604;
 	
 	// Channels 700-799 are used for grouping
 	public static final int soldierGroup1Ch = 700;
@@ -52,7 +51,5 @@ public class Broadcast {
 	public static final int tankGroup2Ch = 703;
 	public static final int droneGroup1Ch = 704;
 	public static final int droneGroup2Ch = 705;
-	
-	
-	
+
 }

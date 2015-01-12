@@ -41,7 +41,7 @@ public class Launcher extends Unit {
 					rc.move(d);
 				}
 			}
-			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
+			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {
 				RobotInfo[] closeRobots = rc.senseNearbyRobots(52, rc.getTeam().opponent());
 				if (closeRobots.length > 0) {
 					MapLocation closestRobot = closeRobots[0].location;
@@ -64,8 +64,11 @@ public class Launcher extends Unit {
 						navigation.moveToDestination(myLocation.add(DirectionHelper.directions[rand.nextInt(8)]), true);
 					}
 				}
+			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
+				MapLocation myHQ = rc.senseHQLocation();
+				navigation.moveToDestination(myHQ, true);
 			} else {
-				navigation.moveToDestination(enemyHQ, false);
+				navigation.moveToDestination(enemyHQ, true);
 			}
 		}
 	}
