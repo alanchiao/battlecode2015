@@ -21,7 +21,6 @@ public class Headquarters extends Building {
 	private int defendGroup;
 	
 	private int numTowers;
-	private boolean towerDied;
 	MapLocation targetTower;
 
 	private int strategy;
@@ -44,7 +43,6 @@ public class Headquarters extends Building {
 		defendGroup = 0;
 		
 		numTowers = 7;
-		towerDied = false;
 		
 		strategy = 2;
 		enemyRush = false;
@@ -63,52 +61,52 @@ public class Headquarters extends Building {
 		int numTowersRemaining = enemyTowers.length;
 		
 		if (numTowersRemaining != numTowers) {
-			towerDied = true;
 			numTowers = numTowersRemaining;
-		}
-
-		if (towerDied && numTowers > 0) {
-			//reset tower died status
-			towerDied = false;
-			int[] distances = new int[numTowersRemaining];
-			for (int i = 0; i < numTowersRemaining; i++) {
-				distances[i] = myLocation.distanceSquaredTo(enemyTowers[i]);
-			}
-			
-			boolean towerExists = false;
-			int count = 0;
-			while (count < numTowersRemaining) {
-				int minDistance = 999999;
-				int targetTowerIndex = 0;
+			if (numTowers > 0) {
+				//reset tower died status
+				int[] distances = new int[numTowersRemaining];
 				for (int i = 0; i < numTowersRemaining; i++) {
-					if (distances[i] < minDistance) {
-						minDistance = distances[i];
-						targetTower = enemyTowers[i];
-						targetTowerIndex = i;
+					distances[i] = myLocation.distanceSquaredTo(enemyTowers[i]);
+				}
+				
+				boolean towerExists = false;
+				int count = 0;
+				while (count < numTowersRemaining) {
+					int minDistance = 999999;
+					int targetTowerIndex = 0;
+					for (int i = 0; i < numTowersRemaining; i++) {
+						if (distances[i] < minDistance) {
+							minDistance = distances[i];
+							targetTower = enemyTowers[i];
+							targetTowerIndex = i;
+						}
+					}
+					int numNearbyTowers = 0;
+					for (int j = 0; j < numTowersRemaining; j++) {
+						if (targetTowerIndex != j && targetTower.distanceSquaredTo(enemyTowers[j]) <= 24) {
+							numNearbyTowers++;
+						}
+					}
+					if (numNearbyTowers <= 3) {
+						towerExists = true;
+						break;
+					}
+					else {
+						distances[targetTowerIndex] = 999999;
+						count++;
 					}
 				}
-				int numNearbyTowers = 0;
-				for (int j = 0; j < numTowersRemaining; j++) {
-					if (targetTowerIndex != j && targetTower.distanceSquaredTo(enemyTowers[j]) <= 24) {
-						numNearbyTowers++;
+				if (!towerExists) {
+					if (numTowersRemaining != 6) {
+						targetTower = enemyHQ;
 					}
-				}
-				if (numNearbyTowers <= 3) {
-					towerExists = true;
-					break;
-				}
-				else {
-					distances[targetTowerIndex] = 999999;
-					count++;
+					else {
+						targetTower = null;
+					}
 				}
 			}
-			if (!towerExists) {
-				if (numTowersRemaining != 6) {
-					targetTower = enemyHQ;
-				}
-				else {
-					targetTower = null;
-				}
+			else {
+				targetTower = enemyHQ;
 			}
 		}
 
@@ -291,7 +289,7 @@ public class Headquarters extends Building {
 				for (RobotInfo r : rc.senseNearbyRobots(2)) {
 					if (r.type == RobotType.TOWER) {
 						rc.broadcast(Broadcast.buildBuildingsCloseCh, 0);
-						return;
+						break;
 					}
 				}
 				int offsetIndex = 0;
@@ -395,6 +393,9 @@ public class Headquarters extends Building {
 			else {
 				if (numDronesG2 > 20 && targetTower != null) {
 					rc.broadcast(Broadcast.droneGroup2Ch, 1);
+				}
+				else if (numDronesG2 <= 10) {
+					rc.broadcast(Broadcast.droneGroup2Ch, 0);
 				}
 				groupUnits(Broadcast.droneGroup2Ch, RobotType.DRONE);
 			}
