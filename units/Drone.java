@@ -36,13 +36,15 @@ public class Drone extends Unit {
 				}
 			}
 			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
-				System.out.println(groupID);
+				//System.out.println(groupID);
+				rc.setIndicatorString(1, Integer.toString(groupID));
 				if (groupID == Broadcast.droneGroup2Ch) {
 					int towerX = rc.readBroadcast(Broadcast.groupingTargetLocationXCh);
 					int towerY = rc.readBroadcast(Broadcast.groupingTargetLocationYCh);
 					//System.out.println(towerX + " " + towerY);
 					MapLocation target = new MapLocation(towerX,towerY);
 					rc.setIndicatorString(0,String.valueOf(towerX + " " + towerY));
+					
 					moveToTargetByGroup(target);
 				}
 				else {

@@ -17,6 +17,11 @@ public class Helipad extends Building {
 	protected void actions() throws GameActionException {
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
+
+		int numDrones = rc.readBroadcast(Broadcast.numDronesCh);
+		int numLaunchers = rc.readBroadcast(Broadcast.numLaunchersCh);
+		double L2D = rc.readBroadcast(Broadcast.L2DX100Ch) / 100.0;
+		
 		if (rc.readBroadcast(Broadcast.dronesRallyXCh) == 0) {
 			MapLocation rally = myLocation;
 			// Move 5 squares away
@@ -35,7 +40,7 @@ public class Helipad extends Building {
 			rc.broadcast(Broadcast.dronesRallyXCh, rally.x);
 			rc.broadcast(Broadcast.dronesRallyYCh, rally.y);
 		}
-		if (rc.isCoreReady() && rc.getTeamOre() >= 125) {
+		if (rc.isCoreReady() && L2D * numDrones <= numLaunchers && rc.getTeamOre() >= 125) {
 			int offsetIndex = 0;
 			while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.DRONE)) {
 				offsetIndex++;
