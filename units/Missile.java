@@ -5,6 +5,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import team158.Robot;
+import team158.utils.DirectionHelper;
 
 public class Missile extends Robot {
 
@@ -14,7 +15,7 @@ public class Missile extends Robot {
 		rc = newRC;
 		targetID = 0;
 		
-		RobotInfo enemies[] = rc.senseNearbyRobots(25, rc.getTeam().opponent());
+		RobotInfo enemies[] = rc.senseNearbyRobots(24, rc.getTeam().opponent());
 		for (RobotInfo enemy: enemies) {
 			int distanceToEnemy = rc.getLocation().distanceSquaredTo(enemy.location);
 			if (distanceToEnemy >= 9) {
@@ -27,17 +28,29 @@ public class Missile extends Robot {
 	@Override
 	public void move() {
 		try {
-			RobotInfo enemies[] = rc.senseNearbyRobots(25, rc.getTeam().opponent());
-			for (RobotInfo enemy: enemies) {
-				if (enemy.ID == targetID) {
-					Direction dir = rc.getLocation().directionTo(enemy.location);
-					int distanceToEnemy = rc.getLocation().distanceSquaredTo(enemy.location);
-					if (distanceToEnemy <= 2) {
-						rc.explode();
+			if (rc.isCoreReady()) {
+				RobotInfo enemies[] = rc.senseNearbyRobots(2, rc.getTeam().opponent());
+				if (enemies.length > 0) {
+					rc.explode();
+					return;
+				}
+				enemies = rc.senseNearbyRobots(24, rc.getTeam().opponent());
+				if (enemies.length > 0) {
+					Direction moveDirection = rc.getLocation().directionTo(enemies[0].location);
+					if (rc.canMove(moveDirection)) {
+						rc.move(moveDirection);
+						return;
 					}
-					else if(rc.canMove(dir)) {
-						rc.move(dir);
-					}			
+					moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 9) % 8];
+					if (rc.canMove(moveDirection)) {
+						rc.move(moveDirection);
+						return;
+					}
+					moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 6) % 8];
+					if (rc.canMove(moveDirection)) {
+						rc.move(moveDirection);
+						return;
+					}
 				}
 			}
 		} catch (GameActionException e) {

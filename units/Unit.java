@@ -136,7 +136,7 @@ public abstract class Unit extends Robot {
 	protected Direction selectMoveDirectionMicro() {
 		MapLocation myLocation = rc.getLocation();
 		// set range arbitrarily if robot is a launcher
-		int myRange = rc.getType() != RobotType.LAUNCHER ? rc.getType().attackRadiusSquared : 24;
+		int myRange = rc.getType() != RobotType.LAUNCHER ? rc.getType().attackRadiusSquared : 35;
 		Team opponent = rc.getTeam().opponent();
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, opponent);
 		
@@ -217,14 +217,14 @@ public abstract class Unit extends Robot {
 				for (int i = 0; i < 8; i++) {
 					int newLocationDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(r.location);
 					if (newLocationDistance <= r.type.attackRadiusSquared) {
-						damages[i] += r.type.attackPower / r.type.attackDelay;
+						damages[i] += r.type.attackPower / Math.max(r.type.attackDelay, 1);
 					}
 					if (newLocationDistance <= myRange) {
 						enemyInRange[i] += 1;
 					}
 				}
 				if (myLocation.distanceSquaredTo(r.location) <= r.type.attackRadiusSquared) {
-					damages[8] += r.type.attackPower / r.type.attackDelay;
+					damages[8] += r.type.attackPower / Math.max(r.type.attackDelay, 1);
 				}
 			}
 			
