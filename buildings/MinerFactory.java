@@ -19,7 +19,8 @@ public class MinerFactory extends Building {
 		int oreX100 = rc.readBroadcast(Broadcast.minerOreX100Ch);
 		boolean slowDownMining = rc.readBroadcast(Broadcast.slowMinerProductionCh) == 1;
 		double myOre = rc.getTeamOre();
-		if (rc.isCoreReady() && myOre >= 50 && ((numMiners < 10 && !slowDownMining)
+		int threshold = rc.readBroadcast(Broadcast.numLaunchersCh) > 0 && rc.readBroadcast(Broadcast.numLaunchersCh) < 8 ? 450 : 50;
+		if (rc.isCoreReady() && myOre >= threshold && ((numMiners < 10 && !slowDownMining)
 				|| (oreX100 / miners > 5000 && numMiners < hqDistance / 2))) {
 			int[] offsets = {0,1,-1,2,-2,3,-3,4};
 			int offsetIndex = 0;
