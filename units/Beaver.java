@@ -5,10 +5,12 @@ import battlecode.common.*;
 public class Beaver extends Unit {
 	
 	int stepsUntilEnemyHQ;
+	boolean stayNearHQ;
 
 	public Beaver(RobotController newRC) {
 		super(newRC);
 		stepsUntilEnemyHQ = 0;
+		stayNearHQ = true;
 	}
 
 	private final int[] offsets = {0,1,-1,2,-2,3,-3,4};
@@ -80,9 +82,8 @@ public class Beaver extends Unit {
 				// to get there. May be delayed by enemy units, but shouldn't be much
 				// since early game
 				if (rc.getLocation().distanceSquaredTo(enemyHQ) <= distanceBetweenHQ/4) {
-					System.out.println("REACHABLE IN " + Integer.toString(stepsUntilEnemyHQ * 2));
-					rc.broadcast(Broadcast.scoutEnemyHQCh, -1);
-					rc.disintegrate();
+					rc.broadcast(Broadcast.scoutEnemyHQCh, stepsUntilEnemyHQ * 2);
+					stayNearHQ = false;
 				}
 			} else {
 				double currentOre = rc.senseOre(myLocation);
@@ -92,7 +93,7 @@ public class Beaver extends Unit {
 				// looks around for an ore concentration that is bigger than its current location by a certain fraction
 				for (Direction dir: DirectionHelper.directions) {
 					MapLocation possibleLocation = myLocation.add(dir);
-					if (possibleLocation.distanceSquaredTo(rc.senseHQLocation()) < 8) {
+					if (!stayNearHQ || possibleLocation.distanceSquaredTo(rc.senseHQLocation()) < 8) {
 						double possibleOre = rc.senseOre(possibleLocation);
 						if (possibleOre > maxOre && rc.canMove(dir) && avoidMoves[DirectionHelper.directionToInt(dir)]) {
 							maxOre = possibleOre;

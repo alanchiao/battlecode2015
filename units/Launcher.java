@@ -8,7 +8,6 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
 
 public class Launcher extends Unit {
 
@@ -42,7 +41,7 @@ public class Launcher extends Unit {
 					rc.move(d);
 				}
 			}
-			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
+			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
 				RobotInfo[] closeRobots = rc.senseNearbyRobots(52, rc.getTeam().opponent());
 				if (closeRobots.length > 0) {
 					MapLocation closestRobot = closeRobots[0].location;
@@ -57,7 +56,13 @@ public class Launcher extends Unit {
 					navigation.moveToDestination(closestRobot, false);
 				}
 				else {
-					navigation.moveToDestination(enemyHQ, true);
+					MapLocation myHQ = rc.senseHQLocation();
+					if (myLocation.distanceSquaredTo(myHQ) > 52) {
+						navigation.moveToDestination(myHQ, false);
+					}
+					else {
+						navigation.moveToDestination(myLocation.add(DirectionHelper.directions[rand.nextInt(8)]), true);
+					}
 				}
 			} else {
 				navigation.moveToDestination(enemyHQ, false);

@@ -18,6 +18,12 @@ public class Drone extends Unit {
 
 	@Override
 	protected void actions() throws GameActionException {
+		// Determine if opponent is using tanks/launchers and assess threat
+		if (prevHealth - rc.getHealth() >= 20) {
+			int threat = rc.readBroadcast(Broadcast.enemyThreatCh);
+			rc.broadcast(Broadcast.enemyThreatCh, threat + 1);
+		}
+
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(RobotType.DRONE.attackRadiusSquared, rc.getTeam().opponent());
 
 		if (rc.isWeaponReady()) {

@@ -214,16 +214,17 @@ public abstract class Unit extends Robot {
 				}
 			}
 			for (RobotInfo r : enemies) {
+				int radiusSquared = r.type != RobotType.MISSILE ? r.type.attackRadiusSquared : 5;
 				for (int i = 0; i < 8; i++) {
 					int newLocationDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(r.location);
-					if (newLocationDistance <= r.type.attackRadiusSquared) {
+					if (newLocationDistance <= radiusSquared) {
 						damages[i] += r.type.attackPower / Math.max(r.type.attackDelay, 1);
 					}
 					if (newLocationDistance <= myRange) {
 						enemyInRange[i] += 1;
 					}
 				}
-				if (myLocation.distanceSquaredTo(r.location) <= r.type.attackRadiusSquared) {
+				if (myLocation.distanceSquaredTo(r.location) <= radiusSquared) {
 					damages[8] += r.type.attackPower / Math.max(r.type.attackDelay, 1);
 				}
 			}

@@ -26,6 +26,7 @@ public class Headquarters extends Building {
 	private int strategy;
 	private boolean enemyRush;
 	private boolean enemyThreat;
+	private int pathDifficulty;
 	
 	int closestBeaver;
 	int scoutBeaver;
@@ -40,10 +41,14 @@ public class Headquarters extends Building {
 		
 		attackGroup = 1;
 		defendGroup = 0;
-		strategy = 2;
 		
+		strategy = 2;
 		enemyRush = false;
 		enemyThreat = false;
+		pathDifficulty = 0;
+		
+		closestBeaver = 0;
+		scoutBeaver = 0;
 	}
 	
 	@Override
@@ -52,8 +57,6 @@ public class Headquarters extends Building {
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 		//MapLocation myLocation = rc.getLocation();
 		int numTowersRemaining = enemyTowers.length;
-
-		//targetTower = enemyHQ;
 		
 		if (numTowersRemaining != numTowers) {
 			towerDied = true;
@@ -114,7 +117,6 @@ public class Headquarters extends Building {
 		rc.broadcast(Broadcast.groupingTargetLocationYCh, targetTower.y);
 		
 		rc.setIndicatorString(0, targetTower.x + " " + targetTower.y);
-		//System.out.println(targetTower.x + " " + targetTower.y);
 		
 		int mySupply = (int) rc.getSupplyLevel();
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
@@ -147,7 +149,7 @@ public class Headquarters extends Building {
 		}
 		else {
 			for (RobotInfo r : friendlyRobots) {
-				if (r.type == RobotType.DRONE || r.type == RobotType.SOLDIER || r.type == RobotType.TANK) {
+				if (r.type == RobotType.DRONE || r.type == RobotType.LAUNCHER) {
 					rc.transferSupplies(mySupply, r.location);
 					break;
 				}
@@ -214,8 +216,6 @@ public class Headquarters extends Building {
 		int numDronesG2 = 0;
 		int numAerospaceLabs = 0;
 		
-		int closestBeaver = 0;
-		
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
 			if (type == RobotType.MINER) {
@@ -230,11 +230,12 @@ public class Headquarters extends Building {
 				}		
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
-				if (closestBeaver == 0 && numBeavers == 2) {
+				if (closestBeaver == 0) {
 					closestBeaver = r.ID;
 				}
-				if (scoutBeaver == 0 && numBeavers == 1) {
+				else if (scoutBeaver == 0 && r.ID != closestBeaver) {
 					scoutBeaver = r.ID;
+					rc.broadcast(Broadcast.scoutEnemyHQCh, scoutBeaver);
 				}
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
@@ -257,21 +258,31 @@ public class Headquarters extends Building {
 		
 		if (!enemyRush && Clock.getRoundNum() < 500) {
 			RobotInfo[] enemyRobots = rc.senseNearbyRobots(99, rc.getTeam().opponent());
-			int enemyDrones = 0;
 			for (RobotInfo r : enemyRobots) {
 				if (r.type == RobotType.DRONE) {
-					enemyDrones++;
-					if (enemyDrones == 2) {
-						enemyRush = true;
-						return;
-					}
+					enemyRush = true;
+					return;
 				}
+			}
+		}
+		
+		if (!enemyThreat && Clock.getRoundNum() < 700) {
+			if (rc.readBroadcast(Broadcast.enemyThreatCh) > 2) {
+				enemyThreat = true;
+			}
+		}
+		
+		if (pathDifficulty == 0) {
+			int possibleDifficulty = rc.readBroadcast(Broadcast.scoutEnemyHQCh);
+			if (possibleDifficulty != scoutBeaver) {
+				pathDifficulty = possibleDifficulty;
+				System.out.println(pathDifficulty);
 			}
 		}
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
-			if (numBeavers <= 1) {
+			if (numBeavers == 0 || scoutBeaver == 0) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
@@ -346,13 +357,8 @@ public class Headquarters extends Building {
 				}
 			}
 			
-			if (scoutBeaver != 0 && rc.readBroadcast(Broadcast.scoutEnemyHQCh) != -1) {
-				rc.broadcast(Broadcast.scoutEnemyHQCh, scoutBeaver);
-			}
-			
 			rc.setIndicatorString(1, Integer.toString(numDronesG1));
 			rc.setIndicatorString(2, Integer.toString(numDronesG2));
-			//System.out.println(numDronesG1 + " " + numDronesG2);
 			if (numDronesG1 < 15) {
 				rc.broadcast(Broadcast.droneGroup1Ch, 1);
 				groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
@@ -369,7 +375,6 @@ public class Headquarters extends Building {
 					rc.broadcast(Broadcast.droneGroup2Ch, 0);
 					groupUnits(Broadcast.droneGroup2Ch, RobotType.DRONE);
 				}
-				
 			}
 		}
 		
@@ -487,7 +492,6 @@ public class Headquarters extends Building {
 	
 	public void groupUnits(int ID_Broadcast, RobotType rt) {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
-		int i = 0;
 		if (strategy == 1) {
 			for (RobotInfo r : myRobots) {
 				RobotType type = r.type;
