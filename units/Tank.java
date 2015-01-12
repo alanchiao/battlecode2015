@@ -6,6 +6,10 @@ import battlecode.common.*;
 
 public class Tank extends Unit {
 	
+	public Tank(RobotController newRC) {
+		super(newRC);
+	}
+	
 	@Override
 	protected void actions() throws GameActionException {
 

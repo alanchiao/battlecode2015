@@ -4,6 +4,11 @@ import team158.utils.*;
 import battlecode.common.*;
 
 public class Beaver extends Unit {
+
+	public Beaver(RobotController newRC) {
+		super(newRC);
+	}
+
 	private final int[] offsets = {0,1,-1,2,-2,3,-3,4};
 	private void tryBuildInDirection(int dirint, RobotType robotType) throws GameActionException {
 		int offsetIndex = 0;
@@ -35,18 +40,18 @@ public class Beaver extends Unit {
 		if (rc.isCoreReady()) {
 			if (rc.readBroadcast(Broadcast.buildHelipadsCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildHelipadsCh, 0);
-				int dirint = DirectionHelper.directionToInt(rc.senseEnemyHQLocation().directionTo(rc.senseHQLocation()));
+				int dirint = DirectionHelper.directionToInt(enemyHQ.directionTo(rc.senseHQLocation()));
 				tryBuildInDirection(dirint, RobotType.HELIPAD);
 			}
 			else if (rc.readBroadcast(Broadcast.buildTankFactoriesCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildTankFactoriesCh, 0);
-				int dirint = DirectionHelper.directionToInt(rc.senseEnemyHQLocation().directionTo(rc.senseHQLocation()));
+				int dirint = DirectionHelper.directionToInt(enemyHQ.directionTo(rc.senseHQLocation()));
 				tryBuildInDirection(dirint, RobotType.TANKFACTORY);
 			}
 			// HQ has given command to build a supply depot
 			else if (rc.readBroadcast(Broadcast.buildSupplyCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildSupplyCh, 0);
-				int dirint = DirectionHelper.directionToInt(rc.senseEnemyHQLocation().directionTo(rc.senseHQLocation()));
+				int dirint = DirectionHelper.directionToInt(enemyHQ.directionTo(rc.senseHQLocation()));
 				tryBuildInDirection(dirint, RobotType.SUPPLYDEPOT);
 			}
 			// HQ has given command to build a miner factory
@@ -58,7 +63,7 @@ public class Beaver extends Unit {
 			// HQ has given command to build a barracks
 			else if (rc.readBroadcast(Broadcast.buildBarracksCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildBarracksCh, 0);
-				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(rc.senseEnemyHQLocation()));
+				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(enemyHQ));
 				tryBuildInDirection(dirint, RobotType.BARRACKS);
 			}
 			else {

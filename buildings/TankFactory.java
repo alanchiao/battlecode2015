@@ -1,16 +1,19 @@
 package team158.buildings;
 
 import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 import team158.utils.DirectionHelper;
 
 public class TankFactory extends Building {
+	
+	public TankFactory(RobotController newRC) {
+		super(newRC);
+	}
+
 	@Override
 	protected void actions() throws GameActionException {
 		if (rc.isCoreReady() && rc.getTeamOre() >= RobotType.TANK.oreCost) {
-			MapLocation myLocation = rc.getLocation();
-			MapLocation enemyHQ = rc.senseEnemyHQLocation();
 			int[] offsets = {0,1,-1,2,-2,3,-3,4};
 			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
 			int offsetIndex = 0;

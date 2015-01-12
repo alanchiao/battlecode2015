@@ -21,42 +21,41 @@ public class RobotPlayer {
 	public static void run(RobotController r) {
 		rc = r;
 		if (rc.getType() == RobotType.HQ) {
-			robot = new Headquarters();
+			robot = new Headquarters(rc);
 		}
 		else if (rc.getType() == RobotType.TOWER) {
-        	robot = new Tower();
+        	robot = new Tower(rc);
         }
 		else if (rc.getType() == RobotType.SOLDIER) {
-        	robot = new Soldier();
+        	robot = new Soldier(rc);
         }
 		else if (rc.getType() == RobotType.BEAVER) {
-			robot = new Beaver();
+			robot = new Beaver(rc);
 		}
 		else if (rc.getType() == RobotType.DRONE) {
-			robot = new Drone();
+			robot = new Drone(rc);
 		}
 		else if (rc.getType() == RobotType.BARRACKS) {
-        	robot = new Barracks();
+        	robot = new Barracks(rc);
 		}
 		else if (rc.getType() == RobotType.MINER) {
-        	robot = new Miner();
+        	robot = new Miner(rc);
 		}
 		else if (rc.getType() == RobotType.MINERFACTORY) {
-        	robot = new MinerFactory();
+        	robot = new MinerFactory(rc);
 		}
 		else if (rc.getType() == RobotType.HELIPAD) {
-        	robot = new Helipad();
+        	robot = new Helipad(rc);
         }
 		else if (rc.getType() == RobotType.TANK) {
-        	robot = new Tank();
+        	robot = new Tank(rc);
         }
 		else if (rc.getType() == RobotType.TANKFACTORY) {
-        	robot = new TankFactory();
+        	robot = new TankFactory(rc);
         }
 		else if (rc.getType() == RobotType.SUPPLYDEPOT) {
-			robot = new SupplyDepot();
+			robot = new SupplyDepot(rc);
 		}
-		robot.setRC(rc);
 		while (true) {
 			robot.move();
 			rc.yield();

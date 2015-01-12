@@ -6,6 +6,7 @@ import team158.utils.DirectionHelper;
 import team158.utils.Hashing;
 
 public class Headquarters extends Building {
+
 	int[] groupID = new int[7919];
 	int[] groupA = new int[200];
 	int[] groupB = new int[200];
@@ -18,6 +19,10 @@ public class Headquarters extends Building {
 	
 	// 0 - undecided, 1 - ground, 2 - air
 	private int strategy = 2;
+	
+	public Headquarters(RobotController newRC) {
+		super(newRC);
+	}
 	
 	@Override
 	protected void actions() throws GameActionException {
@@ -59,6 +64,46 @@ public class Headquarters extends Building {
 				}
 			}
 		}
+
+		if (rc.isWeaponReady()) {
+			int numTowers = rc.senseTowerLocations().length;
+			if (numTowers >= 5) { // splash damage
+				RobotInfo[] enemies = rc.senseNearbyRobots(52, rc.getTeam().opponent());
+				if (enemies.length > 0) {
+					RobotInfo[] directlyAttackable = rc.senseNearbyRobots(35, rc.getTeam().opponent());
+					if (directlyAttackable.length > 0) {
+						for (RobotInfo enemy : directlyAttackable) {
+							if (enemy.type != RobotType.MISSILE) {
+								rc.attackLocation(enemy.location);
+								break;
+							}
+						}
+					}
+					else {
+						for (RobotInfo enemy : enemies) {
+							MapLocation attackLocation = enemy.location.add(enemy.location.directionTo(myLocation));
+							if (attackLocation.distanceSquaredTo(myLocation) <= 35) {
+								rc.attackLocation(attackLocation);
+								break;
+							}
+						}
+					}
+				}
+			}
+			else if (numTowers >= 2) { // range 35
+				RobotInfo[] enemies = rc.senseNearbyRobots(35, rc.getTeam().opponent());
+				if (enemies.length > 0) {
+					rc.attackLocation(enemies[0].location);
+				}
+			}
+			else { // range 24
+				RobotInfo[] enemies = rc.senseNearbyRobots(24, rc.getTeam().opponent());
+				if (enemies.length > 0) {
+					rc.attackLocation(enemies[0].location);
+				}
+			}
+		}
+
 		if (strategy == 1) {
 			groundGame();
 		}
@@ -72,7 +117,6 @@ public class Headquarters extends Building {
 
 	protected void openingGame() throws GameActionException {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
-		MapLocation myLocation = rc.getLocation();
 		double myOre = rc.getTeamOre();
 
 		int numBeavers = 0;
@@ -86,7 +130,7 @@ public class Headquarters extends Building {
 			if (numBeavers == 0) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
-				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseEnemyHQLocation()));
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
 				while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BEAVER)) {
 					offsetIndex++;
 				}
@@ -105,7 +149,6 @@ public class Headquarters extends Building {
 	
 	protected void aerialGame() throws GameActionException {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
-		MapLocation myLocation = rc.getLocation();
 		int numBeavers = 0;
 		int numMiners = 0;
 		int numMinerFactories = 0;
@@ -129,23 +172,13 @@ public class Headquarters extends Building {
 				numHelipads++;
 			}
 		}
-		
-		if (rc.isWeaponReady()) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(
-				rc.getType().attackRadiusSquared,
-				rc.getTeam().opponent()
-			);
-			if (enemies.length > 0) {
-				rc.attackLocation(enemies[0].location);
-			}
-		}
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
 			if (numBeavers == 0) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
-				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseEnemyHQLocation()));
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
 				while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BEAVER)) {
 					offsetIndex++;
 				}
@@ -183,7 +216,6 @@ public class Headquarters extends Building {
 
 	protected void groundGame() throws GameActionException {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
-		MapLocation myLocation = rc.getLocation();
 		int numTanks = 0;
 		int numTanksG1 = 0;
 		int numTanksG2 = 0;
@@ -231,17 +263,6 @@ public class Headquarters extends Building {
 		rc.broadcast(Broadcast.numMinerFactoriesCh, numMinerFactories);
 		rc.broadcast(Broadcast.numSupplyDepotsCh, numSupplyDepots);
 		rc.broadcast(Broadcast.numTankFactoriesCh, numTanks);
-		
-		if (rc.isWeaponReady()) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(35, rc.getTeam().opponent());
-			int numTowers = rc.senseTowerLocations().length;
-			for (RobotInfo enemy : enemies) {
-				if (enemy.location.distanceSquaredTo(myLocation) <= 24 || numTowers >= 2) {
-					rc.attackLocation(enemy.location);
-					break;
-				}
-			}
-		}
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
@@ -249,7 +270,7 @@ public class Headquarters extends Building {
 			if (numBeavers == 0) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
-				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseEnemyHQLocation()));
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
 				while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BEAVER)) {
 					offsetIndex++;
 				}

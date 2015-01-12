@@ -4,14 +4,17 @@ import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
 
 public class Barracks extends Building {
+
+	public Barracks(RobotController newRC) {
+		super(newRC);
+	}
 
 	@Override
 	protected void actions() throws GameActionException {
         // get information broadcasted by the HQ
-		MapLocation myLocation = rc.getLocation();
-		MapLocation enemyHQ = rc.senseEnemyHQLocation();
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
 		if (rc.readBroadcast(Broadcast.tankRallyXCh) == 0) {

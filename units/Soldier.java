@@ -6,6 +6,10 @@ import battlecode.common.*;
 
 public class Soldier extends Unit {
 	
+	public Soldier(RobotController newRC) {
+		super(newRC);
+	}
+
 	@Override
 	protected void actions() throws GameActionException {
 

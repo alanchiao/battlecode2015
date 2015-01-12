@@ -1,4 +1,6 @@
 package team158.units;
+import java.util.Random;
+
 import team158.Robot;
 import team158.units.com.Navigation;
 import team158.utils.Broadcast;
@@ -6,6 +8,7 @@ import team158.utils.DirectionHelper;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
@@ -33,6 +36,12 @@ public abstract class Unit extends Robot {
 	
 	private double prevHealth = 0;
 	
+	public Unit (RobotController newRC) {
+		rc = newRC;
+		rand = new Random(rc.getID());
+		enemyHQ = rc.senseEnemyHQLocation();
+	}
+
 	@Override
 	public void move() {
 		try {
@@ -156,7 +165,6 @@ public abstract class Unit extends Robot {
 			int[] damages = new int[9]; // 9th slot for current position
 			int[] enemyInRange = new int[8];
 			
-			MapLocation enemyHQ = rc.senseEnemyHQLocation();
 			int initDistance = myLocation.distanceSquaredTo(enemyHQ);
 			if (initDistance <= 52 && initDistance > 24) {
 				int enemyTowers = rc.senseEnemyTowerLocations().length;
@@ -216,7 +224,7 @@ public abstract class Unit extends Robot {
 		try {
 			boolean toldToAttack = rc.readBroadcast(groupID) == 1;
 			if (toldToAttack) {
-				target = rc.senseEnemyHQLocation();
+				target = enemyHQ;
 			}
 			else {
 				// TODO: more robust way of determining when rally point has been reached
