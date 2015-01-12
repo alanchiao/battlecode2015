@@ -15,7 +15,6 @@ public class Helipad extends Building {
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
 		
 		if (rc.isCoreReady() && rc.getTeamOre() >= 125) {
-			System.out.println("GOING TO SPAWN!");
 			int offsetIndex = 0;
 			while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.DRONE)) {
 				offsetIndex++;

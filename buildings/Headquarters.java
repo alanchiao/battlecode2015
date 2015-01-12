@@ -2,8 +2,6 @@ package team158.buildings;
 
 import battlecode.common.*;
 
-import java.util.*;
-
 import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
 import team158.utils.Hashing;
@@ -19,28 +17,41 @@ public class Headquarters extends Building {
 	// 0 - undecided, 1 - ground, 2 - air
 	private int strategy = 1;
 	private int numTowers = 6;
-	private boolean towerDied = false;
-	private MapLocation[] towerPriority = new MapLocation[6];
+	private boolean towerDied = true;
+	MapLocation targetTower;
 	
 	protected void actions() throws GameActionException {	
-		boolean towerDied = false;	
+		//check if attackable tower exists and broadcasts location
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-		MapLocation myLocation = rc.getLocation();
+		//MapLocation myLocation = rc.getLocation();
+		boolean towerExists = false;
 		if (enemyTowers.length != numTowers) {
 			towerDied = true;
 			numTowers = enemyTowers.length;
 		}
 		
-		MapLocation minTower;
-		int minDist = -1;
-		for (MapLocation tower : enemyTowers) {
-			int initDistance = myLocation.distanceSquaredTo(tower);
-			if (initDistance > minDist || minDist == -1) {
-				minDist = initDistance;
-				minTower = tower;
+		if (towerDied && numTowers > 3) {
+			towerDied = false;
+			
+			for (MapLocation tower : enemyTowers) {
+				int numNearbyTowers = 0;
+				for (MapLocation tower2: enemyTowers) {
+					if (tower != tower2 && tower.distanceSquaredTo(tower2) >= 24) {
+						numNearbyTowers++;
+					}
+				}
+				if (numNearbyTowers <= 3) {
+					towerExists = true;
+					break;
+				}
 			}
 		}
+		if (!towerExists) {
+			targetTower = rc.senseEnemyHQLocation();
+		}
 		
+		rc.broadcast(Broadcast.groupingTargetLocationXCh, targetTower.x);
+		rc.broadcast(Broadcast.groupingTargetLocationYCh, targetTower.y);
 		
 
 		if (strategy == 1) {
@@ -95,8 +106,8 @@ public class Headquarters extends Building {
 		int numMinerFactories = 0;
 		int numSupplyDepots = 0;
 		int numHelipads = 0;
+		int numDrones = 0;
 		
-		int minBeaverDistance = 25; // Make sure that the closest beaver is actually close
 		int closestBeaver = 0;
 		
 		for (RobotInfo r : myRobots) {
@@ -105,17 +116,15 @@ public class Headquarters extends Building {
 				numMiners++;
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
-				int distanceSquared = r.location.distanceSquaredTo(myLocation);
-				if (distanceSquared < minBeaverDistance) {
-					closestBeaver = r.ID;
-					minBeaverDistance = r.location.distanceSquaredTo(myLocation);
-				}
+				closestBeaver = r.ID;
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
 			} else if (type == RobotType.SUPPLYDEPOT) {
 				numSupplyDepots++;
 			} else if (type == RobotType.HELIPAD) {
 				numHelipads++;
+			} else if (type == RobotType.DRONE) {
+				numDrones++;
 			}
 		}
 		
@@ -131,7 +140,7 @@ public class Headquarters extends Building {
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
-			if (numBeavers < 2) {
+			if (numBeavers == 0) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseEnemyHQLocation()));
@@ -150,11 +159,13 @@ public class Headquarters extends Building {
 				if (ore >= 300) {
 					rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
 				}
-			} else if (numMinerFactories == 0) {
+			}
+			else if (numMinerFactories == 0) {
 				if (ore >= 500) {
 					rc.broadcast(Broadcast.buildMinerFactoriesCh, closestBeaver);
 				}
-			} else if (numSupplyDepots == 0 && ore >= 100) {
+			}
+			else if (numSupplyDepots == 0 && ore >= 100) {
 				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 			}
 			else if (ore >= 300 + numHelipads * 200) {
@@ -163,27 +174,8 @@ public class Headquarters extends Building {
 			}
 			else if (numSupplyDepots < 3 && ore >= 500) {
 				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
-			} 
-			
-//			int[] groupSize = {numSoldiersG1, numSoldiersG2};
-//			int[] groupCh = {Broadcast.soldierGroup1Ch, Broadcast.soldierGroup2Ch};
-//			if (numSoldiersG1 > 0 || numSoldiersG2 > 0) {
-//				stopGroup(RobotType.SOLDIER);
-//			}
-//			rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
-//			rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
-//			if (numSoldiers - groupSize[defendGroup] > 30 && groupSize[attackGroup] == 0) {
-//				groupUnits(groupCh[attackGroup], RobotType.SOLDIER);
-//				rc.broadcast(groupCh[attackGroup], 1);
-//			}
-//			else if (rc.readBroadcast(groupCh[attackGroup]) == 1 && groupSize[attackGroup] < 15) {
-//				rc.broadcast(groupCh[attackGroup], 0);
-//				attackGroup = 1 - attackGroup;
-//				defendGroup = 1 - defendGroup;
-//			}
-//			else if (rc.readBroadcast(groupCh[defendGroup]) == -1) {
-//				unGroup(groupCh[defendGroup]);
-//			}			
+			}
+
 		}
 		
 	}

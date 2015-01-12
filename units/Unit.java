@@ -8,6 +8,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
 
 public abstract class Unit extends Robot {
 	// navigation information
@@ -15,9 +16,10 @@ public abstract class Unit extends Robot {
 	public MapLocation destination; // desired point to reach
 	public Direction origDirection = null; // original direction of collision of robot into obstacle
 	public MapLocation monitoredObstacle; // obstacle tile to move relative to
+	public boolean isAvoidAllAttack = false;
 	
 	// grouping information
-	public int groupID = -1;
+	protected int groupID = -1;
 	/**
 	 * groupID:
 	 * -1 = ungrouped
@@ -25,18 +27,21 @@ public abstract class Unit extends Robot {
 	 * >0 = grouped  
 	 */
 	
+	private double prevHealth = 0;
+	
 	public void move() {
 		try {
 			// Transfer supply stage
 			int mySupply = (int) rc.getSupplyLevel();
 			RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
 			if (friendlyRobots.length > 0) {
-				if (rc.getHealth() < 9) {
+				// If predicted to die on this turn
+				if (rc.getHealth() <= prevHealth / 2) {
 					
 					RobotInfo bestFriend = null;
 					double maxHealth = 0;
 					for (RobotInfo r : friendlyRobots) {
-						if (r.health > maxHealth) {
+						if (r.health > maxHealth && r.type != RobotType.HQ) {
 							maxHealth = r.health;
 							bestFriend = r;
 						}
@@ -78,6 +83,7 @@ public abstract class Unit extends Robot {
 			}
 			// Unit-specific actions
 			actions();
+			prevHealth = rc.getHealth();
 		}
 		catch (Exception e) {
 			System.out.println(rc.getType());
@@ -105,10 +111,59 @@ public abstract class Unit extends Robot {
 	protected Direction selectMoveDirectionMicro() {
 		MapLocation myLocation = rc.getLocation();
 		int myRange = rc.getType().attackRadiusSquared;
-		RobotInfo[] enemies = rc.senseNearbyRobots(15, rc.getTeam().opponent());
-		int[] damages = new int[9]; // 9th slot for current position
-		int[] enemyInRange = new int[8];
-		if (enemies.length < 5) { // Only do computation if it won't take too long
+		Team opponent = rc.getTeam().opponent();
+		RobotInfo[] enemies = rc.senseNearbyRobots(24, opponent); // keep max sight range
+		
+		if (enemies.length == 0) {
+			return null;
+		}
+
+		RobotInfo[] attackableEnemies = rc.senseNearbyRobots(myRange, opponent);
+		// Approach enemy units in range
+		if (attackableEnemies.length == 0) {
+			for (RobotInfo r : enemies) {
+				int distance = myLocation.distanceSquaredTo(r.location);
+				if (r.type.attackRadiusSquared >= distance && myRange < distance) {
+					Direction enemyDirection = myLocation.directionTo(r.location);
+					if (rc.canMove(enemyDirection)) {
+						return enemyDirection;
+					}
+				}
+			}
+			return null;
+		}
+		
+		// Take less damage
+		if (enemies.length < 6) { // Only do computation if it won't take too long
+			int[] damages = new int[9]; // 9th slot for current position
+			int[] enemyInRange = new int[8];
+			
+			MapLocation enemyHQ = rc.senseEnemyHQLocation();
+			int initDistance = myLocation.distanceSquaredTo(enemyHQ);
+			if (initDistance <= 52 && initDistance > 24) {
+				int enemyTowers = rc.senseEnemyTowerLocations().length;
+				int towerDamage = 0;
+				if (enemyTowers == 6) {
+					towerDamage = 240;
+				}
+				else if (enemyTowers >= 3) {
+					towerDamage = 36;
+				}
+				else if (enemyTowers == 2) { // Must have at least 2 towers to be missed with 24 sight range
+					towerDamage = 24;
+				}
+
+				if (towerDamage > 0) {
+					if (initDistance <= 35) {
+						damages[8] += towerDamage;
+					}
+					for (int i = 0; i < 8; i++) {
+						if (myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(enemyHQ) <= 35) {
+							damages[i] += towerDamage;
+						}
+					}
+				}
+			}
 			for (RobotInfo r : enemies) {
 				for (int i = 0; i < 8; i++) {
 					int newLocationDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(r.location);
@@ -123,21 +178,20 @@ public abstract class Unit extends Robot {
 					damages[8] += r.type.attackPower / r.type.attackDelay;
 				}
 			}
-		}
-		int bestDirection = 8;
-		int bestDamage = 999999;
-		for (int i = 0; i < 8; i++) {
-			if (rc.canMove(DirectionHelper.directions[i]) && damages[i] <= bestDamage && enemyInRange[i] > 0) {
-				bestDirection = i;
-				bestDamage = damages[i];
+			
+			int bestDirection = 8;
+			int bestDamage = 999999;
+			for (int i = 0; i < 8; i++) {
+				if (rc.canMove(DirectionHelper.directions[i]) && damages[i] <= bestDamage && enemyInRange[i] > 0) {
+					bestDirection = i;
+					bestDamage = damages[i];
+				}
+			}
+			if (bestDamage < damages[8]) {
+				return DirectionHelper.directions[bestDirection];
 			}
 		}
-		if (bestDamage < damages[8]) {
-			return DirectionHelper.directions[bestDirection];
-		}
-		else {
-			return null;
-		}
+		return null;
 	}
 	
 	protected void moveToTargetByGroup(MapLocation target) {
@@ -158,7 +212,7 @@ public abstract class Unit extends Robot {
 				this.isAvoidingObstacle = false;
 			}
 			this.destination = target;
-			Navigation.moveToDestination(rc, this, target);
+			Navigation.moveToDestination(rc, this, target, false);
 
 		} 
 		catch (GameActionException e) {
@@ -166,66 +220,4 @@ public abstract class Unit extends Robot {
 		}
 	}
 	
-	protected boolean[] moveDirectionsAvoidingAttack(RobotInfo[] enemies, int rangeSquared) {
-		boolean[] possibleMovesAvoidingEnemies = {true,true,true,true,true,true,true,true,true};
-		MapLocation myLocation = rc.getLocation();
-		// enemies
-		if (enemies.length > 0) {
-			for (RobotInfo enemy : enemies) {
-				if (enemy.type.attackRadiusSquared > rangeSquared) {
-					if (myLocation.distanceSquaredTo(enemy.location) <= enemy.type.attackRadiusSquared) {
-						possibleMovesAvoidingEnemies[8] = false;
-					}
-					for (Direction d : DirectionHelper.directions) {
-						if (myLocation.add(d).distanceSquaredTo(enemy.location) <= enemy.type.attackRadiusSquared) {
-							possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-						}
-					}
-				}
-			}
-		}
-		// towers
-		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-		for (MapLocation l : enemyTowers) {
-			int initDistance = myLocation.distanceSquaredTo(l);
-			if (initDistance <= 34) {
-				if (initDistance <= 24) {
-					possibleMovesAvoidingEnemies[8] = false;
-				}
-				for (Direction d : DirectionHelper.directions) {
-					if (myLocation.add(d).distanceSquaredTo(l) <= 24) {
-						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-					}
-				}
-			}
-		}
-		// hq
-		MapLocation enemyHQ = rc.senseEnemyHQLocation();
-		int initDistance = myLocation.distanceSquaredTo(enemyHQ);
-		if (enemyTowers.length < 2) {
-			if (initDistance <= 34) {
-				if (initDistance <= 24) {
-					possibleMovesAvoidingEnemies[8] = false;
-				}
-				for (Direction d : DirectionHelper.directions) {
-					if (myLocation.add(d).distanceSquaredTo(enemyHQ) <= 24) {
-						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-					}
-				}
-			}
-		}
-		else {
-			if (initDistance <= 52) {
-				if (initDistance <= 35) {
-					possibleMovesAvoidingEnemies[8] = false;
-				}
-				for (Direction d : DirectionHelper.directions) {
-					if (myLocation.add(d).distanceSquaredTo(enemyHQ) <= 24) {
-						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-					}
-				}
-			}
-		}
-		return possibleMovesAvoidingEnemies;
-	}
 }
