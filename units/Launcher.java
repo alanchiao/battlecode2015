@@ -18,7 +18,7 @@ public class Launcher extends Unit {
 
 	@Override
 	protected void actions() throws GameActionException {
-		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(RobotType.LAUNCHER.sensorRadiusSquared, rc.getTeam().opponent());
+		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(35, rc.getTeam().opponent());
 		MapLocation myLocation = rc.getLocation();
 
 		if (enemiesAttackable.length > 0) {
