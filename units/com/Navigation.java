@@ -25,8 +25,11 @@ public class Navigation {
 	public MapLocation lastLocation;
 	public int timeSinceLastMove;
 	
+	public MapLocation enemyHQ;
+	
 	public Navigation(RobotController r) {
 		rc = r;
+		enemyHQ = rc.senseEnemyHQLocation();
 		
 		isAvoidingObstacle = false;
 		isAvoidAllAttack = false;
@@ -282,10 +285,14 @@ public class Navigation {
 			}
 		}
 		// hq
-		MapLocation enemyHQ = rc.senseEnemyHQLocation();
 		int initDistance = loc.distanceSquaredTo(enemyHQ);
 		if (enemyTowers.length < 2) {
 			if (initDistance <= 24) {
+				return false;
+			}
+		}
+		else if (enemyTowers.length > 4) {
+			if (loc.add(loc.directionTo(enemyHQ)).distanceSquaredTo(enemyHQ) <= 35) {
 				return false;
 			}
 		}
@@ -322,7 +329,6 @@ public class Navigation {
 			}
 		}
 		// hq
-		MapLocation enemyHQ = rc.senseEnemyHQLocation();
 		int initDistance = myLocation.distanceSquaredTo(enemyHQ);
 		if (enemyTowers.length < 2) {
 			if (initDistance <= 34) {
@@ -333,10 +339,23 @@ public class Navigation {
 				}
 			}
 		}
-		else {
+		else if (enemyTowers.length < 5) {
 			if (initDistance <= 52) {
 				for (Direction d : DirectionHelper.directions) {
 					if (myLocation.add(d).distanceSquaredTo(enemyHQ) <= 35) {
+						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
+					}
+				}
+			}
+		}
+		else {
+			if (initDistance <= 74) {
+				for (Direction d : DirectionHelper.directions) {
+					MapLocation newLocation = myLocation.add(d);
+					if (newLocation.distanceSquaredTo(enemyHQ) <= 35) {
+						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
+					}
+					else if (newLocation.add(newLocation.directionTo(enemyHQ)).distanceSquaredTo(enemyHQ) <= 35) {
 						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
 					}
 				}

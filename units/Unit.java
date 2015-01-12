@@ -135,7 +135,7 @@ public abstract class Unit extends Robot {
 		MapLocation myLocation = rc.getLocation();
 		int myRange = rc.getType().attackRadiusSquared;
 		Team opponent = rc.getTeam().opponent();
-		RobotInfo[] enemies = rc.senseNearbyRobots(24, opponent); // keep max sight range
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, opponent);
 		
 		if (enemies.length == 0) {
 			return null;
@@ -162,20 +162,44 @@ public abstract class Unit extends Robot {
 			int[] enemyInRange = new int[8];
 			
 			int initDistance = myLocation.distanceSquaredTo(enemyHQ);
-			if (initDistance <= 52 && initDistance > 24) {
-				int enemyTowers = rc.senseEnemyTowerLocations().length;
-				int towerDamage = 0;
-				if (enemyTowers == 6) {
-					towerDamage = 240;
+			int enemyTowers = rc.senseEnemyTowerLocations().length;
+			
+			// Must have enough distance to have been missed by sight radius
+			if (initDistance > rc.getType().sensorRadiusSquared && enemyTowers >= 2) {
+				if (enemyTowers >= 5 && initDistance <= 74) {
+					int towerDamage;
+					if (enemyTowers == 6) {
+						towerDamage = 240;
+					}
+					else {
+						towerDamage = 36;
+					}
+					int splashDamage = towerDamage / 2;
+	
+					if (initDistance <= 35) {
+						damages[8] += towerDamage;
+					}
+					else if (myLocation.add(myLocation.directionTo(enemyHQ)).distanceSquaredTo(enemyHQ) <= 35) {
+						damages[8] += splashDamage;
+					}
+					for (int i = 0; i < 8; i++) {
+						MapLocation newLocation = myLocation.add(DirectionHelper.directions[i]);
+						if (newLocation.distanceSquaredTo(enemyHQ) <= 35) {
+							damages[i] += towerDamage;
+						}
+						else if (newLocation.add(newLocation.directionTo(enemyHQ)).distanceSquaredTo(enemyHQ) <= 35) {
+							damages[i] += splashDamage;
+						}
+					}
 				}
-				else if (enemyTowers >= 3) {
-					towerDamage = 36;
-				}
-				else if (enemyTowers == 2) { // Must have at least 2 towers to be missed with 24 sight range
-					towerDamage = 24;
-				}
-
-				if (towerDamage > 0) {
+				else if (initDistance <= 52) {
+					int towerDamage;
+					if (enemyTowers == 2) {
+						towerDamage = 24;
+					}
+					else {
+						towerDamage = 36;
+					}
 					if (initDistance <= 35) {
 						damages[8] += towerDamage;
 					}
