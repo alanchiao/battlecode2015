@@ -48,8 +48,10 @@ public class Beaver extends Unit {
 		else {
 			Direction buildDirection = DirectionHelper.directions[2 * numBuildings];
 			if (rc.canBuild(buildDirection, robotType)) {
+				if (numBuildings < 3) {
+					needMove = true;
+				}
 				rc.build(buildDirection, robotType);
-				needMove = true;
 			}
 			else {
 				rc.mine();
@@ -70,8 +72,11 @@ public class Beaver extends Unit {
 		if (rc.isCoreReady()) {
 			int buildings = rc.readBroadcast(Broadcast.numBuildingsCh);
 			if (needMove) {
-				rc.move(DirectionHelper.directions[(3 + buildings * 2) % 8]);
-				needMove = false;
+				Direction dir = DirectionHelper.directions[(3 + buildings * 2) % 8];
+				if (rc.canMove(dir)) {
+					rc.move(DirectionHelper.directions[(3 + buildings * 2) % 8]);
+					needMove = false;
+				}
 			}
 			else if (rc.readBroadcast(Broadcast.buildAerospaceLabsCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildAerospaceLabsCh, 0);
