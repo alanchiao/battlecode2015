@@ -94,6 +94,9 @@ public abstract class Unit extends Robot {
 				else if (rc.getType() == RobotType.TANK) {
 					broadcastCh = Broadcast.groupingTanksCh;
 				}
+				else if (rc.getType() == RobotType.LAUNCHER) {
+					broadcastCh = Broadcast.groupingLaunchersCh;
+				}
 				if (broadcastCh != -1) {
 					int group = rc.readBroadcast(broadcastCh);
 					if (group > 0) {
@@ -260,6 +263,12 @@ public abstract class Unit extends Robot {
 				} else if (rc.getType() == RobotType.TANK) {
 					xLoc = rc.readBroadcast(Broadcast.tankRallyXCh);
 					yLoc = rc.readBroadcast(Broadcast.tankRallyYCh);
+					target = new MapLocation(xLoc, yLoc);
+				} else if (rc.getType() == RobotType.LAUNCHER) {
+//					xLoc = rc.readBroadcast(Broadcast.launcherRallyXCh);
+//					yLoc = rc.readBroadcast(Broadcast.launcherRallyYCh);
+					xLoc = rc.readBroadcast(Broadcast.launcherTargetLocationXCh);
+					yLoc = rc.readBroadcast(Broadcast.launcherTargetLocationYCh);
 					target = new MapLocation(xLoc, yLoc);
 				} 
 				// TODO: more robust way of determining when rally point has been reached

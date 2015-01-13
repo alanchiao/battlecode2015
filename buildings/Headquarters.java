@@ -115,6 +115,27 @@ public class Headquarters extends Building {
 			rc.broadcast(Broadcast.groupingTargetLocationYCh, targetTower.y);
 		}
 		
+		//find closest enemy target
+		RobotInfo[] closeRobots = rc.senseNearbyRobots(100, rc.getTeam().opponent());
+		MapLocation closestRobot;
+		if (closeRobots.length > 0) {
+			closestRobot = closeRobots[0].location;
+			int closestDistance = closestRobot.distanceSquaredTo(myLocation);
+			for (int i = 1; i < closeRobots.length; i++) {
+				int distance = closeRobots[i].location.distanceSquaredTo(myLocation);
+				if (distance < closestDistance) {
+					closestDistance = distance;
+					closestRobot = closeRobots[i].location;
+				}
+			}
+		}		
+		else {
+			closestRobot = myLocation;
+		}
+		rc.setIndicatorString(0, String.valueOf(closestRobot));
+		rc.broadcast(Broadcast.launcherTargetLocationXCh, closestRobot.x);
+		rc.broadcast(Broadcast.launcherTargetLocationYCh, closestRobot.y);
+		
 		int mySupply = (int) rc.getSupplyLevel();
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
 
@@ -123,26 +144,26 @@ public class Headquarters extends Building {
 			for (RobotInfo r : friendlyRobots) {
 				if (r.type == RobotType.MINER) {
 					if (r.supplyLevel < r.type.supplyUpkeep * 20 * distanceFactor) {
-						rc.setIndicatorString(0, "transferring supply to miner/launcher");
+//						rc.setIndicatorString(0, "transferring supply to miner/launcher");
 						rc.transferSupplies(r.type.supplyUpkeep * 30 * distanceFactor, r.location);
 						break;
 					}
 				}
 				else if (r.type == RobotType.DRONE || r.type == RobotType.LAUNCHER) {
 					if (r.supplyLevel < r.type.supplyUpkeep * 10 * distanceFactor) {
-						rc.setIndicatorString(0, r.location.toString());
+//						rc.setIndicatorString(0, r.location.toString());
 						rc.transferSupplies(r.type.supplyUpkeep * 15 * distanceFactor, r.location);
 						break;
 					}
 				}
 				else if (r.type == RobotType.BEAVER) {
 					if (r.supplyLevel < r.type.supplyUpkeep * 100) {
-						rc.setIndicatorString(0, Integer.toString(r.type.supplyUpkeep * 6 * distanceFactor));
+//						rc.setIndicatorString(0, Integer.toString(r.type.supplyUpkeep * 6 * distanceFactor));
 						rc.transferSupplies(r.type.supplyUpkeep * 200, r.location);
 						break;
 					}
 				}
-				rc.setIndicatorString(0, "no supply transferred");
+				//rc.setIndicatorString(0, "no supply transferred");
 			}
 		}
 		else {
@@ -371,6 +392,16 @@ public class Headquarters extends Building {
 			rc.setIndicatorString(1, Integer.toString(numDronesG1));
 			rc.setIndicatorString(2, Integer.toString(numDronesG2));
 			
+			if (numLaunchers > 0) {
+				if (numLaunchers > 5) {
+					rc.broadcast(Broadcast.launcherGroupCh, 1);
+				}
+				else {
+					rc.broadcast(Broadcast.launcherGroupCh, 0);
+					//groupUnits(Broadcast.launcherGroupCh, RobotType.LAUNCHER);
+				}
+			}
+			
 			//if they don't build tanks and launchers
 			if (!enemyThreat) {
 				if (numDronesG1 < 15 || targetTower == null) {
@@ -396,17 +427,11 @@ public class Headquarters extends Building {
 				if (numDronesG2 > 20 && targetTower != null) {
 					rc.broadcast(Broadcast.droneGroup2Ch, 1);
 				}
-				else if (numDronesG2 <= 10){
+				else if (numDronesG2 <= 15){
 					rc.setIndicatorString(2, String.valueOf(numDronesG2));
 					rc.broadcast(Broadcast.droneGroup2Ch, 0);
 				}
 				groupUnits(Broadcast.droneGroup2Ch, RobotType.DRONE);
-//				if (numLaunchers > 5) {
-//					rc.broadcast(Broadcast.launcherGroupCh, 0);
-//				}
-//				else {
-//					rc.broadcast(Broadcast.launcherGroupCh, 1);
-//				}
 			}
 		}
 		
@@ -555,7 +580,7 @@ public class Headquarters extends Building {
 						Hashing.put(groupID, r.ID, ID_Broadcast);
 						//update the corresponding broadcasted group
 						if (ID_Broadcast == Broadcast.droneGroup1Ch) {
-							//System.out.println("id: " + r.ID);
+							System.out.println("id: " + r.ID);
 							groupA[ptA] = r.ID;
 							ptA++;
 						}
@@ -569,11 +594,14 @@ public class Headquarters extends Building {
 		}
 		
 		int broadcastCh;
-		if (rt == RobotType.TANK) {
-			broadcastCh = Broadcast.groupingTanksCh;
-		}
-		else if (rt == RobotType.DRONE) {
+		if (rt == RobotType.DRONE) {
 			broadcastCh = Broadcast.groupingDronesCh;
+		}
+		else if (rt == RobotType.LAUNCHER) {
+			broadcastCh = Broadcast.groupingLaunchersCh;
+		}
+		else if (rt == RobotType.TANK) {
+			broadcastCh = Broadcast.groupingTanksCh;
 		}
 		else {
 			broadcastCh = 9999;
@@ -611,7 +639,7 @@ public class Headquarters extends Building {
 			if (ID_Broadcast == Broadcast.droneGroup1Ch) {
 				int i = 0;
 				while (groupA[i] != 0) {
-					//System.out.println("in group 1: " + groupA[i]);
+					System.out.println("in group 1: " + groupA[i]);
 					Hashing.put(groupID, groupA[i], 0);
 					groupA[i] = 0;
 					i++;
