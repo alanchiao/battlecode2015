@@ -48,8 +48,10 @@ public class Beaver extends Unit {
 		else {
 			Direction buildDirection = DirectionHelper.directions[2 * numBuildings];
 			if (rc.canBuild(buildDirection, robotType)) {
+				if (numBuildings < 3) {
+					needMove = true;
+				}
 				rc.build(buildDirection, robotType);
-				needMove = true;
 			}
 			else {
 				rc.mine();
@@ -70,8 +72,16 @@ public class Beaver extends Unit {
 		if (rc.isCoreReady()) {
 			int buildings = rc.readBroadcast(Broadcast.numBuildingsCh);
 			if (needMove) {
-				rc.move(DirectionHelper.directions[(3 + buildings * 2) % 8]);
-				needMove = false;
+				Direction dir = DirectionHelper.directions[(3 + buildings * 2) % 8];
+				if (rc.canMove(dir)) {
+					rc.move(DirectionHelper.directions[(3 + buildings * 2) % 8]);
+					needMove = false;
+				}
+			}
+			else if (rc.readBroadcast(Broadcast.buildAerospaceLabsCh) == rc.getID()) {
+				rc.broadcast(Broadcast.buildAerospaceLabsCh, 0);
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));
+				tryBuildInDirection(dirint, RobotType.AEROSPACELAB, buildings);
 			}
 			else if (rc.readBroadcast(Broadcast.buildHelipadsCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildHelipadsCh, 0);
@@ -86,7 +96,7 @@ public class Beaver extends Unit {
 			// HQ has given command to build a supply depot
 			else if (rc.readBroadcast(Broadcast.buildSupplyCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildSupplyCh, 0);
-				int dirint = DirectionHelper.directionToInt(enemyHQ.directionTo(rc.senseHQLocation()));
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));
 				tryBuildInDirection(dirint, RobotType.SUPPLYDEPOT, buildings);
 			}
 			// HQ has given command to build a miner factory
@@ -100,11 +110,6 @@ public class Beaver extends Unit {
 				rc.broadcast(Broadcast.buildBarracksCh, 0);
 				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(enemyHQ));
 				tryBuildInDirection(dirint, RobotType.BARRACKS, buildings);
-			}
-			else if (rc.readBroadcast(Broadcast.buildAerospaceLabsCh) == rc.getID()) {
-				rc.broadcast(Broadcast.buildAerospaceLabsCh, 0);
-				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(enemyHQ));
-				tryBuildInDirection(dirint, RobotType.AEROSPACELAB, buildings);
 			}
 			else if (rc.readBroadcast(Broadcast.scoutEnemyHQCh) == rc.getID()) {
 				navigation.moveToDestination(enemyHQ, true);
