@@ -28,7 +28,7 @@ public class Helipad extends Building {
 			rc.broadcast(Broadcast.dronesRallyXCh, rally.x);
 			rc.broadcast(Broadcast.dronesRallyYCh, rally.y);
 		}
-		int threshold = rc.readBroadcast(Broadcast.numLaunchersCh) > 0 && rc.readBroadcast(Broadcast.numLaunchersCh) < 8 ? 450 : 125;
+		int threshold = rc.readBroadcast(Broadcast.yieldToLaunchers) == 1 ? 450 : 125;
 		
 		if (rc.isCoreReady() && rc.getTeamOre() >= threshold && rc.readBroadcast(Broadcast.stopDroneProductionCh) != 1) {
 			int offsetIndex = 0;

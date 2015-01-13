@@ -75,7 +75,7 @@ public class Beaver extends Unit {
 			}
 			else if (rc.readBroadcast(Broadcast.buildAerospaceLabsCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildAerospaceLabsCh, 0);
-				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(enemyHQ));
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));
 				tryBuildInDirection(dirint, RobotType.AEROSPACELAB, buildings);
 			}
 			else if (rc.readBroadcast(Broadcast.buildHelipadsCh) == rc.getID()) {
@@ -91,7 +91,7 @@ public class Beaver extends Unit {
 			// HQ has given command to build a supply depot
 			else if (rc.readBroadcast(Broadcast.buildSupplyCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildSupplyCh, 0);
-				int dirint = DirectionHelper.directionToInt(enemyHQ.directionTo(rc.senseHQLocation()));
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(rc.senseHQLocation()));
 				tryBuildInDirection(dirint, RobotType.SUPPLYDEPOT, buildings);
 			}
 			// HQ has given command to build a miner factory

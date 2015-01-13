@@ -255,21 +255,25 @@ public class Headquarters extends Building {
 		rc.broadcast(Broadcast.numLaunchersCh, numLaunchers);
 		rc.broadcast(Broadcast.numBuildingsCh, numMinerFactories + numSupplyDepots + numHelipads + numAerospaceLabs);
 		
-		if (!enemyRush && Clock.getRoundNum() < 500) {
+		if (!enemyRush && Clock.getRoundNum() < 600) {
 			RobotInfo[] enemyRobots = rc.senseNearbyRobots(99, rc.getTeam().opponent());
 			for (RobotInfo r : enemyRobots) {
 				if (r.type == RobotType.DRONE) {
 					enemyRush = true;
 					// Cancel requested builds
 					rc.broadcast(Broadcast.buildHelipadsCh, 0);
+					// Tell helipads to yield
+					rc.broadcast(Broadcast.yieldToLaunchers, 1);
 					break;
 				}
 			}
 		}
 		
-		if (!enemyThreat && Clock.getRoundNum() < 1000) {
+		if (!enemyThreat && Clock.getRoundNum() < 1200) {
 			if (rc.readBroadcast(Broadcast.enemyThreatCh) > 2) {
 				enemyThreat = true;
+				rc.broadcast(Broadcast.buildHelipadsCh, 0);
+				rc.broadcast(Broadcast.yieldToLaunchers, 1);
 				unGroup(Broadcast.droneGroup1Ch);
 			}
 		}
@@ -278,7 +282,6 @@ public class Headquarters extends Building {
 			int possibleDifficulty = rc.readBroadcast(Broadcast.scoutEnemyHQCh);
 			if (possibleDifficulty != scoutBeaver) {
 				pathDifficulty = possibleDifficulty;
-				System.out.println(pathDifficulty);
 			}
 		}
 
@@ -334,10 +337,10 @@ public class Headquarters extends Building {
 							rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 						}
 					}
-					else if (ore >= 500 + numAerospaceLabs * 300) {
+					else if (ore >= 400 + numAerospaceLabs * 300) {
 						rc.broadcast(Broadcast.buildAerospaceLabsCh, closestBeaver);
 					}
-					else if (numSupplyDepots < 3 && ore >= 600) {
+					else if (numSupplyDepots < 3 && ore >= 750) {
 						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 					}
 				}
@@ -353,18 +356,18 @@ public class Headquarters extends Building {
 							rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 						}
 					}
-					else if (ore >= 300 + numHelipads * 200) {
+					else if (ore >= 500 + numHelipads * 200) {
 						rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
 					}
-					else if (numSupplyDepots < 3 && ore >= 600) {
+					else if (numSupplyDepots < 3 && ore >= 750) {
 						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 					}
 				}
 				else {
-					if (ore >= 300 + numHelipads * 200) {
+					if (ore >= 500 + numHelipads * 200) {
 						rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
 					}
-					else if (numSupplyDepots < 3 && ore >= 600) {
+					else if (numSupplyDepots < 3 && ore >= 750) {
 						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 					}
 				}
