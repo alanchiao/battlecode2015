@@ -340,7 +340,11 @@ public class Headquarters extends Building {
 				else if (enemyRush) { // Build some launchers
 					if (numAerospaceLabs == 0) {
 						if (ore >= 500) {
+							rc.broadcast(Broadcast.slowMinerProductionCh, 0);
 							rc.broadcast(Broadcast.buildAerospaceLabsCh, closestBeaver);
+						}
+						else {
+							rc.broadcast(Broadcast.slowMinerProductionCh, 1);
 						}
 					}
 					else if (numSupplyDepots == 0 && ore >= 100) {
@@ -348,7 +352,6 @@ public class Headquarters extends Building {
 					}
 					else if (ore >= 300 + numHelipads * 200) {
 						rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
-						// tell closest beaver to build barracks
 					}
 					else if (numSupplyDepots < 3 && ore >= 500) {
 						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
@@ -360,7 +363,6 @@ public class Headquarters extends Building {
 					}
 					else if (ore >= 300 + numHelipads * 200) {
 						rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
-						// tell closest beaver to build barracks
 					}
 					else if (numSupplyDepots < 3 && ore >= 500) {
 						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
