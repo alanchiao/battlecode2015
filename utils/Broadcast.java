@@ -31,9 +31,15 @@ public class Broadcast {
 	public static final int soldierRallyYCh = 403;
 	public static final int dronesRallyXCh = 404;
 	public static final int dronesRallyYCh = 405;
+	public static final int launcherRallyXCh = 406;
+	public static final int launcherRallyYCh = 407;
 	
-	public static final int groupingTargetLocationXCh = 406;
-	public static final int groupingTargetLocationYCh = 407;
+	
+	public static final int groupingTargetLocationXCh = 408;
+	public static final int groupingTargetLocationYCh = 409;
+	public static final int launcherTargetLocationXCh = 410;
+	public static final int launcherTargetLocationYCh = 411;
+	
 	
 	public static final int groupingSoldiersCh = 501;
 	public static final int groupingTanksCh = 502;
@@ -56,5 +62,6 @@ public class Broadcast {
 	public static final int tankGroup2Ch = 703;
 	public static final int droneGroup1Ch = 704;
 	public static final int droneGroup2Ch = 705;
+	public static final int launcherGroupCh = 706;
 
 }

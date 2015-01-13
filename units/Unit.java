@@ -264,6 +264,12 @@ public abstract class Unit extends Robot {
 					xLoc = rc.readBroadcast(Broadcast.tankRallyXCh);
 					yLoc = rc.readBroadcast(Broadcast.tankRallyYCh);
 					target = new MapLocation(xLoc, yLoc);
+				} else if (rc.getType() == RobotType.LAUNCHER) {
+//					xLoc = rc.readBroadcast(Broadcast.launcherRallyXCh);
+//					yLoc = rc.readBroadcast(Broadcast.launcherRallyYCh);
+					xLoc = rc.readBroadcast(Broadcast.launcherTargetLocationXCh);
+					yLoc = rc.readBroadcast(Broadcast.launcherTargetLocationYCh);
+					target = new MapLocation(xLoc, yLoc);
 				} 
 				// TODO: more robust way of determining when rally point has been reached
 //				if (target.distanceSquaredTo(rc.getLocation()) <= 24) {

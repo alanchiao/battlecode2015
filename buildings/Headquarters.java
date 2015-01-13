@@ -115,6 +115,27 @@ public class Headquarters extends Building {
 			rc.broadcast(Broadcast.groupingTargetLocationYCh, targetTower.y);
 		}
 		
+		//find closest enemy target
+		RobotInfo[] closeRobots = rc.senseNearbyRobots(100, rc.getTeam().opponent());
+		MapLocation closestRobot;
+		if (closeRobots.length > 0) {
+			closestRobot = closeRobots[0].location;
+			int closestDistance = closestRobot.distanceSquaredTo(myLocation);
+			for (int i = 1; i < closeRobots.length; i++) {
+				int distance = closeRobots[i].location.distanceSquaredTo(myLocation);
+				if (distance < closestDistance) {
+					closestDistance = distance;
+					closestRobot = closeRobots[i].location;
+				}
+			}
+		}		
+		else {
+			closestRobot = myLocation;
+		}
+		rc.setIndicatorString(0, String.valueOf(closestRobot));
+		rc.broadcast(Broadcast.launcherTargetLocationXCh, closestRobot.x);
+		rc.broadcast(Broadcast.launcherTargetLocationYCh, closestRobot.y);
+		
 		int mySupply = (int) rc.getSupplyLevel();
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
 
@@ -409,6 +430,17 @@ public class Headquarters extends Building {
 			rc.setIndicatorString(1, Integer.toString(numDronesG1));
 			rc.setIndicatorString(2, Integer.toString(numDronesG2));
 			
+			if (numLaunchers > 0) {
+				if (numLaunchers > 5) {
+					rc.broadcast(Broadcast.launcherGroupCh, 1);
+				}
+				else {
+					rc.broadcast(Broadcast.launcherGroupCh, 0);
+					//groupUnits(Broadcast.launcherGroupCh, RobotType.LAUNCHER);
+				}
+			}
+			
+			//if they don't build tanks and launchers
 			if (!enemyThreat) {
 				if (numDronesG1 < 15 || targetTower == null) {
 					rc.broadcast(Broadcast.droneGroup1Ch, 1);
@@ -428,11 +460,13 @@ public class Headquarters extends Building {
 					}
 				}
 			}
+			//if enemy builds tanks and launchers
 			else {
 				if (numDronesG2 > 20 && targetTower != null) {
 					rc.broadcast(Broadcast.droneGroup2Ch, 1);
 				}
-				else if (numDronesG2 <= 10) {
+				else if (numDronesG2 <= 15){
+					rc.setIndicatorString(2, String.valueOf(numDronesG2));
 					rc.broadcast(Broadcast.droneGroup2Ch, 0);
 				}
 				groupUnits(Broadcast.droneGroup2Ch, RobotType.DRONE);
@@ -562,6 +596,14 @@ public class Headquarters extends Building {
 					if (Hashing.find(groupID, r.ID) == 0) {
 						Hashing.put(groupID, r.ID, ID_Broadcast);
 						//update the corresponding broadcasted group
+						if (ID_Broadcast == Broadcast.tankGroup1Ch) {
+							groupA[ptA] = r.ID;
+							ptA++;
+						}
+						else if (ID_Broadcast == Broadcast.tankGroup2Ch) {
+							groupB[ptB] = r.ID;
+							ptB++;
+						}
 					}
 				} 
 			}
@@ -576,6 +618,7 @@ public class Headquarters extends Building {
 						Hashing.put(groupID, r.ID, ID_Broadcast);
 						//update the corresponding broadcasted group
 						if (ID_Broadcast == Broadcast.droneGroup1Ch) {
+							System.out.println("id: " + r.ID);
 							groupA[ptA] = r.ID;
 							ptA++;
 						}
@@ -589,11 +632,14 @@ public class Headquarters extends Building {
 		}
 		
 		int broadcastCh;
-		if (rt == RobotType.TANK) {
-			broadcastCh = Broadcast.groupingTanksCh;
-		}
-		else if (rt == RobotType.DRONE) {
+		if (rt == RobotType.DRONE) {
 			broadcastCh = Broadcast.groupingDronesCh;
+		}
+		else if (rt == RobotType.LAUNCHER) {
+			broadcastCh = Broadcast.groupingLaunchersCh;
+		}
+		else if (rt == RobotType.TANK) {
+			broadcastCh = Broadcast.groupingTanksCh;
 		}
 		else {
 			broadcastCh = 9999;
@@ -628,7 +674,23 @@ public class Headquarters extends Building {
 	public void unGroup(int ID_Broadcast) {
 		try {
 			rc.broadcast(ID_Broadcast, -1);
-
+			if (ID_Broadcast == Broadcast.droneGroup1Ch) {
+				int i = 0;
+				while (groupA[i] != 0) {
+					System.out.println("in group 1: " + groupA[i]);
+					Hashing.put(groupID, groupA[i], 0);
+					groupA[i] = 0;
+					i++;
+				}
+			}
+			else if (ID_Broadcast == Broadcast.droneGroup2Ch) {
+				int i = 0;
+				while (groupB[i] != 0) {
+					Hashing.put(groupID, groupB[i], 0);
+					groupB[i] = 0;
+					i++;
+				}
+			}
 			if (ID_Broadcast == Broadcast.tankGroup1Ch) {
 				int i = 0;
 				while (groupA[i] != 0) {
