@@ -260,6 +260,8 @@ public class Headquarters extends Building {
 			for (RobotInfo r : enemyRobots) {
 				if (r.type == RobotType.DRONE) {
 					enemyRush = true;
+					// Cancel requested builds
+					rc.broadcast(Broadcast.buildHelipadsCh, 0);
 					break;
 				}
 			}
@@ -316,21 +318,23 @@ public class Headquarters extends Building {
 					rc.broadcast(Broadcast.buildMinerFactoriesCh, closestBeaver);
 				}
 			}
+			else if (numSupplyDepots == 0 && ore >= 100) {
+				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
+			}
 			else {
 				if (enemyThreat && pathDifficulty < 70) { // Build launchers
 					if (numAerospaceLabs == 0) {
 						if (ore >= 500) {
 							rc.broadcast(Broadcast.slowMinerProductionCh, 0);
+							rc.broadcast(Broadcast.stopDroneProductionCh, 0);
 							rc.broadcast(Broadcast.buildAerospaceLabsCh, closestBeaver);
 						}
 						else {
 							rc.broadcast(Broadcast.slowMinerProductionCh, 1);
+							rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 						}
 					}
-					else if (numSupplyDepots == 0 && ore >= 100) {
-						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
-					}
-					else if (ore >= 500 + numAerospaceLabs * 400) {
+					else if (ore >= 500 + numAerospaceLabs * 300) {
 						rc.broadcast(Broadcast.buildAerospaceLabsCh, closestBeaver);
 					}
 					else if (numSupplyDepots < 3 && ore >= 600) {
@@ -341,30 +345,26 @@ public class Headquarters extends Building {
 					if (numAerospaceLabs == 0) {
 						if (ore >= 500) {
 							rc.broadcast(Broadcast.slowMinerProductionCh, 0);
+							rc.broadcast(Broadcast.stopDroneProductionCh, 0);
 							rc.broadcast(Broadcast.buildAerospaceLabsCh, closestBeaver);
 						}
 						else {
 							rc.broadcast(Broadcast.slowMinerProductionCh, 1);
+							rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 						}
-					}
-					else if (numSupplyDepots == 0 && ore >= 100) {
-						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 					}
 					else if (ore >= 300 + numHelipads * 200) {
 						rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
 					}
-					else if (numSupplyDepots < 3 && ore >= 500) {
+					else if (numSupplyDepots < 3 && ore >= 600) {
 						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 					}
 				}
 				else {
-					if (numSupplyDepots == 0 && ore >= 100) {
-						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
-					}
-					else if (ore >= 300 + numHelipads * 200) {
+					if (ore >= 300 + numHelipads * 200) {
 						rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
 					}
-					else if (numSupplyDepots < 3 && ore >= 500) {
+					else if (numSupplyDepots < 3 && ore >= 600) {
 						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 					}
 				}

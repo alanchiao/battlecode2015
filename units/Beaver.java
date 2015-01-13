@@ -73,6 +73,11 @@ public class Beaver extends Unit {
 				rc.move(DirectionHelper.directions[(3 + buildings * 2) % 8]);
 				needMove = false;
 			}
+			else if (rc.readBroadcast(Broadcast.buildAerospaceLabsCh) == rc.getID()) {
+				rc.broadcast(Broadcast.buildAerospaceLabsCh, 0);
+				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(enemyHQ));
+				tryBuildInDirection(dirint, RobotType.AEROSPACELAB, buildings);
+			}
 			else if (rc.readBroadcast(Broadcast.buildHelipadsCh) == rc.getID()) {
 				rc.broadcast(Broadcast.buildHelipadsCh, 0);
 				int dirint = DirectionHelper.directionToInt(enemyHQ.directionTo(rc.senseHQLocation()));
@@ -100,11 +105,6 @@ public class Beaver extends Unit {
 				rc.broadcast(Broadcast.buildBarracksCh, 0);
 				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(enemyHQ));
 				tryBuildInDirection(dirint, RobotType.BARRACKS, buildings);
-			}
-			else if (rc.readBroadcast(Broadcast.buildAerospaceLabsCh) == rc.getID()) {
-				rc.broadcast(Broadcast.buildAerospaceLabsCh, 0);
-				int dirint = DirectionHelper.directionToInt(rc.senseHQLocation().directionTo(enemyHQ));
-				tryBuildInDirection(dirint, RobotType.AEROSPACELAB, buildings);
 			}
 			else if (rc.readBroadcast(Broadcast.scoutEnemyHQCh) == rc.getID()) {
 				navigation.moveToDestination(enemyHQ, true);
