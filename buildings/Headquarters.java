@@ -618,7 +618,6 @@ public class Headquarters extends Building {
 						Hashing.put(groupID, r.ID, ID_Broadcast);
 						//update the corresponding broadcasted group
 						if (ID_Broadcast == Broadcast.droneGroup1Ch) {
-							System.out.println("id: " + r.ID);
 							groupA[ptA] = r.ID;
 							ptA++;
 						}
@@ -677,7 +676,6 @@ public class Headquarters extends Building {
 			if (ID_Broadcast == Broadcast.droneGroup1Ch) {
 				int i = 0;
 				while (groupA[i] != 0) {
-					System.out.println("in group 1: " + groupA[i]);
 					Hashing.put(groupID, groupA[i], 0);
 					groupA[i] = 0;
 					i++;
