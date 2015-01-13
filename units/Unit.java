@@ -65,7 +65,7 @@ public abstract class Unit extends Robot {
 				// Get rid of excess supply
 				else if (mySupply > rc.getType().supplyUpkeep * 250) {
 					for (RobotInfo r : friendlyRobots) {
-						if (r.supplyLevel < r.type.supplyUpkeep * 150) {
+						if (rc.getType() == r.type && r.supplyLevel < r.type.supplyUpkeep * 150) {
 							rc.transferSupplies(mySupply - rc.getType().supplyUpkeep * 250, r.location);
 							break;
 						}
@@ -74,7 +74,7 @@ public abstract class Unit extends Robot {
 				// Give supply to robots that really need it
 				else if (mySupply > rc.getType().supplyUpkeep * 100) {
 					for (RobotInfo r : friendlyRobots) {
-						if (r.supplyLevel < r.type.supplyUpkeep * 50 && mySupply > r.supplyLevel) {
+						if (rc.getType() == r.type && r.supplyLevel < r.type.supplyUpkeep * 50) {
 							rc.transferSupplies((int)(mySupply - r.supplyLevel) / 2, r.location);
 							break;
 						}

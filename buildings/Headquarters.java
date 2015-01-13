@@ -120,29 +120,62 @@ public class Headquarters extends Building {
 
 		if (Clock.getRoundNum() < TIME_UNTIL_LAUNCHERS_GROUP) {
 			int distanceFactor = (int) hqDistance;
+
+			MapLocation loc = null;
+			boolean transferred = false;
+			int supplyAmount = 0;
 			for (RobotInfo r : friendlyRobots) {
-				if (r.type == RobotType.MINER) {
-					if (r.supplyLevel < r.type.supplyUpkeep * 20 * distanceFactor) {
-						rc.setIndicatorString(0, "transferring supply to miner/launcher");
-						rc.transferSupplies(r.type.supplyUpkeep * 30 * distanceFactor, r.location);
-						break;
+				if (r.type == RobotType.LAUNCHER) {
+					if (r.supplyLevel < r.type.supplyUpkeep * 16 * distanceFactor) {
+						if (r.supplyLevel == 0) {
+							rc.transferSupplies(r.type.supplyUpkeep * 24 * distanceFactor, r.location);
+							transferred = true;
+						}
+						else {
+							loc = r.location;
+							supplyAmount = r.type.supplyUpkeep * 24 * distanceFactor;
+						}
 					}
 				}
-				else if (r.type == RobotType.DRONE || r.type == RobotType.LAUNCHER) {
-					if (r.supplyLevel < r.type.supplyUpkeep * 10 * distanceFactor) {
-						rc.setIndicatorString(0, r.location.toString());
-						rc.transferSupplies(r.type.supplyUpkeep * 15 * distanceFactor, r.location);
-						break;
+				else if (r.type == RobotType.MINER) {
+					if (r.supplyLevel < r.type.supplyUpkeep * 16 * distanceFactor) {
+						if (r.supplyLevel == 0) {
+							rc.transferSupplies(r.type.supplyUpkeep * 24 * distanceFactor, r.location);
+							transferred = true;
+						}
+						else {
+							loc = r.location;
+							supplyAmount = r.type.supplyUpkeep * 24 * distanceFactor;
+						}
+					}
+				}
+				else if (r.type == RobotType.DRONE) {
+					if (r.supplyLevel < r.type.supplyUpkeep * 8 * distanceFactor) {
+						if (r.supplyLevel == 0) {
+							rc.transferSupplies(r.type.supplyUpkeep * 12 * distanceFactor, r.location);
+							transferred = true;
+						}
+						else {
+							loc = r.location;
+							supplyAmount = r.type.supplyUpkeep * 12 * distanceFactor;
+						}
 					}
 				}
 				else if (r.type == RobotType.BEAVER) {
 					if (r.supplyLevel < r.type.supplyUpkeep * 100) {
-						rc.setIndicatorString(0, Integer.toString(r.type.supplyUpkeep * 6 * distanceFactor));
-						rc.transferSupplies(r.type.supplyUpkeep * 200, r.location);
-						break;
+						if (r.supplyLevel == 0) {
+							rc.transferSupplies(r.type.supplyUpkeep * 200, r.location);
+							transferred = true;
+						}
+						else {
+							loc = r.location;
+							supplyAmount = r.type.supplyUpkeep * 200;
+						}
 					}
 				}
-				rc.setIndicatorString(0, "no supply transferred");
+			}
+			if (!transferred && loc != null) {
+				rc.transferSupplies(supplyAmount, loc);
 			}
 		}
 		else {
