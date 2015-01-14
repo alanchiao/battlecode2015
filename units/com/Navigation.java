@@ -60,8 +60,8 @@ public class Navigation {
 			lastLocation = null;
 		}
 		
-		// new destination
 		destination = nextDestination;
+		// reached destination
 		if (destination.equals(rc.getLocation())) {
 			return;
 		}
