@@ -89,9 +89,9 @@ public abstract class Unit extends Robot {
 					broadcastCh = Broadcast.groupingLaunchersCh;
 				}
 				if (broadcastCh != -1) {
-					int group = rc.readBroadcast(broadcastCh);
-					if (groupManager.isGrouped()) {
-						groupManager.setGroupID(group);
+					int newGroupID = rc.readBroadcast(broadcastCh);
+					if (newGroupID > 0) {
+						groupManager.setGroupID(newGroupID);
 					}
 				}
 			}
