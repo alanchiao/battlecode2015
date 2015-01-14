@@ -15,7 +15,8 @@ public class AerospaceLab extends Building {
 	protected void actions() throws GameActionException {
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
-//		
+
+
 //		if (rc.readBroadcast(Broadcast.launcherRallyXCh) == 0) {
 //			MapLocation rally = myLocation;
 //			// Move 5 squares away

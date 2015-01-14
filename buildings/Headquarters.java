@@ -7,7 +7,6 @@ import team158.utils.Hashing;
 
 public class Headquarters extends Building {
 
-	int[] groupID;
 	int ptA;
 	int[] groupA;
 	int ptB;
@@ -33,7 +32,6 @@ public class Headquarters extends Building {
 	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
-		groupID = new int[7919];
 		groupA = new int[512];
 		groupB = new int[512];
 		ptA = 0;
@@ -272,10 +270,10 @@ public class Headquarters extends Building {
 				numMiners++;
 			} else if (type == RobotType.DRONE) {
 				numDrones++;
-				if (Hashing.find(groupID, r.ID) == Broadcast.droneGroup1Ch) {
+				if (Hashing.find(r.ID) == Broadcast.droneGroup1Ch) {
 					numDronesG1++;
 				}							
-				else if (Hashing.find(groupID, r.ID)  == Broadcast.droneGroup2Ch) {
+				else if (Hashing.find(r.ID)  == Broadcast.droneGroup2Ch) {
 					numDronesG2++;
 				}		
 			} else if (type == RobotType.BEAVER) {
@@ -449,7 +447,7 @@ public class Headquarters extends Building {
 						rc.broadcast(Broadcast.droneGroup2Ch, 1);
 						groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
 					}
-					else if (numDronesG2 > 10 && rc.readBroadcast(Broadcast.droneGroup2Ch) == 1) {
+					else if (numDronesG2 > 15 && rc.readBroadcast(Broadcast.droneGroup2Ch) == 1) {
 						groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
 					}
 					else {
@@ -491,10 +489,10 @@ public class Headquarters extends Building {
 			RobotType type = r.type;
 			if (type == RobotType.TANK) {
 				numTanks++;
-				if (Hashing.find(groupID, r.ID) == Broadcast.tankGroup1Ch) {
+				if (Hashing.find(r.ID) == Broadcast.tankGroup1Ch) {
 					numTanksG1++;
 				}							
-				else if (Hashing.find(groupID, r.ID)  == Broadcast.tankGroup2Ch) {
+				else if (Hashing.find(r.ID)  == Broadcast.tankGroup2Ch) {
 					numTanksG2++;
 				}			
 
@@ -591,8 +589,8 @@ public class Headquarters extends Building {
 				if (type == RobotType.TANK) {
 					//update hashmap with (id, group id) pair;
 					// if tank is in the hashmap but not in a group
-					if (Hashing.find(groupID, r.ID) == 0) {
-						Hashing.put(groupID, r.ID, ID_Broadcast);
+					if (Hashing.find(r.ID) == 0) {
+						Hashing.put(r.ID, ID_Broadcast);
 						//update the corresponding broadcasted group
 						if (ID_Broadcast == Broadcast.tankGroup1Ch) {
 							groupA[ptA] = r.ID;
@@ -612,8 +610,8 @@ public class Headquarters extends Building {
 				if (type == RobotType.DRONE) {
 					//update hashmap with (id, group id) pair;
 					// if tank is in the hashmap but not in a group
-					if (Hashing.find(groupID, r.ID) == 0) {
-						Hashing.put(groupID, r.ID, ID_Broadcast);
+					if (Hashing.find(r.ID) == 0) {
+						Hashing.put(r.ID, ID_Broadcast);
 						//update the corresponding broadcasted group
 						if (ID_Broadcast == Broadcast.droneGroup1Ch) {
 							groupA[ptA] = r.ID;
@@ -674,7 +672,7 @@ public class Headquarters extends Building {
 			if (ID_Broadcast == Broadcast.droneGroup1Ch) {
 				int i = 0;
 				while (groupA[i] != 0) {
-					Hashing.put(groupID, groupA[i], 0);
+					Hashing.put(groupA[i], 0);
 					groupA[i] = 0;
 					i++;
 				}
@@ -682,7 +680,7 @@ public class Headquarters extends Building {
 			else if (ID_Broadcast == Broadcast.droneGroup2Ch) {
 				int i = 0;
 				while (groupB[i] != 0) {
-					Hashing.put(groupID, groupB[i], 0);
+					Hashing.put(groupB[i], 0);
 					groupB[i] = 0;
 					i++;
 				}
@@ -690,7 +688,7 @@ public class Headquarters extends Building {
 			if (ID_Broadcast == Broadcast.tankGroup1Ch) {
 				int i = 0;
 				while (groupA[i] != 0) {
-					Hashing.put(groupID, groupA[i], 0);
+					Hashing.put(groupA[i], 0);
 					groupA[i] = 0;
 					i++;
 				}
@@ -698,7 +696,7 @@ public class Headquarters extends Building {
 			else if (ID_Broadcast == Broadcast.tankGroup2Ch) {
 				int i = 0;
 				while (groupB[i] != 0) {
-					Hashing.put(groupID, groupB[i], 0);
+					Hashing.put(groupB[i], 0);
 					groupB[i] = 0;
 					i++;
 				}
