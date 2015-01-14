@@ -1,5 +1,7 @@
 package team158.units;
 
+import com.sun.xml.internal.ws.api.ComponentFeature.Target;
+
 import team158.buildings.Headquarters;
 import team158.utils.Broadcast;
 import battlecode.common.Clock;
@@ -42,14 +44,16 @@ public class Drone extends Unit {
 				}
 			}
 			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
-				rc.setIndicatorString(1, Integer.toString(groupID));
-				if (groupID == Broadcast.droneGroup2Ch) {
-					MapLocation target = Broadcast.readLocation(rc, Broadcast.groupingTargetLocationChs);
-					rc.setIndicatorString(0, String.valueOf(target.toString()));
-					moveToTargetByGroup(target);
+				if (groupManager.groupID == Broadcast.droneGroup2Ch) {
+					boolean hasHQCommand = rc.readBroadcast(groupManager.groupID) == 1;
+					if (hasHQCommand) {
+						MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
+						navigation.moveToDestination(target, false);
+					} else {
+						groupManager.spawnRallyInGroup(navigation);
+					}
 				}
 				else {
-					rc.setIndicatorString(0, enemyHQ.toString());
 					navigation.moveToDestination(enemyHQ, true);
 				}
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {

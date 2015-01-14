@@ -43,8 +43,7 @@ public class Launcher extends Unit {
 				}
 			}
 			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {				
-				rc.setIndicatorString(1, Integer.toString(groupID));
-				MapLocation target = Broadcast.readLocation(rc, Broadcast.launcherTargetLocationChs);
+				MapLocation target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
 				//if launcher Target Location is not set to Tower
 //				if (rc.readBroadcast(Broadcast.launcherGroupCh)) {
 //					

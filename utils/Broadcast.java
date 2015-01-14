@@ -29,12 +29,13 @@ public class Broadcast {
 	public static final int minerOreX100Ch = 301;
 	public static final int minersProducedCh = 302;
 	
+	// commanded by unit spawning buildings
 	public static final int tankRallyLocationChs = 400; // 400 - 401
 	public static final int soldierRallyLocationChs = 402; // 402 - 403
-	public static final int dronesRallyLocationChs = 404; // 404 - 405
-	
-	public static final int groupingTargetLocationChs = 408; // 408 - 409
-	public static final int launcherTargetLocationChs = 410; // 410 - 411
+	public static final int droneRallyLocationChs = 404; // 404 - 405
+	public static final int launcherRallyLocationChs = 408; // 408- 409
+	// commanded by the HQ
+	public static final int groupTargetLocationChs = 410; // 410 - 411
 	
 	public static final int groupingSoldiersCh = 501;
 	public static final int groupingTanksCh = 502;
