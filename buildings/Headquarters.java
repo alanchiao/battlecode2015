@@ -71,6 +71,7 @@ public class Headquarters extends Building {
 				int count = 0;
 				while (count < numTowersRemaining) {
 					int minDistance = 999999;
+					int maxDistance = 0;
 					int targetTowerIndex = 0;
 					for (int i = 0; i < numTowersRemaining; i++) {
 						if (distances[i] < minDistance) {

@@ -1,7 +1,9 @@
 package team158.buildings;
 
+import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
 import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 
@@ -16,6 +18,29 @@ public class AerospaceLab extends Building {
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
 
+		MapLocation[] myTowers = rc.senseTowerLocations();
+		int numTowersRemaining = myTowers.length;
+		int[] distances = new int[numTowersRemaining];
+		for (int i = 0; i < numTowersRemaining; i++) {
+			distances[i] = myLocation.distanceSquaredTo(myTowers[i]);
+		}
+		
+		int maxDistance = 0;
+		MapLocation targetTower = null;
+		
+		for (int i = 0; i < numTowersRemaining; i++) {		
+			if (myLocation.directionTo(myTowers[i]).equals(myLocation.directionTo(enemyHQ))) {
+				if (distances[i] > maxDistance) {
+					maxDistance = distances[i];
+					targetTower = myTowers[i];
+				}
+			}
+		}
+		
+		if (targetTower != null) {
+			Broadcast.broadcastLocation(rc, targetTower, Broadcast.launcherAttackLocationChs);
+		}
+		rc.setIndicatorString(0, String.valueOf(targetTower));
 
 //		if (rc.readBroadcast(Broadcast.launcherRallyXCh) == 0) {
 //			MapLocation rally = myLocation;

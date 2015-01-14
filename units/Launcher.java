@@ -43,45 +43,17 @@ public class Launcher extends Unit {
 				}
 			}
 			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {				
-				MapLocation target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
-				//if launcher Target Location is not set to Tower
-//				if (rc.readBroadcast(Broadcast.launcherGroupCh)) {
-//					
-//				} else {
-//					
-//				}
-
-	
-//						locX = rc.readBroadcast(Broadcast.launcherRallyXCh);
-////						locY = rc.readBroadcast(Broadcast.launcherRallyYCh);
-//				locX = rc.readBroadcast(Broadcast.launcherTargetLocationXCh);
-//				locY = rc.readBroadcast(Broadcast.launcherTargetLocationYCh);
-				
+				MapLocation target;
+				boolean hasHQCommand = rc.readBroadcast(Broadcast.launcherGroupCh) == 1;
+				// if headquarter says attack, read from attack channel
+				if (hasHQCommand) {
+					 target = Broadcast.readLocation(rc, Broadcast.launcherAttackLocationChs);
+				} else {
+					 target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
+				}
 				rc.setIndicatorString(0, target.toString());
 				navigation.moveToDestination(target, false);
 	
-
-//					RobotInfo[] closeRobots = rc.senseNearbyRobots(52, rc.getTeam().opponent());
-//					if (closeRobots.length > 0) {
-//						MapLocation closestRobot = closeRobots[0].location;
-//						int closestDistance = closestRobot.distanceSquaredTo(myLocation);
-//						for (int i = 1; i < closeRobots.length; i++) {
-//							int distance = closeRobots[i].location.distanceSquaredTo(myLocation);
-//							if (distance < closestDistance) {
-//								closestDistance = distance;
-//								closestRobot = closeRobots[i].location;
-//							}
-//						}
-//						navigation.moveToDestination(closestRobot, false);
-//					}
-//					else {
-//						if (myLocation.distanceSquaredTo(myHQ) > 52) {
-//							navigation.moveToDestination(myHQ, false);
-//						}
-//						else {
-//							navigation.moveToDestination(myLocation.add(DirectionHelper.directions[rand.nextInt(8)]), true);
-//						}
-//					}
 				
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
 				MapLocation myHQ = rc.senseHQLocation();

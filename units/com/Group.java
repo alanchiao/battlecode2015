@@ -52,11 +52,7 @@ public class Group {
 								assert(false);
 								break;				
 			} 
-			// TODO: more robust way of determining when rally point has been reached
-//				if (target.distanceSquaredTo(rc.getLocation()) <= 24) {
-//					rc.broadcast(groupID, -1);
-//					groupID = -1;
-//				}
+			
 			navigation.moveToDestination(target, false);
 		}  catch (GameActionException e) {
 			return;

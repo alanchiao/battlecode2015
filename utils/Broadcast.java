@@ -36,6 +36,7 @@ public class Broadcast {
 	public static final int launcherRallyLocationChs = 408; // 408- 409
 	// commanded by the HQ
 	public static final int groupTargetLocationChs = 410; // 410 - 411
+	public static final int launcherAttackLocationChs = 412;
 	
 	public static final int groupingSoldiersCh = 501;
 	public static final int groupingTanksCh = 502;
