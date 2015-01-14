@@ -7,7 +7,6 @@ import team158.units.com.Navigation;
 import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
 import battlecode.common.Direction;
-import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -110,7 +109,7 @@ public abstract class Unit extends Robot {
 		}
 	}
 
-	protected MapLocation selectTarget(RobotInfo[] enemies) {
+	public static MapLocation selectTarget(RobotInfo[] enemies) {
 		MapLocation target = null;
 		double maxPriority = 0;
 		for (RobotInfo r : enemies) {

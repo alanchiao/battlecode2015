@@ -1,5 +1,6 @@
 package team158.buildings;
 
+import team158.units.Unit;
 import battlecode.common.*;
 
 public class Tower extends Building {
@@ -16,7 +17,7 @@ public class Tower extends Building {
 				rc.getTeam().opponent()
 			);
 			if (enemies.length > 0) {
-				rc.attackLocation(enemies[0].location);
+				rc.attackLocation(Unit.selectTarget(enemies));
 			}
 		}
 	}

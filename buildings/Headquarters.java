@@ -1,6 +1,7 @@
 package team158.buildings;
 
 import battlecode.common.*;
+import team158.units.Unit;
 import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
 import team158.utils.Hashing;
@@ -55,7 +56,6 @@ public class Headquarters extends Building {
 	protected void actions() throws GameActionException {	
 		//check if attackable tower exists and broadcasts location
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-		//MapLocation myLocation = rc.getLocation();
 		int numTowersRemaining = enemyTowers.length;
 		
 		if (numTowersRemaining != numTowers) {
@@ -71,7 +71,6 @@ public class Headquarters extends Building {
 				int count = 0;
 				while (count < numTowersRemaining) {
 					int minDistance = 999999;
-					int maxDistance = 0;
 					int targetTowerIndex = 0;
 					for (int i = 0; i < numTowersRemaining; i++) {
 						if (distances[i] < minDistance) {
@@ -211,6 +210,7 @@ public class Headquarters extends Building {
 				RobotInfo[] enemies = rc.senseNearbyRobots(52, rc.getTeam().opponent());
 				if (enemies.length > 0) {
 					RobotInfo[] directlyAttackable = rc.senseNearbyRobots(35, rc.getTeam().opponent());
+					// Greedy attack. Could potentially use selectTarget but it doesn't factor in splash.
 					if (directlyAttackable.length > 0) {
 						for (RobotInfo enemy : directlyAttackable) {
 							if (enemy.type != RobotType.MISSILE) {
@@ -233,13 +233,13 @@ public class Headquarters extends Building {
 			else if (numTowers >= 2) { // range 35
 				RobotInfo[] enemies = rc.senseNearbyRobots(35, rc.getTeam().opponent());
 				if (enemies.length > 0) {
-					rc.attackLocation(enemies[0].location);
+					rc.attackLocation(Unit.selectTarget(enemies));
 				}
 			}
 			else { // range 24
 				RobotInfo[] enemies = rc.senseNearbyRobots(24, rc.getTeam().opponent());
 				if (enemies.length > 0) {
-					rc.attackLocation(enemies[0].location);
+					rc.attackLocation(Unit.selectTarget(enemies));
 				}
 			}
 		}
@@ -339,15 +339,6 @@ public class Headquarters extends Building {
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
 			if (numBeavers == 0 || scoutBeaver == 0) {
-				if (numTowers < 2) {
-					rc.broadcast(Broadcast.buildBuildingsCloseCh, 1);
-				}
-				for (RobotInfo r : rc.senseNearbyRobots(2)) {
-					if (r.type == RobotType.TOWER) {
-						rc.broadcast(Broadcast.buildBuildingsCloseCh, 0);
-						break;
-					}
-				}
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(Direction.EAST);
