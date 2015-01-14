@@ -2,6 +2,7 @@ package team158.units;
 import java.util.Random;
 
 import team158.Robot;
+import team158.units.com.Group;
 import team158.units.com.Navigation;
 import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
@@ -14,18 +15,9 @@ import battlecode.common.RobotType;
 import battlecode.common.Team;
 
 public abstract class Unit extends Robot {
-	
-	// grouping information
-	public int groupID;
-	
-	/**
-	 * groupID:
-	 * -1 = ungrouped
-	 * 0 = retreating back
-	 * >0 = grouped  
-	 */
-	
+		
 	protected Navigation navigation;
+	protected Group groupManager;
 	protected double prevHealth;
 	
 	public Unit (RobotController newRC) {
@@ -34,10 +26,9 @@ public abstract class Unit extends Robot {
 		ownHQ = rc.senseHQLocation();
 		enemyHQ = rc.senseEnemyHQLocation();	
 		distanceBetweenHQ = ownHQ.distanceSquaredTo(enemyHQ);
-		navigation = new Navigation(rc, rand);
-
-		groupID = -1;
 		prevHealth = 0;
+		navigation = new Navigation(rc, rand);
+		groupManager = new Group(rc);
 	}
 
 	@Override
@@ -83,7 +74,7 @@ public abstract class Unit extends Robot {
 			}
 			
 			// Grouping stage
-			if (groupID == -1) {
+			if (groupManager.groupID == Group.UNGROUPED) {
 				int broadcastCh = -1;
 				if (rc.getType() == RobotType.SOLDIER) {
 					broadcastCh = Broadcast.groupingSoldiersCh;
@@ -99,14 +90,14 @@ public abstract class Unit extends Robot {
 				}
 				if (broadcastCh != -1) {
 					int group = rc.readBroadcast(broadcastCh);
-					if (group > 0) {
-						groupID = group;
+					if (groupManager.isGrouped()) {
+						groupManager.setGroupID(group);
 					}
 				}
 			}
 			else {
-				if (rc.readBroadcast(groupID) == -1) {
-					groupID = -1;
+				if (rc.readBroadcast(groupManager.groupID) == -1) {
+					groupManager.unGroup();
 				}
 			}
 			// Unit-specific actions
@@ -245,35 +236,5 @@ public abstract class Unit extends Robot {
 			}
 		}
 		return null;
-	}
-	
-	protected void moveToTargetByGroup(MapLocation target) {
-		try {
-			boolean toldToAttack = rc.readBroadcast(groupID) == 1;
-			if (!toldToAttack) {
-				if (rc.getType() == RobotType.DRONE) {
-					target = Broadcast.readLocation(rc, Broadcast.dronesRallyLocationChs);
-				} else if (rc.getType() == RobotType.SOLDIER) {
-					target = Broadcast.readLocation(rc, Broadcast.soldierRallyLocationChs);
-				} else if (rc.getType() == RobotType.TANK) {
-					target = Broadcast.readLocation(rc, Broadcast.tankRallyLocationChs);
-				} else if (rc.getType() == RobotType.LAUNCHER) {
-//					target = Broadcast.readLocation(Broadcast.launcherRallyChs);
-//					xLoc = rc.readBroadcast(Broadcast.launcherTargetLocationXCh);
-					target = Broadcast.readLocation(rc, Broadcast.launcherTargetLocationChs);
-				} 
-				// TODO: more robust way of determining when rally point has been reached
-//				if (target.distanceSquaredTo(rc.getLocation()) <= 24) {
-//					rc.broadcast(groupID, -1);
-//					groupID = -1;
-//				}
-			}
-			//rc.setIndicatorString(0, String.valueOf(rc.getLocation().distanceSquaredTo(target)));
-			navigation.moveToDestination(target, false);
-		} 
-		catch (GameActionException e) {
-			return;
-		}
-	}
-	
+	}	
 }

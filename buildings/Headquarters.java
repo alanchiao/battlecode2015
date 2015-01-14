@@ -111,7 +111,7 @@ public class Headquarters extends Building {
 		}
 
 		if (targetTower != null) {
-			Broadcast.broadcastLocation(rc, targetTower, Broadcast.groupingTargetLocationChs);
+			Broadcast.broadcastLocation(rc, targetTower, Broadcast.groupTargetLocationChs);
 		}
 		
 		//find closest enemy target
@@ -132,7 +132,7 @@ public class Headquarters extends Building {
 			closestRobot = myLocation;
 		}
 		rc.setIndicatorString(0, String.valueOf(closestRobot));
-		Broadcast.broadcastLocation(rc, closestRobot, Broadcast.launcherTargetLocationChs);
+		Broadcast.broadcastLocation(rc, closestRobot, Broadcast.launcherRallyLocationChs);
 		
 		int mySupply = (int) rc.getSupplyLevel();
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
@@ -424,10 +424,7 @@ public class Headquarters extends Building {
 					}
 				}
 			}
-			
-			rc.setIndicatorString(1, Integer.toString(numDronesG1));
-			rc.setIndicatorString(2, Integer.toString(numDronesG2));
-			
+				
 			if (numLaunchers > 0) {
 				if (numLaunchers > 5) {
 					rc.broadcast(Broadcast.launcherGroupCh, 1);

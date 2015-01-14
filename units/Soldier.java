@@ -23,7 +23,6 @@ public class Soldier extends Unit {
 			// 20 is how far away a drone can be for the soldier to have a risk of getting too close
 			RobotInfo[] enemies = rc.senseNearbyRobots(20, rc.getTeam().opponent());
 			if (enemies.length > 0) {
-				rc.setIndicatorString(0, "enemy detected");
 				Direction d = selectMoveDirectionMicro();
 				if (d != null) {
 					rc.move(d);
@@ -32,13 +31,14 @@ public class Soldier extends Unit {
 			}
 			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(RobotType.SOLDIER.attackRadiusSquared, rc.getTeam().opponent());
 			if (attackableEnemies.length == 0) {
-				MapLocation target;
-				target = Broadcast.readLocation(rc , Broadcast.soldierRallyLocationChs);
-				if (groupID > 0) {
-					moveToTargetByGroup(target);
+				boolean hasHQCommand = rc.readBroadcast(groupManager.groupID) == 1;
+				// just always moveToDestination target?
+				if (groupManager.isGrouped() && hasHQCommand) {
+					MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
+					navigation.moveToDestination(target, false);
 				}
 				else {
-					navigation.moveToDestination(target, false);
+					groupManager.spawnRallyInGroup(navigation);
 				}
 			}
 		}	
