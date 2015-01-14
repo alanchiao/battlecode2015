@@ -5,6 +5,10 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
+/***
+ * Class for helping an individual unit keep track of what group it is in
+ * and decide what to do in response to what group it is in.
+ */
 public class Group {
 	
 	public static final int UNGROUPED = -1;
