@@ -3,6 +3,11 @@
 # $1 - first argument = commit #to go to
 cd ..
 
+if [ -d "oldteam" ]
+  then
+    rm -r oldteam
+fi
+
 cp -r team158/ oldteam
 cd oldteam
 
