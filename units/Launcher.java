@@ -58,6 +58,7 @@ public class Launcher extends Unit {
 			} else {
 				navigation.moveToDestination(this.enemyHQ, true);
 			}
+			rc.setIndicatorString(2, this.navigation.destination.toString());
 		}
 	}
 

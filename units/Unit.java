@@ -33,13 +33,14 @@ public abstract class Unit extends Robot {
 	@Override
 	public void move() {
 		try {
+			rc.setIndicatorString(0, Integer.toString(groupManager.groupID));
+			
 			// Transfer supply stage
 			int mySupply = (int) rc.getSupplyLevel();
 			RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
 			if (friendlyRobots.length > 0) {
 				// If predicted to die on this turn
 				if (rc.getHealth() <= prevHealth / 2) {
-					
 					RobotInfo bestFriend = null;
 					double maxHealth = 0;
 					for (RobotInfo r : friendlyRobots) {

@@ -67,7 +67,7 @@ public class Navigation {
 		}
 		this.isAvoidAllAttack = isAvoidAllAttack;
 		possibleMovesAvoidingEnemies = null;
-		
+		rc.setIndicatorString(1, Boolean.toString(isAvoidingObstacle));
 		if (USE_WALL_HUGGING) {
 			wallHuggingToDestination();
 		} else {
@@ -420,6 +420,7 @@ public class Navigation {
 			   type == RobotType.BEAVER ||
 			   type == RobotType.COMMANDER ||
 			   type == RobotType.DRONE ||
-			   type == RobotType.SOLDIER;
+			   type == RobotType.SOLDIER ||
+			   type == RobotType.LAUNCHER;
 	}
 }
