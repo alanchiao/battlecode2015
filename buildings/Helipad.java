@@ -18,15 +18,14 @@ public class Helipad extends Building {
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
 		
-		if (rc.readBroadcast(Broadcast.dronesRallyXCh) == 0) {
+		if (Broadcast.isNotInitiated(rc, Broadcast.dronesRallyLocationChs)) {
 			MapLocation rally = myLocation;
 			// Move 5 squares away
 			int rallyDistance = (int)hqDistance / 6;
 			for (int i = 0; i < rallyDistance; i++) {
 				rally = rally.add(DirectionHelper.directions[dirint]);
 			}
-			rc.broadcast(Broadcast.dronesRallyXCh, rally.x);
-			rc.broadcast(Broadcast.dronesRallyYCh, rally.y);
+			Broadcast.broadcastLocation(rc, rally, Broadcast.dronesRallyLocationChs);
 		}
 		int threshold = rc.readBroadcast(Broadcast.yieldToLaunchers) == 1 ? 450 : 125;
 		

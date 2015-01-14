@@ -251,25 +251,16 @@ public abstract class Unit extends Robot {
 		try {
 			boolean toldToAttack = rc.readBroadcast(groupID) == 1;
 			if (!toldToAttack) {
-				int xLoc, yLoc;
 				if (rc.getType() == RobotType.DRONE) {
-					xLoc = rc.readBroadcast(Broadcast.dronesRallyXCh);
-					yLoc = rc.readBroadcast(Broadcast.dronesRallyYCh);
-					target = new MapLocation(xLoc, yLoc);
+					target = Broadcast.readLocation(rc, Broadcast.dronesRallyLocationChs);
 				} else if (rc.getType() == RobotType.SOLDIER) {
-					xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
-					yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
-					target = new MapLocation(xLoc, yLoc);
+					target = Broadcast.readLocation(rc, Broadcast.soldierRallyLocationChs);
 				} else if (rc.getType() == RobotType.TANK) {
-					xLoc = rc.readBroadcast(Broadcast.tankRallyXCh);
-					yLoc = rc.readBroadcast(Broadcast.tankRallyYCh);
-					target = new MapLocation(xLoc, yLoc);
+					target = Broadcast.readLocation(rc, Broadcast.tankRallyLocationChs);
 				} else if (rc.getType() == RobotType.LAUNCHER) {
-//					xLoc = rc.readBroadcast(Broadcast.launcherRallyXCh);
-//					yLoc = rc.readBroadcast(Broadcast.launcherRallyYCh);
-					xLoc = rc.readBroadcast(Broadcast.launcherTargetLocationXCh);
-					yLoc = rc.readBroadcast(Broadcast.launcherTargetLocationYCh);
-					target = new MapLocation(xLoc, yLoc);
+//					target = Broadcast.readLocation(Broadcast.launcherRallyChs);
+//					xLoc = rc.readBroadcast(Broadcast.launcherTargetLocationXCh);
+					target = Broadcast.readLocation(rc, Broadcast.launcherTargetLocationChs);
 				} 
 				// TODO: more robust way of determining when rally point has been reached
 //				if (target.distanceSquaredTo(rc.getLocation()) <= 24) {

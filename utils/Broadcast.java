@@ -1,5 +1,9 @@
 package team158.utils;
 
+import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
+
 public class Broadcast {
 	
 	public static final int numBeaversCh = 0;
@@ -25,21 +29,12 @@ public class Broadcast {
 	public static final int minerOreX100Ch = 301;
 	public static final int minersProducedCh = 302;
 	
-	public static final int tankRallyXCh = 400;
-	public static final int tankRallyYCh = 401;
-	public static final int soldierRallyXCh = 402;
-	public static final int soldierRallyYCh = 403;
-	public static final int dronesRallyXCh = 404;
-	public static final int dronesRallyYCh = 405;
-	public static final int launcherRallyXCh = 406;
-	public static final int launcherRallyYCh = 407;
+	public static final int tankRallyLocationChs = 400; // 400 - 401
+	public static final int soldierRallyLocationChs = 402; // 402 - 403
+	public static final int dronesRallyLocationChs = 404; // 404 - 405
 	
-	
-	public static final int groupingTargetLocationXCh = 408;
-	public static final int groupingTargetLocationYCh = 409;
-	public static final int launcherTargetLocationXCh = 410;
-	public static final int launcherTargetLocationYCh = 411;
-	
+	public static final int groupingTargetLocationChs = 408; // 408 - 409
+	public static final int launcherTargetLocationChs = 410; // 410 - 411
 	
 	public static final int groupingSoldiersCh = 501;
 	public static final int groupingTanksCh = 502;
@@ -63,5 +58,21 @@ public class Broadcast {
 	public static final int droneGroup1Ch = 704;
 	public static final int droneGroup2Ch = 705;
 	public static final int launcherGroupCh = 706;
+	
+	// read two contiguous channels for location information, x and y coordinates
+	public static MapLocation readLocation(RobotController rc, int channelStart) throws GameActionException {
+		return new MapLocation(rc.readBroadcast(channelStart), rc.readBroadcast(channelStart + 1));
+	}
+	
+	// write to two contiguous channels for a location
+	public static void broadcastLocation (RobotController rc, MapLocation location, int channelStart) throws GameActionException {
+		rc.broadcast(channelStart, location.x);
+		rc.broadcast(channelStart + 1, location.y);
+	}
+	
+	// check if channel has not been initiated yet
+	public static boolean isNotInitiated(RobotController rc, int channelStart) throws GameActionException {
+		return rc.readBroadcast(channelStart) == 0;
+	}
 
 }

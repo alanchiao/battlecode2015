@@ -43,10 +43,8 @@ public class Launcher extends Unit {
 				}
 			}
 			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {				
-				rc.setIndicatorString(1, Integer.toString(groupID));				
-				int locX = rc.readBroadcast(Broadcast.launcherTargetLocationXCh);
-				int locY = rc.readBroadcast(Broadcast.launcherTargetLocationYCh);
-				MapLocation target = new MapLocation(locX, locY);
+				rc.setIndicatorString(1, Integer.toString(groupID));
+				MapLocation target = Broadcast.readLocation(rc, Broadcast.launcherTargetLocationChs);
 				//if launcher Target Location is not set to Tower
 //				if (rc.readBroadcast(Broadcast.launcherGroupCh)) {
 //					
@@ -60,8 +58,7 @@ public class Launcher extends Unit {
 //				locX = rc.readBroadcast(Broadcast.launcherTargetLocationXCh);
 //				locY = rc.readBroadcast(Broadcast.launcherTargetLocationYCh);
 				
-				target = new MapLocation(locX, locY);
-				rc.setIndicatorString(0,String.valueOf(target.x + " " + target.y));
+				rc.setIndicatorString(0, target.toString());
 				navigation.moveToDestination(target, false);
 	
 

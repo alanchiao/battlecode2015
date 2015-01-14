@@ -44,16 +44,12 @@ public class Drone extends Unit {
 			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
 				rc.setIndicatorString(1, Integer.toString(groupID));
 				if (groupID == Broadcast.droneGroup2Ch) {
-					int towerX = rc.readBroadcast(Broadcast.groupingTargetLocationXCh);
-					int towerY = rc.readBroadcast(Broadcast.groupingTargetLocationYCh);
-					//System.out.println(towerX + " " + towerY);
-					MapLocation target = new MapLocation(towerX,towerY);
-					rc.setIndicatorString(0,String.valueOf(towerX + " " + towerY));
-					
+					MapLocation target = Broadcast.readLocation(rc, Broadcast.groupingTargetLocationChs);
+					rc.setIndicatorString(0, String.valueOf(target.toString()));
 					moveToTargetByGroup(target);
 				}
 				else {
-					rc.setIndicatorString(0,String.valueOf(enemyHQ.x + " " + enemyHQ.y));
+					rc.setIndicatorString(0, enemyHQ.toString());
 					navigation.moveToDestination(enemyHQ, true);
 				}
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {

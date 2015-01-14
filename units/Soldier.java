@@ -33,9 +33,7 @@ public class Soldier extends Unit {
 			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(RobotType.SOLDIER.attackRadiusSquared, rc.getTeam().opponent());
 			if (attackableEnemies.length == 0) {
 				MapLocation target;
-				int xLoc = rc.readBroadcast(Broadcast.soldierRallyXCh);
-				int yLoc = rc.readBroadcast(Broadcast.soldierRallyYCh);
-				target = new MapLocation(xLoc, yLoc);
+				target = Broadcast.readLocation(rc , Broadcast.soldierRallyLocationChs);
 				if (groupID > 0) {
 					moveToTargetByGroup(target);
 				}

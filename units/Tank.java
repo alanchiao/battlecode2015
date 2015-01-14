@@ -32,16 +32,11 @@ public class Tank extends Unit {
 			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(RobotType.TANK.attackRadiusSquared, rc.getTeam().opponent());
 			if (attackableEnemies.length == 0) {
 				if (groupID > 0) {
-					int towerX = rc.readBroadcast(Broadcast.groupingTargetLocationXCh);
-					int towerY = rc.readBroadcast(Broadcast.groupingTargetLocationYCh);
-					MapLocation target = new MapLocation(towerX,towerY);
+					MapLocation target = Broadcast.readLocation(rc, Broadcast.groupingTargetLocationChs);
 					moveToTargetByGroup(target);
 				}
 				else {
-					MapLocation rally;
-					int xLoc = rc.readBroadcast(Broadcast.tankRallyXCh);
-					int yLoc = rc.readBroadcast(Broadcast.tankRallyYCh);
-					rally = new MapLocation(xLoc, yLoc);
+					MapLocation rally = Broadcast.readLocation(rc, Broadcast.tankRallyLocationChs);
 					navigation.moveToDestination(rally, false);
 				}
 			}
