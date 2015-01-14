@@ -133,7 +133,6 @@ public abstract class Unit extends Robot {
 		int myRange = rc.getType() != RobotType.LAUNCHER ? rc.getType().attackRadiusSquared : 35;
 		Team opponent = rc.getTeam().opponent();
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, opponent);
-		
 		if (enemies.length == 0) {
 			return null;
 		}

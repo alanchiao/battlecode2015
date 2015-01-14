@@ -42,24 +42,21 @@ public class Launcher extends Unit {
 					rc.move(d);
 				}
 			}
-			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {				
+			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {
+				// if headquarter says attack, read from attack channel, otherwise
+				// rally normally
 				MapLocation target;
 				boolean hasHQCommand = rc.readBroadcast(Broadcast.launcherGroupCh) == 1;
-				// if headquarter says attack, read from attack channel
 				if (hasHQCommand) {
 					 target = Broadcast.readLocation(rc, Broadcast.launcherAttackLocationChs);
 				} else {
 					 target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
 				}
-				rc.setIndicatorString(0, target.toString());
 				navigation.moveToDestination(target, false);
-	
-				
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
-				MapLocation myHQ = rc.senseHQLocation();
-				navigation.moveToDestination(myHQ, true);
+				navigation.moveToDestination(this.ownHQ, true);
 			} else {
-				navigation.moveToDestination(enemyHQ, true);
+				navigation.moveToDestination(this.enemyHQ, true);
 			}
 		}
 	}

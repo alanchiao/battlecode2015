@@ -55,10 +55,9 @@ public class Drone extends Unit {
 					navigation.moveToDestination(enemyHQ, true);
 				}
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
-				MapLocation myHQ = rc.senseHQLocation();
-				navigation.moveToDestination(myHQ, true);
+				navigation.moveToDestination(this.ownHQ, true);
 			} else {
-				navigation.moveToDestination(enemyHQ, false);
+				navigation.moveToDestination(this.enemyHQ, false);
 			}
 		}
 	}

@@ -10,10 +10,12 @@ import team158.utils.DirectionHelper;
 public class Missile extends Robot {
 
 	public int targetID;
+	public int timeUntilDeath;
 	
 	public Missile (RobotController newRC) {
 		rc = newRC;
 		targetID = 0;
+		timeUntilDeath = 5;
 		
 		RobotInfo enemies[] = rc.senseNearbyRobots(24, rc.getTeam().opponent());
 		for (RobotInfo enemy: enemies) {
@@ -28,11 +30,16 @@ public class Missile extends Robot {
 	@Override
 	public void move() {
 		try {
+			timeUntilDeath --;
 			if (rc.isCoreReady()) {
 				RobotInfo enemies[] = rc.senseNearbyRobots(2, rc.getTeam().opponent());
-				if (enemies.length > 0) {
+				RobotInfo allies[] = rc.senseNearbyRobots(2, rc.getTeam());
+				if (enemies.length > 0 && allies.length == 0) {
 					rc.explode();
 					return;
+				} 
+				if (timeUntilDeath == 1) {
+					rc.disintegrate();
 				}
 				enemies = rc.senseNearbyRobots(24, rc.getTeam().opponent());
 				if (enemies.length > 0) {
