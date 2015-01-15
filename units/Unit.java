@@ -2,7 +2,7 @@ package team158.units;
 import java.util.Random;
 
 import team158.Robot;
-import team158.units.com.Group;
+import team158.units.com.GroupTracker;
 import team158.units.com.Navigation;
 import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
@@ -16,7 +16,7 @@ import battlecode.common.Team;
 public abstract class Unit extends Robot {
 		
 	protected Navigation navigation;
-	protected Group groupManager;
+	protected GroupTracker groupTracker;
 	protected double prevHealth;
 	
 	public Unit (RobotController newRC) {
@@ -27,13 +27,13 @@ public abstract class Unit extends Robot {
 		distanceBetweenHQ = ownHQ.distanceSquaredTo(enemyHQ);
 		prevHealth = 0;
 		navigation = new Navigation(rc, rand);
-		groupManager = new Group(rc);
+		groupTracker = new GroupTracker(rc);
 	}
 
 	@Override
 	public void move() {
 		try {
-			rc.setIndicatorString(0, Integer.toString(groupManager.groupID));
+			rc.setIndicatorString(0, Integer.toString(groupTracker.groupID));
 			
 			// Transfer supply stage
 			int mySupply = (int) rc.getSupplyLevel();
@@ -74,7 +74,7 @@ public abstract class Unit extends Robot {
 			}
 			
 			// Grouping stage
-			if (groupManager.groupID == Group.UNGROUPED) {
+			if (groupTracker.groupID == GroupTracker.UNGROUPED) {
 				int broadcastCh = -1;
 				if (rc.getType() == RobotType.SOLDIER) {
 					broadcastCh = Broadcast.groupingSoldiersCh;
@@ -91,13 +91,13 @@ public abstract class Unit extends Robot {
 				if (broadcastCh != -1) {
 					int newGroupID = rc.readBroadcast(broadcastCh);
 					if (newGroupID > 0) {
-						groupManager.setGroupID(newGroupID);
+						groupTracker.setGroupID(newGroupID);
 					}
 				}
 			}
 			else {
-				if (rc.readBroadcast(groupManager.groupID) == -1) {
-					groupManager.unGroup();
+				if (rc.readBroadcast(groupTracker.groupID) == -1) {
+					groupTracker.unGroup();
 				}
 			}
 			// Unit-specific actions

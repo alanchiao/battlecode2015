@@ -31,14 +31,14 @@ public class Soldier extends Unit {
 			}
 			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(RobotType.SOLDIER.attackRadiusSquared, rc.getTeam().opponent());
 			if (attackableEnemies.length == 0) {
-				boolean hasHQCommand = rc.readBroadcast(groupManager.groupID) == 1;
+				boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 				// just always moveToDestination target?
-				if (groupManager.isGrouped() && hasHQCommand) {
+				if (groupTracker.isGrouped() && hasHQCommand) {
 					MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
 					navigation.moveToDestination(target, false);
 				}
 				else {
-					groupManager.spawnRallyInGroup(navigation);
+					groupTracker.spawnRallyInGroup(navigation);
 				}
 			}
 		}	

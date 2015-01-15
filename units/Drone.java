@@ -42,13 +42,13 @@ public class Drone extends Unit {
 				}
 			}
 			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
-				if (groupManager.groupID == Broadcast.droneGroup2Ch) {
-					boolean hasHQCommand = rc.readBroadcast(groupManager.groupID) == 1;
+				if (groupTracker.groupID == Broadcast.droneGroup2Ch) {
+					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 					if (hasHQCommand) {
 						MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
 						navigation.moveToDestination(target, false);
 					} else {
-						groupManager.spawnRallyInGroup(navigation);
+						groupTracker.spawnRallyInGroup(navigation);
 					}
 				}
 				else {

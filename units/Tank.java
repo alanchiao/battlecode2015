@@ -31,13 +31,16 @@ public class Tank extends Unit {
 			
 			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(RobotType.TANK.attackRadiusSquared, rc.getTeam().opponent());
 			if (attackableEnemies.length == 0) {
-				boolean hasHQCommand = rc.readBroadcast(groupManager.groupID) == 1;
-				if (groupManager.isGrouped() && hasHQCommand) {
-					MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
-					navigation.moveToDestination(target, false);
+				
+				if (groupTracker.isGrouped()) {
+					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
+					if (hasHQCommand) {
+						MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
+						navigation.moveToDestination(target, false);
+					}
 				}
 				else {
-					groupManager.spawnRallyInGroup(navigation);
+					groupTracker.spawnRallyInGroup(navigation);
 				}
 			}
 		}	

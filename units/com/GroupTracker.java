@@ -9,7 +9,7 @@ import battlecode.common.RobotController;
  * Class for helping an individual unit keep track of what group it is in
  * and decide what to do in response to what group it is in.
  */
-public class Group {
+public class GroupTracker {
 	
 	public static final int UNGROUPED = -1;
 	public static final int RETREATING = 0;
@@ -18,9 +18,9 @@ public class Group {
 	
 	public int groupID;
 	
-	public Group (RobotController rc) {
+	public GroupTracker (RobotController rc) {
 		this.rc = rc;
-		groupID = Group.UNGROUPED;
+		groupID = GroupTracker.UNGROUPED;
 	}
 	
 	public boolean isGrouped() {
@@ -32,7 +32,7 @@ public class Group {
 	}
 	
 	public void unGroup() {
-		this.groupID = Group.UNGROUPED;
+		this.groupID = GroupTracker.UNGROUPED;
 	}
 	
 	
