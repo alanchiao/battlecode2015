@@ -7,7 +7,7 @@ import team158.Robot;
 
 public abstract class Building extends Robot {
 	protected double hqDistance;
-	protected MapLocation myLocation;
+	public MapLocation myLocation;
 
 	public Building (RobotController newRC) {
 		rc = newRC;

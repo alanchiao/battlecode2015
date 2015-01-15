@@ -1,11 +1,12 @@
 package team158.buildings;
 
 import battlecode.common.*;
+import team158.strategies.AerialStrategy;
+import team158.strategies.GameStrategy;
+import team158.strategies.GroundStrategy;
 import team158.units.Unit;
 import team158.utils.Broadcast;
-import team158.utils.DirectionHelper;
 import team158.utils.GroupController;
-import team158.utils.Hashing;
 
 public class Headquarters extends Building {
 	
@@ -13,38 +14,28 @@ public class Headquarters extends Building {
 	public final static int TIME_UNTIL_COLLECT_SUPPLY = 1650;
 	public final static int TIME_UNTIL_FULL_ATTACK = 1800;
 	
-	private GroupController groupController;
-
-	private int attackGroup;
-	private int defendGroup;
+	private GroupController gc;
+	private GameStrategy gameStrategy;
 	
 	private int enemyTowersRemaining;
 	MapLocation targetTower;
 
 	private int strategy;
-	private boolean enemyRush;
-	private boolean enemyThreat;
-	private int pathDifficulty;
-	
-	int closestBeaver;
-	int scoutBeaver;
 	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
 		this.strategy = 1;
-		this.groupController = new GroupController(rc, strategy);
+		this.gc = new GroupController(rc, strategy);
+		if (this.strategy == 1) {
+			gameStrategy = new GroundStrategy(rc, gc, this);
+		} else {
+			gameStrategy = new AerialStrategy(rc, gc, this);
+		}
 		
-		attackGroup = 1;
-		defendGroup = 0;
 		
 		enemyTowersRemaining = 7;
 		
-		enemyRush = false;
-		enemyThreat = false;
-		pathDifficulty = 0;
 		
-		closestBeaver = 0;
-		scoutBeaver = 0;
 	}
 	
 	@Override
@@ -143,6 +134,7 @@ public class Headquarters extends Building {
 			}
 		}
 
+		// Headquarters attack strategy
 		if (rc.isWeaponReady()) {
 			int numTowers = rc.senseTowerLocations().length;
 			if (numTowers >= 5) { // splash damage
@@ -183,252 +175,41 @@ public class Headquarters extends Building {
 			}
 		}
 
-		if (strategy == 1) {
-			groundGame();
-		}
-		else {
-			aerialGame();
-		}
+		this.gameStrategy.executeStrategy();
 	}
 	
-	protected void aerialGame() throws GameActionException {
-		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
-		int numBeavers = 0;
-		int numMiners = 0;
-		int numMinerFactories = 0;
-		int numSupplyDepots = 0;
-		int numDrones = 0;
-		int numLaunchers = 0;
-		int numHelipads = 0;
-		int numDronesG1 = 0;
-		int numDronesG2 = 0;
-		int numAerospaceLabs = 0;
-		
-		for (RobotInfo r : myRobots) {
-			RobotType type = r.type;
-			if (type == RobotType.MINER) {
-				numMiners++;
-			} else if (type == RobotType.DRONE) {
-				numDrones++;
-				if (Hashing.find(r.ID) == Broadcast.droneGroup1Ch) {
-					numDronesG1++;
-				}							
-				else if (Hashing.find(r.ID)  == Broadcast.droneGroup2Ch) {
-					numDronesG2++;
-				}		
-			} else if (type == RobotType.BEAVER) {
-				numBeavers++;
-				if (scoutBeaver == 0 && closestBeaver != 0 && r.ID != closestBeaver) {
-					scoutBeaver = r.ID;
-					rc.broadcast(Broadcast.scoutEnemyHQCh, scoutBeaver);
-				}
-				else if (r.ID != scoutBeaver) {
-					closestBeaver = r.ID;
-				}
-			} else if (type == RobotType.MINERFACTORY) {
-				numMinerFactories++;
-			} else if (type == RobotType.SUPPLYDEPOT) {
-				numSupplyDepots++;
-			} else if (type == RobotType.HELIPAD) {
-				numHelipads++;
-			} else if (type == RobotType.AEROSPACELAB) {
-				numAerospaceLabs++;
-			} else if (type == RobotType.LAUNCHER) {
-				numLaunchers++;
-			} else if (type == RobotType.DRONE) {
-				numDrones++;
-			}
-		}
-		
-		rc.broadcast(Broadcast.numMinersCh, numMiners);
-		rc.broadcast(Broadcast.numDronesCh, numDrones);
-		rc.broadcast(Broadcast.numLaunchersCh, numLaunchers);
-		rc.broadcast(Broadcast.numBuildingsCh, numMinerFactories + numSupplyDepots + numHelipads + numAerospaceLabs);
-		
-		if (!enemyRush && Clock.getRoundNum() < 600) {
-			RobotInfo[] enemyRobots = rc.senseNearbyRobots(99, rc.getTeam().opponent());
-			for (RobotInfo r : enemyRobots) {
-				if (r.type == RobotType.DRONE) {
-					enemyRush = true;
-					// Cancel requested builds
-					rc.broadcast(Broadcast.buildHelipadsCh, 0);
-					// Tell helipads to yield
-					rc.broadcast(Broadcast.yieldToLaunchers, 1);
-					break;
-				}
-			}
-		}
-		
-		if (!enemyThreat && Clock.getRoundNum() < 1200) {
-			if (rc.readBroadcast(Broadcast.enemyThreatCh) > 2) {
-				enemyThreat = true;
-				rc.broadcast(Broadcast.buildHelipadsCh, 0);
-				rc.broadcast(Broadcast.yieldToLaunchers, 1);
-				groupController.unGroup(Broadcast.droneGroup1Ch);
-			}
-		}
-		
-		if (pathDifficulty == 0) {
-			int possibleDifficulty = rc.readBroadcast(Broadcast.scoutEnemyHQCh);
-			if (possibleDifficulty != scoutBeaver) {
-				pathDifficulty = possibleDifficulty;
-			}
-		}
-
-		if (rc.isCoreReady()) {
-			double ore = rc.getTeamOre();
-			if (numBeavers == 0 || scoutBeaver == 0) {
-				int offsetIndex = 0;
-				int[] offsets = {0,1,-1,2,-2,3,-3,4};
-				int dirint = DirectionHelper.directionToInt(Direction.EAST);
-				while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BEAVER)) {
-					offsetIndex++;
-				}
-				Direction buildDirection = null;
-				if (offsetIndex < 8) {
-					buildDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
-				}
-				if (buildDirection != null && ore >= 100) {
-					rc.spawn(buildDirection, RobotType.BEAVER);
-				}
-			}
-			else if (numHelipads == 0) {
-				if (ore >= 300) {
-					rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
-				}
-			}
-			else if (numMinerFactories == 0) {
-				if (ore >= 500) {
-					rc.broadcast(Broadcast.buildMinerFactoriesCh, closestBeaver);
-				}
-			}
-			else if (numSupplyDepots == 0 && ore >= 100) {
-				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
-			}
-			else {
-				if (enemyThreat && pathDifficulty < 70) { // Build launchers
-					if (numAerospaceLabs == 0) {
-						if (ore >= 500) {
-							rc.broadcast(Broadcast.slowMinerProductionCh, 0);
-							rc.broadcast(Broadcast.stopDroneProductionCh, 0);
-							rc.broadcast(Broadcast.buildAerospaceLabsCh, closestBeaver);
-						}
-						else {
-							rc.broadcast(Broadcast.slowMinerProductionCh, 1);
-							rc.broadcast(Broadcast.stopDroneProductionCh, 1);
-						}
-					}
-					else if (ore >= 400 + numAerospaceLabs * 300) {
-						rc.broadcast(Broadcast.buildAerospaceLabsCh, closestBeaver);
-					}
-					else if (numSupplyDepots < 3 && ore >= 750) {
-						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
-					}
-				}
-				else if (enemyRush) { // Build some launchers
-					if (numAerospaceLabs == 0) {
-						if (ore >= 500) {
-							rc.broadcast(Broadcast.slowMinerProductionCh, 0);
-							rc.broadcast(Broadcast.stopDroneProductionCh, 0);
-							rc.broadcast(Broadcast.buildAerospaceLabsCh, closestBeaver);
-						}
-						else {
-							rc.broadcast(Broadcast.slowMinerProductionCh, 1);
-							rc.broadcast(Broadcast.stopDroneProductionCh, 1);
-						}
-					}
-					else if (ore >= 500 + numHelipads * 200) {
-						rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
-					}
-					else if (numSupplyDepots < 3 && ore >= 750) {
-						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
-					}
-				}
-				else {
-					if (ore >= 500 + numHelipads * 200) {
-						rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
-					}
-					else if (numSupplyDepots < 3 && ore >= 750) {
-						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
-					}
-				}
-			}
-				
-			if (numLaunchers > 0) {
-				if (numLaunchers > 5) {
-					rc.broadcast(Broadcast.launcherGroupCh, 1);
-				}
-				else {
-					rc.broadcast(Broadcast.launcherGroupCh, 0);
-					//groupUnits(Broadcast.launcherGroupCh, RobotType.LAUNCHER);
-				}
-			}
-			
-			//if they don't build tanks and launchers
-			if (!enemyThreat) {
-				if (numDronesG1 < 15 || targetTower == null) {
-					rc.broadcast(Broadcast.droneGroup1Ch, 1);
-					groupController.groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
-				}
-				else {
-					if (numDronesG2 > 20) {
-						rc.broadcast(Broadcast.droneGroup2Ch, 1);
-						groupController.groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
-					}
-					else if (numDronesG2 > 15 && rc.readBroadcast(Broadcast.droneGroup2Ch) == 1) {
-						groupController.groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
-					}
-					else {
-						rc.broadcast(Broadcast.droneGroup2Ch, 0);
-						groupController.groupUnits(Broadcast.droneGroup2Ch, RobotType.DRONE);
-					}
-				}
-			}
-			//if enemy builds tanks and launchers
-			else {
-				if (numDronesG2 > 20 && targetTower != null) {
-					rc.broadcast(Broadcast.droneGroup2Ch, 1);
-				}
-				else if (numDronesG2 <= 15){
-					rc.setIndicatorString(2, String.valueOf(numDronesG2));
-					rc.broadcast(Broadcast.droneGroup2Ch, 0);
-				}
-				groupController.groupUnits(Broadcast.droneGroup2Ch, RobotType.DRONE);
-			}
-		}
-		
-	}
+	
 	
 	// Broadcasts to groups about a vulnerable tower for us to attack
 	// 
 	// A vulnerable tower is one where that 
 	protected void broadcastVulnerableEnemyTowerAttack() throws GameActionException {
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-		int numTowersRemaining = enemyTowers.length;
+		int enemyTowersRemaining = enemyTowers.length;
 		
-		if (numTowersRemaining != enemyTowersRemaining) {
-			enemyTowersRemaining = numTowersRemaining;
+		if (this.enemyTowersRemaining != enemyTowersRemaining) {
+			this.enemyTowersRemaining = enemyTowersRemaining;
 			if (enemyTowersRemaining > 0) {
 				//reset tower died status
-				int[] distances = new int[numTowersRemaining];
-				for (int i = 0; i < numTowersRemaining; i++) {
-					distances[i] = myLocation.distanceSquaredTo(enemyTowers[i]);
+				int[] distToEnemyTowers = new int[enemyTowersRemaining];
+				for (int i = 0; i < enemyTowersRemaining; i++) {
+					distToEnemyTowers[i] = this.myLocation.distanceSquaredTo(enemyTowers[i]);
 				}
 				
 				boolean towerExists = false;
 				int count = 0;
-				while (count < numTowersRemaining) {
+				while (count < enemyTowersRemaining) {
 					int minDistance = 999999;
 					int targetTowerIndex = 0;
-					for (int i = 0; i < numTowersRemaining; i++) {
-						if (distances[i] < minDistance) {
-							minDistance = distances[i];
+					for (int i = 0; i < enemyTowersRemaining; i++) {
+						if (distToEnemyTowers[i] < minDistance) {
+							minDistance = distToEnemyTowers[i];
 							targetTower = enemyTowers[i];
 							targetTowerIndex = i;
 						}
 					}
 					int numNearbyTowers = 0;
-					for (int j = 0; j < numTowersRemaining; j++) {
+					for (int j = 0; j < enemyTowersRemaining; j++) {
 						if (targetTowerIndex != j && targetTower.distanceSquaredTo(enemyTowers[j]) <= 24) {
 							numNearbyTowers++;
 						}
@@ -436,17 +217,15 @@ public class Headquarters extends Building {
 					if (numNearbyTowers <= 3) {
 						towerExists = true;
 						break;
-					}
-					else {
-						distances[targetTowerIndex] = 999999;
+					} else {
+						distToEnemyTowers[targetTowerIndex] = 999999;
 						count++;
 					}
 				}
 				if (!towerExists) {
-					if (numTowersRemaining != 6) {
+					if (enemyTowersRemaining != 6) {
 						targetTower = enemyHQ;
-					}
-					else {
+					} else {
 						targetTower = null;
 					}
 				}
@@ -460,120 +239,5 @@ public class Headquarters extends Building {
 			Broadcast.broadcastLocation(rc, targetTower, Broadcast.groupTargetLocationChs);
 		}
 
-	}
-
-	protected void groundGame() throws GameActionException {
-		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
-		int numTanks = 0;
-		int numTanksG1 = 0;
-		int numTanksG2 = 0;
-		int numBeavers = 0;
-		int numBarracks = 0;
-		int numMiners = 0;
-		int numMinerFactories = 0;
-		int numSupplyDepots = 0;
-		int numTankFactories = 0;
-		
-		int closestBeaver = 0;
-		
-		for (RobotInfo r : myRobots) {
-			RobotType type = r.type;
-			if (type == RobotType.TANK) {
-				numTanks++;
-				if (Hashing.find(r.ID) == Broadcast.tankGroup1Ch) {
-					numTanksG1++;
-				}							
-				else if (Hashing.find(r.ID)  == Broadcast.tankGroup2Ch) {
-					numTanksG2++;
-				}			
-
-			} else if (type == RobotType.MINER) {
-				numMiners++;
-			} else if (type == RobotType.BEAVER) {
-				numBeavers++;
-				closestBeaver = r.ID;
-			} else if (type == RobotType.TANKFACTORY) {
-				numTankFactories++;
-			}
-			else if (type == RobotType.BARRACKS) {
-				numBarracks++;
-			} else if (type == RobotType.MINERFACTORY) {
-				numMinerFactories++;
-			} else if (type == RobotType.SUPPLYDEPOT) {
-				numSupplyDepots++;
-			}
-		}
-		
-		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
-		rc.broadcast(Broadcast.numTanksCh, numTanks);
-		rc.broadcast(Broadcast.numMinersCh, numMiners);
-		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
-		rc.broadcast(Broadcast.numMinerFactoriesCh, numMinerFactories);
-		rc.broadcast(Broadcast.numSupplyDepotsCh, numSupplyDepots);
-		rc.broadcast(Broadcast.numTankFactoriesCh, numTanks);
-
-		
-
-		if (rc.isCoreReady()) {
-			double ore = rc.getTeamOre();
-			// Spawn beavers
-			if (numBeavers == 0) {
-				int offsetIndex = 0;
-				int[] offsets = {0,1,-1,2,-2,3,-3,4};
-				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
-				while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.BEAVER)) {
-					offsetIndex++;
-				}
-				Direction buildDirection = null;
-				if (offsetIndex < 8) {
-					buildDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
-				}
-				if (buildDirection != null && ore >= 100) {
-					rc.spawn(buildDirection, RobotType.BEAVER);
-				}
-			}
-			// Broadcast to build structures
-			else if (numMinerFactories == 0) {
-				if (ore >= 500) {
-					rc.broadcast(Broadcast.buildMinerFactoriesCh, closestBeaver);
-				}
-			}
-			else if (numSupplyDepots == 0 && ore >= 100) {
-				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
-			}
-			else if (numBarracks == 0) {
-				rc.broadcast(Broadcast.buildBarracksCh, closestBeaver);
-				// tell closest beaver to build barracks
-			}
-			else if (ore >= 500 + numTankFactories * 300) {
-				rc.broadcast(Broadcast.buildTankFactoriesCh, closestBeaver);
-			}
-			else if (numSupplyDepots < 3 && ore >= 500) {
-				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
-			}
-
-			int[] groupSize = {numTanksG1, numTanksG2};
-			int[] groupCh = {Broadcast.tankGroup1Ch, Broadcast.tankGroup2Ch};
-			if (numTanksG1 > 0 || numTanksG2 > 0) {
-				groupController.stopGroup(RobotType.TANK);
-			}
-			rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
-			rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
-			if (numTanks - groupSize[defendGroup] > 20 && groupSize[attackGroup] == 0) {
-				groupController.groupUnits(groupCh[attackGroup], RobotType.TANK);
-				rc.broadcast(groupCh[attackGroup], 1);
-			}
-			else if (rc.readBroadcast(groupCh[attackGroup]) == 1 && groupSize[attackGroup] < 10) {
-				rc.broadcast(groupCh[attackGroup], 0);
-				attackGroup = 1 - attackGroup;
-				defendGroup = 1 - defendGroup;
-			}
-			else if (rc.readBroadcast(groupCh[defendGroup]) == -1) {
-				groupController.unGroup(groupCh[defendGroup]);
-			}
-		}
-	}
-
-	
-	
+	}	
 }
