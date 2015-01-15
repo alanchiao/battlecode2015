@@ -13,9 +13,9 @@ public class Headquarters extends Building {
 	int ptB;
 	int[] groupB;
 	
-	public final static int TIME_UNTIL_LAUNCHERS_GROUP = 1500;
-	public final static int TIME_UNTIL_COLLECT_SUPPLY = 1650;
-	public final static int TIME_UNTIL_FULL_ATTACK = 1800;
+	public final static int TIME_UNTIL_LAUNCHERS_GROUP = 1400;
+	public final static int TIME_UNTIL_COLLECT_SUPPLY = 1600;
+	public final static int TIME_UNTIL_FULL_ATTACK = 1700;
 
 	private int attackGroup;
 	private int defendGroup;
