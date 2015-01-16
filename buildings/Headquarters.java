@@ -26,7 +26,11 @@ public class Headquarters extends Building {
 		super(newRC);
 		this.strategy = 1;
 		this.gc = new GroupController(rc, strategy);
-		gameStrategy = new MinerTest(rc, gc, this);
+		if (this.strategy == 1) {
+			gameStrategy = new GroundStrategy(rc, gc, this);
+		} else {
+			gameStrategy = new AerialStrategy(rc, gc, this);
+		}
 		
 		enemyTowersRemaining = 7;
 	}
