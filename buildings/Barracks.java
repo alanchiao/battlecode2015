@@ -32,7 +32,7 @@ public class Barracks extends Building {
 					offsetIndex++;
 				}
 			}
-			Broadcast.broadcastLocation(rc, rally, Broadcast.tankRallyLocationChs);
+			Broadcast.broadcastLocation(rc, Broadcast.tankRallyLocationChs, rally);
 		}
 	}
 }

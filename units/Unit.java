@@ -33,8 +33,6 @@ public abstract class Unit extends Robot {
 	@Override
 	public void move() {
 		try {
-			rc.setIndicatorString(0, Integer.toString(groupTracker.groupID));
-			
 			// Transfer supply stage
 			int mySupply = (int) rc.getSupplyLevel();
 			RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());

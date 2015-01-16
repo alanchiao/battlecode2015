@@ -5,6 +5,7 @@ import team158.com.GroupController;
 import team158.strategies.AerialStrategy;
 import team158.strategies.GameStrategy;
 import team158.strategies.GroundStrategy;
+import team158.strategies.MinerTest;
 import team158.units.Unit;
 import team158.utils.Broadcast;
 
@@ -25,11 +26,7 @@ public class Headquarters extends Building {
 		super(newRC);
 		this.strategy = 1;
 		this.gc = new GroupController(rc, strategy);
-		if (this.strategy == 1) {
-			gameStrategy = new GroundStrategy(rc, gc, this);
-		} else {
-			gameStrategy = new AerialStrategy(rc, gc, this);
-		}
+		gameStrategy = new MinerTest(rc, gc, this);
 		
 		enemyTowersRemaining = 7;
 	}
@@ -46,7 +43,7 @@ public class Headquarters extends Building {
 			closestEnemyLocation = closestEnemy.location;
 		}
 		rc.setIndicatorString(0, String.valueOf(closestEnemyLocation));
-		Broadcast.broadcastLocation(rc, closestEnemyLocation, Broadcast.launcherRallyLocationChs);
+		Broadcast.broadcastLocation(rc,  Broadcast.launcherRallyLocationChs, closestEnemyLocation);
 		
 		int mySupply = (int) rc.getSupplyLevel();
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
@@ -223,7 +220,7 @@ public class Headquarters extends Building {
 		}
 
 		if (targetTower != null) {
-			Broadcast.broadcastLocation(rc, targetTower, Broadcast.groupTargetLocationChs);
+			Broadcast.broadcastLocation(rc, Broadcast.groupTargetLocationChs, targetTower);
 		}
 
 	}	

@@ -38,7 +38,7 @@ public class AerospaceLab extends Building {
 		}
 		
 		if (targetTower != null) {
-			Broadcast.broadcastLocation(rc, targetTower, Broadcast.launcherAttackLocationChs);
+			Broadcast.broadcastLocation(rc, Broadcast.launcherAttackLocationChs, targetTower);
 		}
 		rc.setIndicatorString(0, String.valueOf(targetTower));
 
