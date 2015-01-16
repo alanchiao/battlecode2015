@@ -1,7 +1,7 @@
 package team158.strategies;
 
 import team158.buildings.Headquarters;
-import team158.utils.GroupController;
+import team158.com.GroupController;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 

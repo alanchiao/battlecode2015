@@ -1,12 +1,12 @@
 package team158.buildings;
 
 import battlecode.common.*;
+import team158.com.GroupController;
 import team158.strategies.AerialStrategy;
 import team158.strategies.GameStrategy;
 import team158.strategies.GroundStrategy;
 import team158.units.Unit;
 import team158.utils.Broadcast;
-import team158.utils.GroupController;
 
 public class Headquarters extends Building {
 	
@@ -14,13 +14,12 @@ public class Headquarters extends Building {
 	public final static int TIME_UNTIL_COLLECT_SUPPLY = 1650;
 	public final static int TIME_UNTIL_FULL_ATTACK = 1800;
 	
+	private int strategy;
 	private GroupController gc;
 	private GameStrategy gameStrategy;
 	
+	// number of enemy towers left
 	private int enemyTowersRemaining;
-	MapLocation targetTower;
-
-	private int strategy;
 	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
@@ -32,35 +31,22 @@ public class Headquarters extends Building {
 			gameStrategy = new AerialStrategy(rc, gc, this);
 		}
 		
-		
 		enemyTowersRemaining = 7;
-		
-		
 	}
 	
 	@Override
 	protected void actions() throws GameActionException {	
 		broadcastVulnerableEnemyTowerAttack();
-				
-		//find closest enemy target
-		RobotInfo[] closeRobots = rc.senseNearbyRobots(100, rc.getTeam().opponent());
-		MapLocation closestRobot;
-		if (closeRobots.length > 0) {
-			closestRobot = closeRobots[0].location;
-			int closestDistance = closestRobot.distanceSquaredTo(myLocation);
-			for (int i = 1; i < closeRobots.length; i++) {
-				int distance = closeRobots[i].location.distanceSquaredTo(myLocation);
-				if (distance < closestDistance) {
-					closestDistance = distance;
-					closestRobot = closeRobots[i].location;
-				}
-			}
-		}		
-		else {
-			closestRobot = myLocation;
+		
+		RobotInfo closestEnemy = findClosestEnemy(100);
+		MapLocation closestEnemyLocation;
+		if (closestEnemy == null) {
+			closestEnemyLocation = myLocation;
+		} else {
+			closestEnemyLocation = closestEnemy.location;
 		}
-		rc.setIndicatorString(0, String.valueOf(closestRobot));
-		Broadcast.broadcastLocation(rc, closestRobot, Broadcast.launcherRallyLocationChs);
+		rc.setIndicatorString(0, String.valueOf(closestEnemyLocation));
+		Broadcast.broadcastLocation(rc, closestEnemyLocation, Broadcast.launcherRallyLocationChs);
 		
 		int mySupply = (int) rc.getSupplyLevel();
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
@@ -184,6 +170,7 @@ public class Headquarters extends Building {
 	// 
 	// A vulnerable tower is one where that 
 	protected void broadcastVulnerableEnemyTowerAttack() throws GameActionException {
+		MapLocation targetTower = null;
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 		int enemyTowersRemaining = enemyTowers.length;
 		
@@ -240,4 +227,25 @@ public class Headquarters extends Building {
 		}
 
 	}	
+	
+	public RobotInfo findClosestEnemy(int rangeSquared) {
+		//find closest enemy target
+		RobotInfo[] closeRobots = rc.senseNearbyRobots(rangeSquared, rc.getTeam().opponent());
+		
+		if (closeRobots.length == 0) {
+			return null;
+		}
+		
+		RobotInfo closestRobot;
+		closestRobot = closeRobots[0];
+		int closestDistance = closestRobot.location.distanceSquaredTo(myLocation);
+		for (int i = 1; i < closeRobots.length; i++) {
+			int distance = closeRobots[i].location.distanceSquaredTo(myLocation);
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				closestRobot = closeRobots[i];
+			}
+		}	
+		return closestRobot;
+	}
 }

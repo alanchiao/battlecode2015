@@ -1,9 +1,9 @@
 package team158.strategies;
 
 import team158.buildings.Headquarters;
+import team158.com.GroupController;
 import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
-import team158.utils.GroupController;
 import team158.utils.Hashing;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
