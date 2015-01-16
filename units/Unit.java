@@ -110,6 +110,16 @@ public abstract class Unit extends Robot {
 		}
 	}
 
+	public static int rangeConverter(int range) {
+		switch (range) {
+		case 2: return 8;
+		case 5: return 13;
+		case 10: return 20;
+		case 15: return 24; // doesn't work perfectly for 4^2 + 3^2 case
+		default: return 0;
+		}
+	}
+
 	public static MapLocation selectTarget(RobotInfo[] enemies) {
 		MapLocation target = null;
 		double maxPriority = 0;
@@ -127,18 +137,19 @@ public abstract class Unit extends Robot {
 		}
 	}
 	
+	// Only use this method if the unit cannot attack!
 	protected Direction selectMoveDirectionMicro() {
-		MapLocation myLocation = rc.getLocation();
-		// set range arbitrarily if robot is a launcher
-		int myRange = rc.getType() != RobotType.LAUNCHER ? rc.getType().attackRadiusSquared : 35;
 		Team opponent = rc.getTeam().opponent();
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, opponent);
 		if (enemies.length == 0) {
 			return null;
 		}
+		MapLocation myLocation = rc.getLocation();
+		// set range arbitrarily if robot is a launcher
+		int myRange = rc.getType() != RobotType.LAUNCHER ? rc.getType().attackRadiusSquared : 35;
 
+		/* Approach enemy units in range
 		RobotInfo[] attackableEnemies = rc.senseNearbyRobots(myRange, opponent);
-		// Approach enemy units in range
 		if (attackableEnemies.length == 0) {
 			for (RobotInfo r : enemies) {
 				int distance = myLocation.distanceSquaredTo(r.location);
@@ -151,11 +162,33 @@ public abstract class Unit extends Robot {
 			}
 			return null;
 		}
-		
+		*/
+
+		if (navigation.isAvoidingAttack(enemies, 0, myLocation)) {
+			for (RobotInfo r : enemies) {
+				if (myLocation.distanceSquaredTo(r.location) <= rangeConverter(r.type.attackRadiusSquared)) {
+					return null;
+				}
+			}
+			for (Direction d : DirectionHelper.directions) {
+				boolean good = false;
+				for (RobotInfo r : enemies) {
+					int potentialLocationDistance = myLocation.add(d).distanceSquaredTo(r.location);
+					if (potentialLocationDistance <= r.type.attackRadiusSquared) {
+						break;
+					}
+					if (potentialLocationDistance <= rangeConverter(r.type.attackRadiusSquared)) {
+						good = true;
+					}
+				}
+				if (good && rc.canMove(d)) {
+					return d;
+				}
+			}
+		}
 		// Take less damage
-		if (enemies.length < 6) { // Only do computation if it won't take too long
+		else {
 			int[] damages = new int[9]; // 9th slot for current position
-			int[] enemyInRange = new int[8];
 			
 			int initDistance = myLocation.distanceSquaredTo(enemyHQ);
 			int enemyTowers = rc.senseEnemyTowerLocations().length;
@@ -213,9 +246,6 @@ public abstract class Unit extends Robot {
 					if (newLocationDistance <= radiusSquared) {
 						damages[i] += r.type.attackPower / Math.max(r.type.attackDelay, 1);
 					}
-					if (newLocationDistance <= myRange) {
-						enemyInRange[i] += 1;
-					}
 				}
 				if (myLocation.distanceSquaredTo(r.location) <= radiusSquared) {
 					damages[8] += r.type.attackPower / Math.max(r.type.attackDelay, 1);
@@ -225,7 +255,7 @@ public abstract class Unit extends Robot {
 			int bestDirection = 8;
 			int bestDamage = 999999;
 			for (int i = 0; i < 8; i++) {
-				if (rc.canMove(DirectionHelper.directions[i]) && damages[i] <= bestDamage && enemyInRange[i] > 0) {
+				if (rc.canMove(DirectionHelper.directions[i]) && damages[i] <= bestDamage) {
 					bestDirection = i;
 					bestDamage = damages[i];
 				}

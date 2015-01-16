@@ -82,7 +82,7 @@ public class Headquarters extends Building {
 						}
 					}
 				}
-				else if (r.type == RobotType.DRONE) {
+				else if (r.type == RobotType.SOLDIER || r.type == RobotType.TANK || r.type == RobotType.DRONE) {
 					if (r.supplyLevel < r.type.supplyUpkeep * 8 * distanceFactor) {
 						if (r.supplyLevel == 0) {
 							rc.transferSupplies(r.type.supplyUpkeep * 12 * distanceFactor, r.location);
@@ -113,7 +113,7 @@ public class Headquarters extends Building {
 		}
 		else {
 			for (RobotInfo r : friendlyRobots) {
-				if (r.type == RobotType.DRONE || r.type == RobotType.LAUNCHER) {
+				if (r.type == RobotType.DRONE || r.type == RobotType.LAUNCHER || r.type == RobotType.TANK) {
 					rc.transferSupplies(mySupply, r.location);
 					break;
 				}

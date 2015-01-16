@@ -12,34 +12,29 @@ public class Soldier extends Unit {
 	@Override
 	protected void actions() throws GameActionException {
 
+		// Note: Soldier attacks every turn (AD=1) if an enemy is in range. This is desired behavior.
 		if (rc.isWeaponReady()) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.SOLDIER.attackRadiusSquared, rc.getTeam().opponent());
 			if (enemies.length > 0) {
 				rc.attackLocation(selectTarget(enemies));
+				return;
 			}
         }
 
 		if (rc.isCoreReady()) {
-			// 20 is how far away a drone can be for the soldier to have a risk of getting too close
-			RobotInfo[] enemies = rc.senseNearbyRobots(20, rc.getTeam().opponent());
-			if (enemies.length > 0) {
-				Direction d = selectMoveDirectionMicro();
-				if (d != null) {
-					rc.move(d);
-					return;
-				}
+			Direction d = selectMoveDirectionMicro();
+			if (d != null) {
+				rc.move(d);
+				return;
 			}
-			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(RobotType.SOLDIER.attackRadiusSquared, rc.getTeam().opponent());
-			if (attackableEnemies.length == 0) {
-				boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-				// just always moveToDestination target?
-				if (groupTracker.isGrouped() && hasHQCommand) {
-					MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
-					navigation.moveToDestination(target, false);
-				}
-				else {
-					groupTracker.spawnRallyInGroup(navigation);
-				}
+			boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
+			// just always moveToDestination target?
+			if (groupTracker.isGrouped() && hasHQCommand) {
+				MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
+				navigation.moveToDestination(target, false);
+			}
+			else {
+				groupTracker.spawnRallyInGroup(navigation);
 			}
 		}	
 	}

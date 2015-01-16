@@ -20,18 +20,15 @@ public class Tank extends Unit {
         }
 
 		if (rc.isCoreReady()) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(24, rc.getTeam().opponent());
-			if (enemies.length > 0) {
-				Direction d = selectMoveDirectionMicro();
-				if (d != null) {
-					rc.move(d);
-					return;
-				}
+			Direction d = selectMoveDirectionMicro();
+			if (d != null) {
+				rc.move(d);
+				return;
 			}
 			
 			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(RobotType.TANK.attackRadiusSquared, rc.getTeam().opponent());
 			if (attackableEnemies.length == 0) {
-				
+
 				if (groupTracker.isGrouped()) {
 					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 					if (hasHQCommand) {
