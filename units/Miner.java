@@ -57,7 +57,7 @@ public class Miner extends Unit {
 				// calculate average ore in 16 squared units
 				int numLocations = 0;
 				int sumOre = 0;
-				MapLocation nearbyLocations[] = myLocation.getAllMapLocationsWithinRadiusSq(myLocation, 16);
+				MapLocation nearbyLocations[] = MapLocation.getAllMapLocationsWithinRadiusSq(myLocation, 16);
 				for (MapLocation location: nearbyLocations) {
 					
 					numLocations++;

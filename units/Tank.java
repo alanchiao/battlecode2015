@@ -20,26 +20,20 @@ public class Tank extends Unit {
         }
 
 		if (rc.isCoreReady()) {
-			Direction d = selectMoveDirectionMicro();
-			if (d != null) {
-				rc.move(d);
-				return;
-			}
-			
-			RobotInfo[] attackableEnemies = rc.senseNearbyRobots(RobotType.TANK.attackRadiusSquared, rc.getTeam().opponent());
-			if (attackableEnemies.length == 0) {
-
-				if (groupTracker.isGrouped()) {
-					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-					if (hasHQCommand) {
-						MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
-						navigation.moveToDestination(target, false);
-					}
-				}
-				else {
-					groupTracker.spawnRallyInGroup(navigation);
+			MapLocation target = null;
+			int approachStrategy = 0;
+			if (groupTracker.isGrouped()) {
+				boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
+				if (hasHQCommand) {
+					target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
+					approachStrategy = 0;
 				}
 			}
+			else {
+				target = groupTracker.getRallyPoint();
+				approachStrategy = 1;
+			}
+			moveToLocationWithMicro(target, approachStrategy);
 		}	
 	}
 }

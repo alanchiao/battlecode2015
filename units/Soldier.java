@@ -22,20 +22,17 @@ public class Soldier extends Unit {
         }
 
 		if (rc.isCoreReady()) {
-			Direction d = selectMoveDirectionMicro();
-			if (d != null) {
-				rc.move(d);
-				return;
-			}
+			MapLocation target;
 			boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 			// just always moveToDestination target?
 			if (groupTracker.isGrouped() && hasHQCommand) {
-				MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
+				target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
 				navigation.moveToDestination(target, false);
 			}
 			else {
-				groupTracker.spawnRallyInGroup(navigation);
+				target = groupTracker.getRallyPoint();
 			}
+			moveToLocationWithMicro(target, 0);
 		}	
 	}
 }

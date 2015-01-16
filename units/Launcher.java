@@ -4,7 +4,6 @@ import team158.buildings.Headquarters;
 import team158.utils.DirectionHelper;
 import team158.utils.Broadcast;
 import battlecode.common.Clock;
-import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -73,17 +72,10 @@ public class Launcher extends Unit {
 				return;
 			}
 			
-			if (enemiesAttackable.length > 0) {
-				Direction d = selectMoveDirectionMicro();
-				navigation.stopObstacleTracking();
-				if (d != null) {
-					rc.move(d);
-				}
-			}
-			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {
+			MapLocation target;
+			if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {
 				// if headquarter says attack, read from attack channel, otherwise
 				// rally normally
-				MapLocation target;
 				boolean hasHQCommand = rc.readBroadcast(Broadcast.launcherGroupCh) == 1;
 				if (hasHQCommand) {
 					 target = Broadcast.readLocation(rc, Broadcast.launcherAttackLocationChs);
@@ -92,10 +84,11 @@ public class Launcher extends Unit {
 				}
 				navigation.moveToDestination(target, false);
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
-				navigation.moveToDestination(this.ownHQ, true);
+				target = this.ownHQ;
 			} else {
-				navigation.moveToDestination(this.enemyHQ, true);
+				target = this.enemyHQ;
 			}
+			moveToLocationWithMicro(target, 0);
 		}
 	}
 
