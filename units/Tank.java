@@ -22,6 +22,7 @@ public class Tank extends Unit {
 		if (rc.isCoreReady()) {
 			MapLocation target = null;
 			int approachStrategy = 0;
+			rc.setIndicatorString(0, String.valueOf(groupTracker.groupID));
 			if (groupTracker.isGrouped()) {
 				if (groupTracker.groupID == Broadcast.tankGroupDefenseCh) {
 					defensiveMove();
@@ -29,7 +30,7 @@ public class Tank extends Unit {
 				else if (groupTracker.groupID == Broadcast.tankGroupAttackCh) {
 					attackMove();
 				}
-				boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
+				//boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 //				if (hasHQCommand) {
 //					target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 //					approachStrategy = 0;

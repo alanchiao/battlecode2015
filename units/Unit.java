@@ -147,12 +147,14 @@ public abstract class Unit extends Robot {
 	public void attackMove() {
 		try {
 			boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
+			System.out.println(hasHQCommand);
 			if (hasHQCommand) {
 				//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
 				MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
 				int approachStrategy = 0;
-				moveToLocationWithMicro(target, approachStrategy);
+				navigation.moveToDestination(target, false);
+				//moveToLocationWithMicro(target, approachStrategy);
 			}
 		}
 		catch (Exception e) {

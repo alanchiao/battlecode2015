@@ -19,9 +19,7 @@ public class Tower extends Building {
 			rc.setIndicatorString(1, String.valueOf(myLocation));
 			Broadcast.broadcastLocation(rc, Broadcast.attackedTowerLocationChs, myLocation);
 		}
-		else {
-			rc.broadcast(Broadcast.towerAttacked, 0);
-		}
+
 		if (rc.isWeaponReady()) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(
 				rc.getType().attackRadiusSquared,

@@ -70,7 +70,7 @@ public class Headquarters extends Building {
 			closestEnemyLocation = closestEnemy.location;
 		}
 		//rc.setIndicatorString(0, String.valueOf(closestEnemyLocation));
-		Broadcast.broadcastLocation(rc,  Broadcast.launcherRallyLocationChs, closestEnemyLocation);
+		Broadcast.broadcastLocation(rc,  Broadcast.enemyNearHQLocationChs, closestEnemyLocation);
 		
 		int mySupply = (int) rc.getSupplyLevel();
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
@@ -198,7 +198,6 @@ public class Headquarters extends Building {
 		MapLocation targetTower = null;
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 		int enemyTowersRemaining = enemyTowers.length;
-		
 		if (this.enemyTowersRemaining != enemyTowersRemaining) {
 			this.enemyTowersRemaining = enemyTowersRemaining;
 			if (enemyTowersRemaining > 0) {
@@ -210,9 +209,12 @@ public class Headquarters extends Building {
 				else {
 					targetTower = ownHQ;
 				}
-				Broadcast.broadcastLocation(rc, Broadcast.enemyTowerTargetLocationChs, targetTower);
-				rc.setIndicatorString(0, String.valueOf(targetTower));
 			}
+			else {
+				targetTower = enemyHQ;
+			}
+			Broadcast.broadcastLocation(rc, Broadcast.enemyTowerTargetLocationChs, targetTower);
+			rc.setIndicatorString(0, String.valueOf(targetTower));
 		}
 	}	
 	//calculates whether the towers are defeatable down to 3 using ground units. If not, we must build launchers

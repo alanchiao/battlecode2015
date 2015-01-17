@@ -44,7 +44,7 @@ public class GroundStrategy extends GameStrategy {
 				if (Hashing.find(r.ID) == Broadcast.tankGroupDefenseCh) {
 					numTanksDefense++;
 				}							
-				else if (Hashing.find(r.ID)  == Broadcast.tankGroupDefenseCh) {
+				else if (Hashing.find(r.ID)  == Broadcast.tankGroupAttackCh) {
 					numTanksAttack++;
 				}			
 
@@ -111,35 +111,37 @@ public class GroundStrategy extends GameStrategy {
 				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 			}
 
-			int[] groupSize = {numTanksAttack, numTanksDefense};
-			int[] groupCh = {Broadcast.tankGroupAttackCh, Broadcast.tankGroupDefenseCh};
+			int[] groupSize = {numTanksDefense, numTanksAttack};
+			int[] groupCh = {Broadcast.tankGroupDefenseCh, Broadcast.tankGroupAttackCh};
 			if (numTanksAttack > 0 || numTanksDefense > 0) {
 				gc.stopGroup(RobotType.TANK);
 			}
 			rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
 			rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
-//			if (groupSize[defendGroup] < 6) {
-//				gc.groupUnits(groupCh[defendGroup], RobotType.TANK);
+			if (groupSize[defendGroup] < 6) {
+				gc.groupUnits(groupCh[defendGroup], RobotType.TANK);
+				rc.broadcast(groupCh[defendGroup], 1);
+			}
+			else {
+				rc.broadcast(groupCh[attackGroup],1);
+				if (numTanks - groupSize[defendGroup] - groupSize[attackGroup] > 6) {
+					gc.groupUnits(groupCh[attackGroup], RobotType.TANK);
+				}
+			}
+			
+//			if (numTanks - groupSize[defendGroup] > 20 && groupSize[attackGroup] == 0) {
+//				gc.groupUnits(groupCh[attackGroup], RobotType.TANK);
+//				rc.broadcast(groupCh[attackGroup], 1);
 //			}
-//			else {
-//				rc.broadcast(groupCh[defendGroup], 1);
-//				if (groupSize[attackGroup] < 10) {
-//					
-//				}
+//			else if (rc.readBroadcast(groupCh[attackGroup]) == 1 && groupSize[attackGroup] < 10) {
+//				rc.broadcast(groupCh[attackGroup], 0);
+//				attackGroup = 1 - attackGroup;
+//				defendGroup = 1 - defendGroup;
+//			}
+//			else if (rc.readBroadcast(groupCh[defendGroup]) == -1) {
+//				gc.unGroup(groupCh[defendGroup]);
 //			}
 			
-			if (numTanks - groupSize[defendGroup] > 20 && groupSize[attackGroup] == 0) {
-				gc.groupUnits(groupCh[attackGroup], RobotType.TANK);
-				rc.broadcast(groupCh[attackGroup], 1);
-			}
-			else if (rc.readBroadcast(groupCh[attackGroup]) == 1 && groupSize[attackGroup] < 10) {
-				rc.broadcast(groupCh[attackGroup], 0);
-				attackGroup = 1 - attackGroup;
-				defendGroup = 1 - defendGroup;
-			}
-			else if (rc.readBroadcast(groupCh[defendGroup]) == -1) {
-				gc.unGroup(groupCh[defendGroup]);
-			}
 		}
 	}	
 }
