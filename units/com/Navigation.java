@@ -382,9 +382,9 @@ public class Navigation {
 			isStationaryBlock = false;
 		}
 		if (isAvoidAllAttack) {
-			return isStationaryBlock || isBuilding(potentialObstacle);
+			return isStationaryBlock;
 		} else {
-			return isStationaryBlock || isBuilding(potentialObstacle) || isNearMultipleEnemyTowers(potentialObstacle);
+			return isStationaryBlock || isNearMultipleEnemyTowers(potentialObstacle);
 		}
 	}
 	
