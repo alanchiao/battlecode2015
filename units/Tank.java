@@ -21,7 +21,6 @@ public class Tank extends Unit {
 
 		if (rc.isCoreReady()) {
 			MapLocation target = null;
-			int approachStrategy = 0;
 			rc.setIndicatorString(0, String.valueOf(groupTracker.groupID));
 			if (groupTracker.isGrouped()) {
 				if (groupTracker.groupID == Broadcast.tankGroupDefenseCh) {
@@ -38,7 +37,7 @@ public class Tank extends Unit {
 			}
 			else {
 				target = groupTracker.getRallyPoint();
-				approachStrategy = 1;
+				int approachStrategy = 0;
 				moveToLocationWithMicro(target, approachStrategy);
 			}
 		}	
