@@ -15,6 +15,10 @@ public class Headquarters extends Building {
 	public final static int TIME_UNTIL_COLLECT_SUPPLY = 1650;
 	public final static int TIME_UNTIL_FULL_ATTACK = 1800;
 	
+	public final static int GROUND_STRATEGY = 1;
+	public final static int AERIAL_STRATEGY = 2;
+	public final static int MINER_TEST = 3;
+	
 	private int strategy;
 	private GroupController gc;
 	private GameStrategy gameStrategy;
@@ -24,12 +28,16 @@ public class Headquarters extends Building {
 	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
-		this.strategy = 1;
+		this.strategy = AERIAL_STRATEGY;
 		this.gc = new GroupController(rc, strategy);
-		if (this.strategy == 1) {
-			gameStrategy = new GroundStrategy(rc, gc, this);
-		} else {
-			gameStrategy = new AerialStrategy(rc, gc, this);
+		
+		switch(this.strategy) {
+			case GROUND_STRATEGY:	gameStrategy = new GroundStrategy(rc, gc, this);
+									break;
+			case AERIAL_STRATEGY:	gameStrategy = new AerialStrategy(rc, gc, this);
+									break;
+			case MINER_TEST:		gameStrategy = new MinerTest(rc, gc, this);
+									break;
 		}
 		
 		enemyTowersRemaining = 7;
@@ -37,6 +45,7 @@ public class Headquarters extends Building {
 	
 	@Override
 	protected void actions() throws GameActionException {	
+		rc.broadcast(Broadcast.idealMiningOreAverage, 0);
 		broadcastVulnerableEnemyTowerAttack();
 		
 		RobotInfo closestEnemy = findClosestEnemy(100);
