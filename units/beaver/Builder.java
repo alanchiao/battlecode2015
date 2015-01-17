@@ -42,7 +42,7 @@ public class Builder {
 		this.buildingType = buildingType;
 		for (int i = 0; i < NUMBER_BUILDINGS_MAX; i++) {
 			MapLocation attemptedLocation = this.safeLocations[i];
-			boolean isBuildable = rc.senseTerrainTile(attemptedLocation).isTraversable() && !navigation.isBuilding(attemptedLocation);
+			boolean isBuildable = !navigation.isBuilding(attemptedLocation);
 			if (isBuildable) {
 				this.buildingLocation = attemptedLocation;
 				break;
@@ -66,7 +66,7 @@ public class Builder {
 	
 	// available build locations are in spiral around HQ
 	//
-	// TODO avoid any spots that are VOID or next to VOID
+	// TODO avoid any spots that are next to too many VOID
 	public void updateSafeBuildLocations() {
 		int dx = 1;
 		int dy = 0;
@@ -79,7 +79,8 @@ public class Builder {
 		int safeLocationCount = 0;
 		
 		for (int k = 0; k < NUMBER_BUILDINGS_MAX * 2; k++) {
-			// spiraling logic
+			///////////////////////////////////
+			// Spiraling logic
 			
 	        // make a step in direction (dx, dy) relative to current position (x, y)
 	        x += dx;
@@ -87,7 +88,6 @@ public class Builder {
 	        segmentPassed++;
 	       
 	        if (segmentPassed == segmentLength) { // then done with current segment. rotate.
-	        	// reset logic
 	            segmentPassed = 0;
 
 	            // rotate directions
@@ -95,15 +95,18 @@ public class Builder {
 	            dx = -dy;
 	            dy = temp;
 
-	            // increase segment length if necessary
+	            // progress to larger segments
 	            if (dy == 0) {
 	                segmentLength++;
 	            }
 	        }
 	        
-	        // adding safe locations : skip every other tile
- 			if (k % 2 == 1) {	        
-		        safeLocations[safeLocationCount] = new MapLocation(x, y);
+	        /////////////////////////////////////
+	        // Adding safe locations : skip every other tile
+	        
+	        MapLocation potentialSafeLocation = new MapLocation(x, y);
+ 			if (k % 2 == 1 && rc.senseTerrainTile(potentialSafeLocation).isTraversable() ) {	        
+		        safeLocations[safeLocationCount] = potentialSafeLocation;
 		        safeLocationCount++;
  			}
 	    }
