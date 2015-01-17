@@ -187,7 +187,8 @@ public abstract class Unit extends Robot {
 	// approachStrategy 0 - do not approach 1 - approach units with same range 2 - charge
 	protected void moveToLocationWithMicro(MapLocation target, int approachStrategy) throws GameActionException {
 		Team opponent = rc.getTeam().opponent();
-		RobotInfo[] enemies = rc.senseNearbyRobots(34, opponent);
+		// 25 covers the edge case with tanks if friendly units have vision
+		RobotInfo[] enemies = rc.senseNearbyRobots(25, opponent);
 		if (enemies.length == 0) {
 			if (target != null) {
 				navigation.moveToDestination(target, true);
@@ -203,25 +204,30 @@ public abstract class Unit extends Robot {
 				navigation.moveToDestination(target, false);
 				return;
 			}
+			// Check if almost in range of an enemy
 			for (RobotInfo r : enemies) {
 				if (myLocation.distanceSquaredTo(r.location) <= rangeConverter(r.type.attackRadiusSquared)) {
 					if (approachStrategy == 0) {
 						return;
 					}
 					else { // approachStrategy == 1
-						if (r.type.attackRadiusSquared == myRange) {
+						if (r.type.attackRadiusSquared == myRange && navigation.isAvoidingAttack(null, myRange, r.location)) {
 							navigation.moveToDestination(r.location, false);
 							return;
 						}
 					}
 				}
 			}
+			
+			// Get almost in range of an enemy, or get closer (?) to the enemies
 			Direction backupMove = null;
+			MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 			for (Direction d : DirectionHelper.directions) {
 				boolean good = false;
 				boolean reasonable = false;
+				MapLocation potentialLocation = myLocation.add(d);
 				for (RobotInfo r : enemies) {
-					int potentialLocationDistance = myLocation.add(d).distanceSquaredTo(r.location);
+					int potentialLocationDistance = potentialLocation.distanceSquaredTo(r.location);
 					if (potentialLocationDistance <= r.type.attackRadiusSquared) {
 						break;
 					}
@@ -232,6 +238,30 @@ public abstract class Unit extends Robot {
 						reasonable = true;
 					}
 				}
+				// Factor in HQ
+				if (enemyTowers.length <= 1) {
+					if (potentialLocation.distanceSquaredTo(enemyHQ) <= 24) {
+						continue;
+					}
+				}
+				else if (enemyTowers.length <= 4) {
+					if (potentialLocation.distanceSquaredTo(enemyHQ) <= 35) {
+						continue;
+					}
+				}
+				else if (potentialLocation.add(potentialLocation.directionTo(enemyHQ)).distanceSquaredTo(enemyHQ) <= 35) {
+					continue;
+				}
+				// Factor in towers
+				for (MapLocation tower : enemyTowers) {
+					if (potentialLocation.distanceSquaredTo(tower) <= 24) {
+						good = false;
+						reasonable = false;
+						break;
+					}
+				}
+
+				// Decide on move
 				if (rc.canMove(d)) {
 					if (good) {
 						navigation.stopObstacleTracking();

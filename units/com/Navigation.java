@@ -261,10 +261,12 @@ public class Navigation {
 	
 	public boolean isAvoidingAttack(RobotInfo[] enemies, int rangeSquared, MapLocation loc) {
 		// enemies
-		for (RobotInfo enemy : enemies) {
-			if (enemy.type.attackRadiusSquared > rangeSquared) {
-				if (loc.distanceSquaredTo(enemy.location) <= enemy.type.attackRadiusSquared) {
-					return false;
+		if (enemies != null) {
+			for (RobotInfo enemy : enemies) {
+				if (enemy.type.attackRadiusSquared > rangeSquared) {
+					if (loc.distanceSquaredTo(enemy.location) <= enemy.type.attackRadiusSquared) {
+						return false;
+					}
 				}
 			}
 		}
