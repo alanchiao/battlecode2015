@@ -124,7 +124,7 @@ public class GroundStrategy extends GameStrategy {
 			}
 			else {
 				rc.broadcast(groupCh[attackGroup],1);
-				if (numTanks - groupSize[defendGroup] - groupSize[attackGroup] > 6) {
+				if (numTanks - groupSize[defendGroup] - groupSize[attackGroup] > 8) {
 					gc.groupUnits(groupCh[attackGroup], RobotType.TANK);
 				}
 			}
