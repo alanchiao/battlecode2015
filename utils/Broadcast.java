@@ -67,13 +67,17 @@ public class Broadcast {
 	public static final int droneGroup2Ch = 705;
 	public static final int launcherGroupCh = 706;
 	
+	// Channels 800-812
+	public static final int idealMiningLocation = 800;
+	public static final int idealMiningOreAverage = 802;
+	
 	// read two contiguous channels for location information, x and y coordinates
 	public static MapLocation readLocation(RobotController rc, int channelStart) throws GameActionException {
 		return new MapLocation(rc.readBroadcast(channelStart), rc.readBroadcast(channelStart + 1));
 	}
 	
 	// write to two contiguous channels for a location
-	public static void broadcastLocation (RobotController rc, MapLocation location, int channelStart) throws GameActionException {
+	public static void broadcastLocation (RobotController rc, int channelStart, MapLocation location) throws GameActionException {
 		rc.broadcast(channelStart, location.x);
 		rc.broadcast(channelStart + 1, location.y);
 	}

@@ -7,6 +7,7 @@ import team158.units.com.Navigation;
 import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
 import battlecode.common.Direction;
+import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -33,8 +34,6 @@ public abstract class Unit extends Robot {
 	@Override
 	public void move() {
 		try {
-			rc.setIndicatorString(0, Integer.toString(groupTracker.groupID));
-			
 			// Transfer supply stage
 			int mySupply = (int) rc.getSupplyLevel();
 			RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
@@ -135,7 +134,8 @@ public abstract class Unit extends Robot {
 //					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
 //				}			
 				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
-				navigation.moveToDestination(target, false);
+				int approachStrategy = 0;
+				moveToLocationWithMicro(target, approachStrategy);
 			}
 		}
 		catch (Exception e) {
@@ -151,7 +151,8 @@ public abstract class Unit extends Robot {
 				//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
 				MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
-				navigation.moveToDestination(target, false);
+				int approachStrategy = 0;
+				moveToLocationWithMicro(target, approachStrategy);
 			}
 		}
 		catch (Exception e) {
@@ -176,12 +177,16 @@ public abstract class Unit extends Robot {
 		}
 	}
 	
-	// Only use this method if the unit cannot attack!
-	protected Direction selectMoveDirectionMicro() {
+	// Only use this method if the unit cannot attack.
+	// approachStrategy 0 - opt 1 - no approach 2 - charge
+	protected void moveToLocationWithMicro(MapLocation target, int approachStrategy) throws GameActionException {
 		Team opponent = rc.getTeam().opponent();
 		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, opponent);
 		if (enemies.length == 0) {
-			return null;
+			if (target != null) {
+				navigation.moveToDestination(target, true);
+			}
+			return;
 		}
 		MapLocation myLocation = rc.getLocation();
 		// set range arbitrarily if robot is a launcher
@@ -204,9 +209,21 @@ public abstract class Unit extends Robot {
 		*/
 
 		if (navigation.isAvoidingAttack(enemies, 0, myLocation)) {
+			if (approachStrategy == 2) {
+				navigation.moveToDestination(target, false);
+				return;
+			}
 			for (RobotInfo r : enemies) {
 				if (myLocation.distanceSquaredTo(r.location) <= rangeConverter(r.type.attackRadiusSquared)) {
-					return null;
+					if (approachStrategy == 0) {
+						return;
+					}
+					else { // approachStrategy == 1
+						if (r.type.attackRadiusSquared == myRange) {
+							navigation.moveToDestination(r.location, false);
+							return;
+						}
+					}
 				}
 			}
 			for (Direction d : DirectionHelper.directions) {
@@ -221,7 +238,9 @@ public abstract class Unit extends Robot {
 					}
 				}
 				if (good && rc.canMove(d)) {
-					return d;
+					navigation.stopObstacleTracking();
+					rc.move(d);
+					return;
 				}
 			}
 		}
@@ -300,9 +319,9 @@ public abstract class Unit extends Robot {
 				}
 			}
 			if (bestDamage < damages[8]) {
-				return DirectionHelper.directions[bestDirection];
+				navigation.stopObstacleTracking();
+				rc.move(DirectionHelper.directions[bestDirection]);
 			}
 		}
-		return null;
 	}	
 }

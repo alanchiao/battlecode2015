@@ -3,7 +3,6 @@ package team158.units;
 import team158.buildings.Headquarters;
 import team158.utils.Broadcast;
 import battlecode.common.Clock;
-import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -34,31 +33,26 @@ public class Drone extends Unit {
 		
 		// Move
 		if (rc.isCoreReady()) {
-			if (enemiesAttackable.length > 0) {
-				Direction d = selectMoveDirectionMicro();
-				navigation.stopObstacleTracking();
-				if (d != null) {
-					rc.move(d);
-				}
-			}
-			else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
+			MapLocation target;
+			if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
 				if (groupTracker.groupID == Broadcast.droneGroup2Ch) {
 					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 					if (hasHQCommand) {
-						MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-						navigation.moveToDestination(target, false);
+						target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
+						// navigation.moveToDestination(target, false);
 					} else {
-						groupTracker.spawnRallyInGroup(navigation);
+						target = groupTracker.getRallyPoint();
 					}
 				}
 				else {
-					navigation.moveToDestination(enemyHQ, true);
+					target = enemyHQ;
 				}
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
-				navigation.moveToDestination(this.ownHQ, true);
+				target = this.ownHQ;
 			} else {
-				navigation.moveToDestination(this.enemyHQ, false);
+				target = this.enemyHQ;
 			}
+			moveToLocationWithMicro(target, 1);
 		}
 	}
 }

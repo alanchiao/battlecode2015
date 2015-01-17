@@ -39,7 +39,7 @@ public class GroupTracker {
 	
 	// rallying to location that spawning buildings
 	// tell units to go to
-	public void spawnRallyInGroup(Navigation navigation) {
+	public MapLocation getRallyPoint() {
 		MapLocation target;
 		try {
 			switch(rc.getType()) {
@@ -57,9 +57,10 @@ public class GroupTracker {
 								break;				
 			} 
 			
-			navigation.moveToDestination(target, false);
+			return target;
 		}  catch (GameActionException e) {
-			return;
+			e.printStackTrace();
+			return null;
 		}
 	}
 

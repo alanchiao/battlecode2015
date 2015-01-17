@@ -118,15 +118,15 @@ public class GroundStrategy extends GameStrategy {
 			}
 			rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
 			rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
-			if (groupSize[defendGroup] < 6) {
-				gc.groupUnits(groupCh[defendGroup], RobotType.TANK);
-			}
-			else {
-				rc.broadcast(groupCh[defendGroup], 1);
-				if (groupSize[attackGroup] < 10) {
-					
-				}
-			}
+//			if (groupSize[defendGroup] < 6) {
+//				gc.groupUnits(groupCh[defendGroup], RobotType.TANK);
+//			}
+//			else {
+//				rc.broadcast(groupCh[defendGroup], 1);
+//				if (groupSize[attackGroup] < 10) {
+//					
+//				}
+//			}
 			
 			if (numTanks - groupSize[defendGroup] > 20 && groupSize[attackGroup] == 0) {
 				gc.groupUnits(groupCh[attackGroup], RobotType.TANK);

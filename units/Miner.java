@@ -1,7 +1,6 @@
 package team158.units;
-
-import team158.utils.*;
 import battlecode.common.*;
+import team158.utils.*;
 
 public class Miner extends Unit {
 	
@@ -44,7 +43,8 @@ public class Miner extends Unit {
 			}
 			else if (myOre >= 10) {
 				int ore = rc.readBroadcast(Broadcast.minerOreX100Ch);
-				rc.broadcast(Broadcast.minerOreX100Ch, ore + (int)(100 * Math.max(myOre / 4, 0.2)));
+				// need to fix because miner can't mine more than 2.5
+				rc.broadcast(Broadcast.minerOreX100Ch,  ore + (int)(100 * Math.max(myOre/4, 0.2)));
 				rc.mine();
 			}
 			else {
@@ -84,7 +84,7 @@ public class Miner extends Unit {
 				}
 				else {
 					int ore = rc.readBroadcast(Broadcast.minerOreX100Ch);
-					rc.broadcast(Broadcast.minerOreX100Ch, ore + (int)(100 * Math.max(myOre / 4, 0.2)));
+					rc.broadcast(Broadcast.minerOreX100Ch,  ore + (int)(100 * Math.max(myOre/4, 0.2)));
 					rc.mine();
 				}
 			}

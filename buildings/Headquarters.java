@@ -5,6 +5,7 @@ import team158.com.GroupController;
 import team158.strategies.AerialStrategy;
 import team158.strategies.GameStrategy;
 import team158.strategies.GroundStrategy;
+import team158.strategies.MinerTest;
 import team158.units.Unit;
 import team158.utils.Broadcast;
 
@@ -13,6 +14,10 @@ public class Headquarters extends Building {
 	public final static int TIME_UNTIL_LAUNCHERS_GROUP = 1500;
 	public final static int TIME_UNTIL_COLLECT_SUPPLY = 1650;
 	public final static int TIME_UNTIL_FULL_ATTACK = 1800;
+	
+	public final static int GROUND_STRATEGY = 1;
+	public final static int AERIAL_STRATEGY = 2;
+	public final static int MINER_TEST = 3;
 	
 	private int strategy;
 	private GroupController gc;
@@ -28,12 +33,16 @@ public class Headquarters extends Building {
 	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
-		this.strategy = 1;
+		this.strategy = GROUND_STRATEGY;
 		this.gc = new GroupController(rc, strategy);
-		if (this.strategy == 1) {
-			gameStrategy = new GroundStrategy(rc, gc, this);
-		} else {
-			gameStrategy = new AerialStrategy(rc, gc, this);
+		
+		switch(this.strategy) {
+			case GROUND_STRATEGY:	gameStrategy = new GroundStrategy(rc, gc, this);
+									break;
+			case AERIAL_STRATEGY:	gameStrategy = new AerialStrategy(rc, gc, this);
+									break;
+			case MINER_TEST:		gameStrategy = new MinerTest(rc, gc, this);
+									break;
 		}
 		towerOrder = new MapLocation[6];
 		numTowersDefeatable = 0;
@@ -49,6 +58,7 @@ public class Headquarters extends Building {
 				System.out.println(towerOrder[i]);
 			}
 		}
+		rc.broadcast(Broadcast.idealMiningOreAverage, 0);
 		broadcastVulnerableEnemyTowerAttack();
 //		/broadcastPotentialTowerAttack();
 		
@@ -60,7 +70,7 @@ public class Headquarters extends Building {
 			closestEnemyLocation = closestEnemy.location;
 		}
 		//rc.setIndicatorString(0, String.valueOf(closestEnemyLocation));
-		Broadcast.broadcastLocation(rc, closestEnemyLocation, Broadcast.enemyNearHQLocationChs);
+		Broadcast.broadcastLocation(rc,  Broadcast.launcherRallyLocationChs, closestEnemyLocation);
 		
 		int mySupply = (int) rc.getSupplyLevel();
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
@@ -200,7 +210,7 @@ public class Headquarters extends Building {
 				else {
 					targetTower = ownHQ;
 				}
-				Broadcast.broadcastLocation(rc, targetTower, Broadcast.enemyTowerTargetLocationChs);
+				Broadcast.broadcastLocation(rc, Broadcast.enemyTowerTargetLocationChs, targetTower);
 				rc.setIndicatorString(0, String.valueOf(targetTower));
 			}
 		}

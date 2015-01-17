@@ -17,7 +17,7 @@ public class Tower extends Building {
 		if (prevHealth > rc.getHealth()) {		
 			rc.broadcast(Broadcast.towerAttacked, 1);
 			rc.setIndicatorString(1, String.valueOf(myLocation));
-			Broadcast.broadcastLocation(rc, myLocation, Broadcast.attackedTowerLocationChs);
+			Broadcast.broadcastLocation(rc, Broadcast.attackedTowerLocationChs, myLocation);
 		}
 		else {
 			rc.broadcast(Broadcast.towerAttacked, 0);
@@ -40,7 +40,7 @@ public class Tower extends Building {
 				closestEnemyLocation = closestEnemy.location;
 			}
 			rc.setIndicatorString(0, String.valueOf(closestEnemyLocation));
-			Broadcast.broadcastLocation(rc, closestEnemyLocation, Broadcast.enemyNearTowerLocationChs);
+			Broadcast.broadcastLocation(rc, Broadcast.enemyNearTowerLocationChs, closestEnemyLocation);
 		}
 	}
 }

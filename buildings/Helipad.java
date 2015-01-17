@@ -25,7 +25,7 @@ public class Helipad extends Building {
 			for (int i = 0; i < rallyDistance; i++) {
 				rallyLocation = rallyLocation.add(DirectionHelper.directions[dirint]);
 			}
-			Broadcast.broadcastLocation(rc, rallyLocation, Broadcast.droneRallyLocationChs);
+			Broadcast.broadcastLocation(rc, Broadcast.droneRallyLocationChs, rallyLocation);
 		}
 		int threshold = rc.readBroadcast(Broadcast.yieldToLaunchers) == 1 ? 450 : 125;
 		if (rc.isCoreReady() && rc.getTeamOre() >= threshold && rc.readBroadcast(Broadcast.stopDroneProductionCh) != 1) {
