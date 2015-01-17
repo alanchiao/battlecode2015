@@ -178,10 +178,10 @@ public abstract class Unit extends Robot {
 	}
 	
 	// Only use this method if the unit cannot attack.
-	// approachStrategy 0 - opt 1 - no approach 2 - charge
+	// approachStrategy 0 - do not approach 1 - approach units with same range 2 - charge
 	protected void moveToLocationWithMicro(MapLocation target, int approachStrategy) throws GameActionException {
 		Team opponent = rc.getTeam().opponent();
-		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, opponent);
+		RobotInfo[] enemies = rc.senseNearbyRobots(34, opponent);
 		if (enemies.length == 0) {
 			if (target != null) {
 				navigation.moveToDestination(target, true);
@@ -191,22 +191,6 @@ public abstract class Unit extends Robot {
 		MapLocation myLocation = rc.getLocation();
 		// set range arbitrarily if robot is a launcher
 		int myRange = rc.getType() != RobotType.LAUNCHER ? rc.getType().attackRadiusSquared : 35;
-
-		/* Approach enemy units in range
-		RobotInfo[] attackableEnemies = rc.senseNearbyRobots(myRange, opponent);
-		if (attackableEnemies.length == 0) {
-			for (RobotInfo r : enemies) {
-				int distance = myLocation.distanceSquaredTo(r.location);
-				if (r.type.attackRadiusSquared >= distance && myRange < distance) {
-					Direction enemyDirection = myLocation.directionTo(r.location);
-					if (rc.canMove(enemyDirection)) {
-						return enemyDirection;
-					}
-				}
-			}
-			return null;
-		}
-		*/
 
 		if (navigation.isAvoidingAttack(enemies, 0, myLocation)) {
 			if (approachStrategy == 2) {
@@ -226,8 +210,10 @@ public abstract class Unit extends Robot {
 					}
 				}
 			}
+			Direction backupMove = null;
 			for (Direction d : DirectionHelper.directions) {
 				boolean good = false;
+				boolean reasonable = false;
 				for (RobotInfo r : enemies) {
 					int potentialLocationDistance = myLocation.add(d).distanceSquaredTo(r.location);
 					if (potentialLocationDistance <= r.type.attackRadiusSquared) {
@@ -236,12 +222,24 @@ public abstract class Unit extends Robot {
 					if (potentialLocationDistance <= rangeConverter(r.type.attackRadiusSquared)) {
 						good = true;
 					}
+					else {
+						reasonable = true;
+					}
 				}
-				if (good && rc.canMove(d)) {
-					navigation.stopObstacleTracking();
-					rc.move(d);
-					return;
+				if (rc.canMove(d)) {
+					if (good) {
+						navigation.stopObstacleTracking();
+						rc.move(d);
+						return;
+					}
+					else if (reasonable) {
+						backupMove = d;
+					}
 				}
+			}
+			if (backupMove != null) {
+				navigation.stopObstacleTracking();
+				rc.move(backupMove);
 			}
 		}
 		// Take less damage
