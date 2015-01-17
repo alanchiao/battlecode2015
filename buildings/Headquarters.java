@@ -6,6 +6,7 @@ import team158.strategies.AerialStrategy;
 import team158.strategies.GameStrategy;
 import team158.strategies.GroundStrategy;
 import team158.strategies.MinerTest;
+import team158.strategies.NavigationTest;
 import team158.units.Unit;
 import team158.utils.Broadcast;
 
@@ -17,7 +18,8 @@ public class Headquarters extends Building {
 	
 	public final static int GROUND_STRATEGY = 1;
 	public final static int AERIAL_STRATEGY = 2;
-	public final static int MINER_TEST = 3;
+	public final static int MINER_STRATEGY = 3;
+	public final static int NAVIGATION_STRATEGY = 4;
 	
 	private int strategy;
 	private GroupController gc;
@@ -33,16 +35,18 @@ public class Headquarters extends Building {
 	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
-		this.strategy = AERIAL_STRATEGY;
+		this.strategy = NAVIGATION_STRATEGY;
 		this.gc = new GroupController(rc, strategy);
 		
 		switch(this.strategy) {
-			case GROUND_STRATEGY:	gameStrategy = new GroundStrategy(rc, gc, this);
-									break;
-			case AERIAL_STRATEGY:	gameStrategy = new AerialStrategy(rc, gc, this);
-									break;
-			case MINER_TEST:		gameStrategy = new MinerTest(rc, gc, this);
-									break;
+			case GROUND_STRATEGY:		gameStrategy = new GroundStrategy(rc, gc, this);
+										break;
+			case AERIAL_STRATEGY:		gameStrategy = new AerialStrategy(rc, gc, this);
+										break;
+			case MINER_STRATEGY:		gameStrategy = new MinerTest(rc, gc, this);
+										break;
+			case NAVIGATION_STRATEGY:	gameStrategy = new NavigationTest(rc, gc, this);
+										break;
 		}
 		towerOrder = new MapLocation[6];
 		numTowersDefeatable = 0;

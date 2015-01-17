@@ -56,7 +56,7 @@ public class Navigation {
 		}
 	
 		// optimization: let it change it go back to its previous location if it hasn't moved for some time.
-		if (timeSinceLastMove >= 8) {
+		if (timeSinceLastMove >= 4) {
 			lastLocation = null;
 		}
 		

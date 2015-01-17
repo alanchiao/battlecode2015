@@ -14,8 +14,6 @@ public class Beaver extends Unit {
 		this.builder = new Builder(rc, ownHQ, navigation);
 	}
 
-	
-	
 	@Override
 	protected void actions() throws GameActionException {
 		if (rc.isWeaponReady()) {
@@ -44,17 +42,14 @@ public class Beaver extends Unit {
 				rc.broadcast(Broadcast.buildTankFactoriesCh, 0);
 				builder.buildBuilding(RobotType.TANKFACTORY);
 			}
-			// HQ has given command to build a supply depot
 			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildSupplyCh)) {
 				rc.broadcast(Broadcast.buildSupplyCh, 0);
 				builder.buildBuilding(RobotType.SUPPLYDEPOT);
 			}
-			// HQ has given command to build a miner factory
 			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildMinerFactoriesCh)) {
 				rc.broadcast(Broadcast.buildMinerFactoriesCh, 0);
 				builder.buildBuilding(RobotType.MINERFACTORY);
 			}
-			// HQ has given command to build a barracks
 			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildBarracksCh)) {
 				rc.broadcast(Broadcast.buildBarracksCh, 0);
 				builder.buildBuilding(RobotType.BARRACKS);
