@@ -26,10 +26,9 @@ public class Beaver extends Unit {
 	
 	@Override
 	protected void actions() throws GameActionException {
-		MapLocation myLocation = rc.getLocation();
-		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
-		if (enemies.length > 0 && rc.isWeaponReady()) { 
-			if (rc.isWeaponReady()) {
+		if (rc.isWeaponReady()) {
+			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
+			if (enemies.length > 0) { 
 				rc.attackLocation(selectTarget(enemies));
 			}
 		}
@@ -41,47 +40,35 @@ public class Beaver extends Unit {
 				return;
 			}
 			
-			if (rc.readBroadcast(Broadcast.buildAerospaceLabsCh) == rc.getID()) {
+			if (Broadcast.hasSoloCommand(rc, Broadcast.buildAerospaceLabsCh)) {
 				rc.broadcast(Broadcast.buildAerospaceLabsCh, 0);
 				builder.buildBuilding(RobotType.AEROSPACELAB);
 			}
-			else if (rc.readBroadcast(Broadcast.buildHelipadsCh) == rc.getID()) {
+			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildHelipadsCh)) {
 				rc.broadcast(Broadcast.buildHelipadsCh, 0);
 				builder.buildBuilding(RobotType.HELIPAD);
 			}
-			else if (rc.readBroadcast(Broadcast.buildTankFactoriesCh) == rc.getID()) {
+			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildTankFactoriesCh)) {
 				rc.broadcast(Broadcast.buildTankFactoriesCh, 0);
 				builder.buildBuilding(RobotType.TANKFACTORY);
 			}
 			// HQ has given command to build a supply depot
-			else if (rc.readBroadcast(Broadcast.buildSupplyCh) == rc.getID()) {
+			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildSupplyCh)) {
 				rc.broadcast(Broadcast.buildSupplyCh, 0);
 				builder.buildBuilding(RobotType.SUPPLYDEPOT);
 			}
 			// HQ has given command to build a miner factory
-			else if (rc.readBroadcast(Broadcast.buildMinerFactoriesCh) == rc.getID()) {
+			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildMinerFactoriesCh)) {
 				rc.broadcast(Broadcast.buildMinerFactoriesCh, 0);
 				builder.buildBuilding(RobotType.MINERFACTORY);
 			}
 			// HQ has given command to build a barracks
-			else if (rc.readBroadcast(Broadcast.buildBarracksCh) == rc.getID()) {
+			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildBarracksCh)) {
 				rc.broadcast(Broadcast.buildBarracksCh, 0);
 				builder.buildBuilding(RobotType.BARRACKS);
 			}
-			/**
-			else if (rc.readBroadcast(Broadcast.scoutEnemyHQCh) == rc.getID()) {
-				navigation.moveToDestination(enemyHQ, true);
-				stepsUntilEnemyHQ++;
-				// uses symmetrical properties of map. doubles distance it had to travel
-				// to get there. May be delayed by enemy units, but shouldn't be much
-				// since early game
-				if (rc.getLocation().distanceSquaredTo(enemyHQ) <= rc.getLocation().distanceSquaredTo(ownHQ)) {
-					rc.broadcast(Broadcast.scoutEnemyHQCh, stepsUntilEnemyHQ * 2);
-					stayNearHQ = false;
-				}
-			}
-			else if (!stayNearHQ) { **/
 			else {
+				MapLocation myLocation = rc.getLocation();
 				double currentOre = rc.senseOre(myLocation);
 				double maxOre = -2;
 				Direction bestDirection = null;

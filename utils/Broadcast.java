@@ -72,6 +72,11 @@ public class Broadcast {
 	public static final int idealMiningLocation = 800;
 	public static final int idealMiningOreAverage = 802;
 	
+	// check if channel has not been initiated yet
+	public static boolean isNotInitiated(RobotController rc, int channelStart) throws GameActionException {
+		return rc.readBroadcast(channelStart) == 0;
+	}
+	
 	// read two contiguous channels for location information, x and y coordinates
 	public static MapLocation readLocation(RobotController rc, int channelStart) throws GameActionException {
 		return new MapLocation(rc.readBroadcast(channelStart), rc.readBroadcast(channelStart + 1));
@@ -83,9 +88,11 @@ public class Broadcast {
 		rc.broadcast(channelStart + 1, location.y);
 	}
 	
-	// check if channel has not been initiated yet
-	public static boolean isNotInitiated(RobotController rc, int channelStart) throws GameActionException {
-		return rc.readBroadcast(channelStart) == 0;
+	// read from channel to see if this particular unit has a unique command (own ID matches channel information)
+	public static boolean hasSoloCommand(RobotController rc, int channel) throws GameActionException{
+		return rc.readBroadcast(channel) == rc.getID();
 	}
+	
+	
 
 }
