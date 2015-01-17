@@ -24,10 +24,9 @@ public class Navigation {
 	
 	public MapLocation destination; // desired point to reach
 	public Direction origDirection; // original direction of collision of robot into obstacle
+	public MapLocation origLocation;
 	
 	public MapLocation monitoredObstacle; // obstacle tile to move relative to
-	public MapLocation lastLocation;
-	public int timeSinceLastMove;
 	
 	public MapLocation enemyHQ;
 	// precomputation per turn
@@ -43,21 +42,15 @@ public class Navigation {
 		destination = null;
 		origDirection = null;
 		monitoredObstacle = null;
-		lastLocation = null;
-		timeSinceLastMove = 0;
 		possibleMovesAvoidingEnemies = null;
 	}
 	
 	public void moveToDestination(MapLocation nextDestination, boolean isAvoidAllAttack) {
+		rc.setIndicatorString(0, Boolean.toString(isAvoidingObstacle));
+		
 		// optimization: stop avoiding current obstacle if destination changes
 		if (!nextDestination.equals(destination)) { // then no longer obstacle
 			stopObstacleTracking();
-			lastLocation = null;
-		}
-	
-		// optimization: let it change it go back to its previous location if it hasn't moved for some time.
-		if (timeSinceLastMove >= 4) {
-			lastLocation = null;
 		}
 		
 		destination = nextDestination;
@@ -82,9 +75,8 @@ public class Navigation {
 			
 			if (isAvoidingObstacle) { // then hug wall in counterclockwise motion
 				Direction dirToObstacle = rc.getLocation().directionTo(monitoredObstacle);
-				boolean isClockwise = rand.nextInt(2) == 1;
 				Direction clockwiseDirections[];
-				if (isClockwise) {
+				if (rc.getID() % 2 == 0) {
 					clockwiseDirections = DirectionHelper.getClockwiseDirections(dirToObstacle);
 				} else {
 					clockwiseDirections = DirectionHelper.getCounterClockwiseDirections(dirToObstacle);
@@ -92,18 +84,7 @@ public class Navigation {
 				for (int i = 0; i < clockwiseDirections.length; i++) {
 					Direction attemptedDir = clockwiseDirections[i];
 					MapLocation attemptedLocation = rc.getLocation().add(attemptedDir);
-					
-					// wrong direction - go other way to stay consistent
-					if (lastLocation != null && attemptedLocation.equals(lastLocation)) {
-						if (isClockwise) {
-							clockwiseDirections = DirectionHelper.getCounterClockwiseDirections(dirToObstacle);
-						} else {
-							clockwiseDirections = DirectionHelper.getClockwiseDirections(dirToObstacle);
-						}	
-						i = -1;
-						continue;
-					}
-					
+						
 					// if there is a unit there blocking the hug path, move greedily
 					if (isMobileUnit(attemptedLocation)) {
 						stopObstacleTracking();
@@ -117,41 +98,53 @@ public class Navigation {
 						Direction obstacleSearch[] = {Direction.NORTH, Direction.EAST,	Direction.SOUTH, Direction.WEST};
 						MapLocation potNextObsts[] = new MapLocation[4];
 						int numObstacles = 0;
-						for (Direction dir: obstacleSearch) {
-							MapLocation potentialObstacle = attemptedLocation.add(dir);
-							// ignore yourself - not obstacle
-							if (dir == attemptedDir.opposite()) {
-								continue;
-							}
-							if (isObstacle(potentialObstacle, attemptedDir)) { // then is obstacle
-								potNextObsts[numObstacles] = potentialObstacle;
-								numObstacles++;
-							}
-						}
-						// obstacle to monitor next is one that is farthest away from the current location
-						double maxDistanceSquared = -1;
-						MapLocation bestObstacle = null;
-						for (int j = 0; j < numObstacles; j++) {
-							double distanceSquared = rc.getLocation().distanceSquaredTo(potNextObsts[j]);
-							if (distanceSquared > maxDistanceSquared) {
-								maxDistanceSquared = distanceSquared;
-								bestObstacle = potNextObsts[j];
-							}
-						}
 						
-						if (bestObstacle != null) {
-							monitoredObstacle = bestObstacle;
+						// special case
+						// x w
+						// w 
+						// you want to go across the w's
+						Direction directionToOrigObstacle = attemptedLocation.directionTo(monitoredObstacle);
+						Direction checkDirection = directionToOrigObstacle.rotateRight();
+						Direction checkDirection2 = directionToOrigObstacle.rotateLeft();
+						if (!isObstacle(attemptedLocation.add(checkDirection), checkDirection) || !isObstacle(attemptedLocation.add(checkDirection2), checkDirection2)) {
+							
+						} else {
+							for (Direction dir: obstacleSearch) {
+								MapLocation potentialObstacle = attemptedLocation.add(dir);
+								// ignore yourself - not obstacle
+								if (dir == attemptedDir.opposite()) {
+									continue;
+								}
+								if (isObstacle(potentialObstacle, attemptedDir)) { // then is obstacle
+									potNextObsts[numObstacles] = potentialObstacle;
+									numObstacles++;
+								}
+							}
+							// obstacle to monitor next is one that is farthest away from the current location
+							double maxDistanceSquared = -1;
+							MapLocation bestObstacle = null;
+							for (int j = 0; j < numObstacles; j++) {
+								double distanceSquared = rc.getLocation().distanceSquaredTo(potNextObsts[j]);
+								if (distanceSquared > maxDistanceSquared) {
+									maxDistanceSquared = distanceSquared;
+									bestObstacle = potNextObsts[j];
+								}
+							}
+							
+							if (bestObstacle != null) {
+								monitoredObstacle = bestObstacle;
+								rc.setIndicatorDot(monitoredObstacle, 0, 0, 0);
+							}
 						}
 						
 						// have traversed past a part of the obstacle if
-						// going in the same direction again
-						if(attemptedDir == origDirection) {
+						// closer to destination than originally and can move towards
+						// destination
+						if(rc.canMove(directDirection) && rc.getLocation().distanceSquaredTo(destination) <= origLocation.distanceSquaredTo(destination)) {
 							stopObstacleTracking();
 						}
 						if (rc.canMove(attemptedDir)) {
-							lastLocation = rc.getLocation();
 							rc.move(attemptedDir);
-							timeSinceLastMove = 0;
 						}
 						return;
 					}
@@ -161,13 +154,11 @@ public class Navigation {
 			// not in state of avoiding obstacle
 
 			else if (isPassable(directLocation, directDirection)) {
-				lastLocation = rc.getLocation();
 				rc.move(directDirection);
 			// possibly found obstacle
 			} else {
 				if (isObstacle(directLocation, directDirection)) {
 					startObstacleTracking(directLocation, directDirection);
-					timeSinceLastMove++;
 				} else { // otherwise, using bugging gets scary with moving obstacles
 					greedyMoveToDestination();
 				}
@@ -197,13 +188,9 @@ public class Navigation {
 			}
 			if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(destination) <= myLocation.distanceSquaredTo(destination)) {
 				if (rc.canMove(moveDirection)) {
-					lastLocation = rc.getLocation();
 					rc.move(moveDirection);
-					timeSinceLastMove = 0;
 				}
-			} else {
-				timeSinceLastMove++;
-			}
+			} 
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
@@ -221,6 +208,7 @@ public class Navigation {
 		isAvoidingObstacle = true;
 		monitoredObstacle = obstacle;
 		origDirection = collisionDirection;
+		origLocation = rc.getLocation();
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -421,6 +409,7 @@ public class Navigation {
 			   type == RobotType.COMMANDER ||
 			   type == RobotType.DRONE ||
 			   type == RobotType.SOLDIER ||
-			   type == RobotType.LAUNCHER;
+			   type == RobotType.LAUNCHER ||
+			   type == RobotType.MINER;
 	}
 }
