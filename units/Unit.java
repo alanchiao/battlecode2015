@@ -124,11 +124,16 @@ public abstract class Unit extends Robot {
 			boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 			if (hasHQCommand) {
 				//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
+				Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
 				MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
 				rc.setIndicatorString(1, String.valueOf(rc.readBroadcast(Broadcast.towerAttacked)));
 				boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
+				boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
 				if (towerAttacked) {
 					target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
+				}
+				else if (enemyNear) {
+					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
 				}
 //				else if (enemyAround) {
 //					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
@@ -147,7 +152,7 @@ public abstract class Unit extends Robot {
 	public void attackMove() {
 		try {
 			boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-			System.out.println(hasHQCommand);
+			//System.out.println(hasHQCommand);
 			if (hasHQCommand) {
 				//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
 				MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);

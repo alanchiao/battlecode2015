@@ -57,6 +57,7 @@ public class Broadcast {
 	public static final int yieldToLaunchers = 607;
 	public static final int towerAttacked = 608;
 	public static final int enemyTowerFound = 609;
+	public static final int enemyNearTower = 610;
 	
 	// Channels 700-799 are used for grouping
 	public static final int soldierGroup1Ch = 700;
