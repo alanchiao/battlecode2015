@@ -152,9 +152,8 @@ public abstract class Unit extends Robot {
 				//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
 				MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
-				int approachStrategy = 0;
-				navigation.moveToDestination(target, false);
-				//moveToLocationWithMicro(target, approachStrategy);
+				int approachStrategy = 1;
+				moveToLocationWithMicro(target, approachStrategy);
 			}
 		}
 		catch (Exception e) {
