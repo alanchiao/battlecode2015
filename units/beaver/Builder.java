@@ -9,7 +9,7 @@ import battlecode.common.RobotType;
 
 public class Builder {
 	
-	public final static int NUMBER_BUILDINGS_MAX = 20;
+	public final static int NUMBER_BUILDINGS_MAX = 30;
 	
 	// necessary information from Beaver
 	private RobotController rc;
