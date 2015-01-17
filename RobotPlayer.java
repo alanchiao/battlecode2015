@@ -8,13 +8,13 @@ import team158.buildings.MinerFactory;
 import team158.buildings.SupplyDepot;
 import team158.buildings.TankFactory;
 import team158.buildings.Tower;
-import team158.units.Beaver;
 import team158.units.Drone;
 import team158.units.Launcher;
 import team158.units.Miner;
 import team158.units.Missile;
 import team158.units.Soldier;
 import team158.units.Tank;
+import team158.units.beaver.Beaver;
 import battlecode.common.*;
 
 public class RobotPlayer {

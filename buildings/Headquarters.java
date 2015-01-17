@@ -53,16 +53,14 @@ public class Headquarters extends Building {
 	protected void actions() throws GameActionException {	
 		if (Clock.getRoundNum()==0) {
 			towerDefeatable();
-			System.out.println(numTowersDefeatable);
 			for (int i = 0; i < numTowersDefeatable; i++) {
-				System.out.println(towerOrder[i]);
 			}
 		}
 		rc.broadcast(Broadcast.idealMiningOreAverage, 0);
 		broadcastVulnerableEnemyTowerAttack();
 //		/broadcastPotentialTowerAttack();
 		
-		RobotInfo closestEnemy = findClosestEnemy(100);
+		RobotInfo closestEnemy = super.findClosestEnemy(100);
 		MapLocation closestEnemyLocation;
 		if (closestEnemy == null) {
 			closestEnemyLocation = myLocation;

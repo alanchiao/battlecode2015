@@ -15,7 +15,7 @@ public class Tower extends Building {
 		//if  tower took damage, broadcast tower location
 //		rc.setIndicatorString(0, String.valueOf(prevHealth));
 //		if (prevHealth > rc.getHealth()) {		
-//			rc.broadcast(Broadcast.towerAttacked, 1);
+//			rc.broadcast(Broadcast.tow erAttacked, 1);
 //			rc.setIndicatorString(1, String.valueOf(myLocation));
 //			Broadcast.broadcastLocation(rc, Broadcast.attackedTowerLocationChs, myLocation);
 //		}
