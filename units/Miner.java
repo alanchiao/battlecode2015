@@ -40,40 +40,22 @@ public class Miner extends Unit {
 				if (offsetIndex < 8) {
 					rc.move(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8]);
 				}
-			} else {
-				// calculate average ore in 16 squared units
-				int numLocations = 0;
-				int sumOre = 0;
-				MapLocation nearbyLocations[] = MapLocation.getAllMapLocationsWithinRadiusSq(myLocation, 16);
-				for (MapLocation location: nearbyLocations) {
-					
-					numLocations++;
-					sumOre += rc.senseOre(location);
-				}
-				int averageOre = sumOre/numLocations;
-				int currentIdealAverage = rc.readBroadcast(Broadcast.idealMiningOreAverage);
-				MapLocation betterLocation = Broadcast.readLocation(rc, Broadcast.idealMiningLocation);
-				
-				rc.setIndicatorString(0, Integer.toString(averageOre));
-				rc.setIndicatorString(1, Integer.toString(currentIdealAverage));
-				rc.setIndicatorString(2, Boolean.toString(isLeaderMiner));
-				
-				/**
-				if (currentIdealAverage <= 2) {
-					ORE_THRESHOLD_TO_MOVE = 0.5;
-				} else if (currentIdealAverage >= 20) {
-					ORE_THRESHOLD_TO_MOVE = 10;
-				}
-				**/
-				
-				if (isLeaderMiner) {
-					if (lastBroadcastedOreCount == currentIdealAverage) {
-						if (currentIdealAverage > averageOre) {
-							rc.broadcast(Broadcast.idealMiningOreAverage, averageOre);
-							lastBroadcastedOreCount = averageOre;
-						}
-					} else {
-						isLeaderMiner = false;
+			}
+			else if (myOre >= 10) {
+				int ore = rc.readBroadcast(Broadcast.minerOreX100Ch);
+				// need to fix because miner can't mine more than 2.5
+				rc.broadcast(Broadcast.minerOreX100Ch,  ore + (int)(100 * Math.max(myOre/4, 0.2)));
+				rc.mine();
+			}
+			else {
+				double maxOre = 0;
+				Direction bestDirection = null;
+				// looks around for an ore concentration that is bigger than its current location by a certain fraction
+				for (Direction dir: DirectionHelper.directions) {
+					double possibleOre = rc.senseOre(myLocation.add(dir));
+					if (possibleOre > maxOre && possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(dir)]) {
+						maxOre = possibleOre;
+						bestDirection = dir;
 					}
 				}
 
@@ -102,6 +84,7 @@ public class Miner extends Unit {
 				}
 				else {
 					int ore = rc.readBroadcast(Broadcast.minerOreX100Ch);
+					rc.broadcast(Broadcast.minerOreX100Ch,  ore + (int)(100 * Math.max(myOre/4, 0.2)));
 					rc.mine();
 				}
 			}
