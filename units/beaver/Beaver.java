@@ -6,20 +6,12 @@ import battlecode.common.*;
 
 public class Beaver extends Unit {
 	
-	int stepsUntilEnemyHQ;
-	boolean stayNearHQ;
-	boolean buildBuildingsClose;
-	MapLocation[] safeLocations;
 	public Builder builder;
-
+	
+	
 	public Beaver(RobotController newRC) {
 		super(newRC);
-		// for building
 		this.builder = new Builder(rc, ownHQ, navigation);
-		// for scouting
-		stepsUntilEnemyHQ = 0;
-		// for balancing the two
-		stayNearHQ = true;
 	}
 
 	
@@ -76,7 +68,7 @@ public class Beaver extends Unit {
 				// looks around for an ore concentration that is bigger than its current location by a certain fraction
 				for (Direction dir: DirectionHelper.directions) {
 					MapLocation possibleLocation = myLocation.add(dir);
-					if (!stayNearHQ || possibleLocation.distanceSquaredTo(ownHQ) < 15) {
+					if (possibleLocation.distanceSquaredTo(ownHQ) < 15) {
 						double possibleOre = rc.senseOre(possibleLocation);
 						if (possibleOre > maxOre && rc.canMove(dir) && avoidMoves[DirectionHelper.directionToInt(dir)]) {
 							maxOre = possibleOre;

@@ -4,23 +4,11 @@ import team158.utils.*;
 
 public class Miner extends Unit {
 	
-	/**
-	 * /**
-			else if (rc.readBroadcast(Broadcast.scoutEnemyHQCh) == rc.getID()) {
-				navigation.moveToDestination(enemyHQ, true);
-				stepsUntilEnemyHQ++;
-				// uses symmetrical properties of map. doubles distance it had to travel
-				// to get there. May be delayed by enemy units, but shouldn't be much
-				// since early game
-				if (rc.getLocation().distanceSquaredTo(enemyHQ) <= rc.getLocation().distanceSquaredTo(ownHQ)) {
-					rc.broadcast(Broadcast.scoutEnemyHQCh, stepsUntilEnemyHQ * 2);
-					stayNearHQ = false;
-				}
-			}
-	**/
+	private int stepsUntilEnemyHQ;
 	
 	public Miner(RobotController newRC) {
 		super(newRC);
+		stepsUntilEnemyHQ = 0;
 	}
 
 	private Direction prevDirection = null;
@@ -54,6 +42,16 @@ public class Miner extends Unit {
 				}
 				if (offsetIndex < 8) {
 					rc.move(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8]);
+				}
+			}
+			else if (rc.readBroadcast(Broadcast.scoutEnemyHQCh) == rc.getID()) {
+				navigation.moveToDestination(enemyHQ, true);
+				stepsUntilEnemyHQ++;
+				// uses symmetrical properties of map. doubles distance it had to travel
+				// to get there. May be delayed by enemy units, but shouldn't be much
+				// since early game
+				if (rc.getLocation().distanceSquaredTo(enemyHQ) <= rc.getLocation().distanceSquaredTo(ownHQ)) {
+					rc.broadcast(Broadcast.scoutEnemyHQCh, stepsUntilEnemyHQ * 2);
 				}
 			}
 			else if (myOre >= 10) {
