@@ -35,7 +35,7 @@ public class Drone extends Unit {
 		if (rc.isCoreReady()) {
 			MapLocation target;
 			if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
-				if (groupTracker.groupID == Broadcast.droneGroup2Ch) {
+				if (groupTracker.groupID == Broadcast.droneGroupDefenseCh) {
 					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 					if (hasHQCommand) {
 						target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);

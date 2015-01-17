@@ -20,10 +20,14 @@ public class AerialStrategy extends GameStrategy {
 	private int pathDifficulty;
 	private int closestBeaver;
 	private int scoutBeaver;
+	private int attackGroup;
+	private int defendGroup;
 	
 	public AerialStrategy(RobotController rc, GroupController gc, Headquarters hq) {
 		super(rc, gc, hq);
 		
+		this.attackGroup = 1;
+		this.defendGroup = 0;
 		this.enemyRush = false;
 		this.enemyThreat = false;
 		this.pathDifficulty = 0;	
@@ -40,8 +44,8 @@ public class AerialStrategy extends GameStrategy {
 		int numDrones = 0;
 		int numLaunchers = 0;
 		int numHelipads = 0;
-		int numDronesG1 = 0;
-		int numDronesG2 = 0;
+		int numDronesAttack = 0;
+		int numDronesDefense = 0;
 		int numAerospaceLabs = 0;
 		
 		for (RobotInfo r : myRobots) {
@@ -50,11 +54,11 @@ public class AerialStrategy extends GameStrategy {
 				numMiners++;
 			} else if (type == RobotType.DRONE) {
 				numDrones++;
-				if (Hashing.find(r.ID) == Broadcast.droneGroup1Ch) {
-					numDronesG1++;
+				if (Hashing.find(r.ID) == Broadcast.droneGroupAttackCh) {
+					numDronesAttack++;
 				}							
-				else if (Hashing.find(r.ID)  == Broadcast.droneGroup2Ch) {
-					numDronesG2++;
+				else if (Hashing.find(r.ID)  == Broadcast.droneGroupDefenseCh) {
+					numDronesDefense++;
 				}		
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
@@ -104,7 +108,7 @@ public class AerialStrategy extends GameStrategy {
 				enemyThreat = true;
 				rc.broadcast(Broadcast.buildHelipadsCh, 0);
 				rc.broadcast(Broadcast.yieldToLaunchers, 1);
-				gc.unGroup(Broadcast.droneGroup1Ch);
+				gc.unGroup(Broadcast.droneGroupAttackCh);
 			}
 		}
 		
@@ -193,7 +197,15 @@ public class AerialStrategy extends GameStrategy {
 					}
 				}
 			}
-				
+			int[] groupSize = {numDronesDefense, numDronesAttack};
+			int[] groupCh = {Broadcast.droneGroupDefenseCh, Broadcast.droneGroupAttackCh};
+			if (numDronesAttack > 0 || numDronesDefense > 0) {
+				gc.stopGroup(RobotType.DRONE);
+			}
+			
+			rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
+			rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
+	
 			if (numLaunchers > 0) {
 				if (numLaunchers > 5) {
 					rc.broadcast(Broadcast.launcherGroupCh, 1);
@@ -206,36 +218,28 @@ public class AerialStrategy extends GameStrategy {
 			
 			//if they don't build tanks and launchers
 			if (!enemyThreat) {
-				MapLocation targetTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-				if (numDronesG1 < 15 || targetTower == null) {
-					rc.broadcast(Broadcast.droneGroup1Ch, 1);
-					gc.groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
+				if (groupSize[defendGroup] < 10) {
+					gc.groupUnits(groupCh[defendGroup], RobotType.DRONE);
+					rc.broadcast(groupCh[defendGroup], 1);
 				}
 				else {
-					if (numDronesG2 > 20) {
-						rc.broadcast(Broadcast.droneGroup2Ch, 1);
-						gc.groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
-					}
-					else if (numDronesG2 > 15 && rc.readBroadcast(Broadcast.droneGroup2Ch) == 1) {
-						gc.groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
-					}
-					else {
-						rc.broadcast(Broadcast.droneGroup2Ch, 0);
-						gc.groupUnits(Broadcast.droneGroup2Ch, RobotType.DRONE);
+					rc.broadcast(groupCh[attackGroup],1);
+					if (numDrones - groupSize[defendGroup] - groupSize[attackGroup] > 10) {
+						gc.groupUnits(groupCh[attackGroup], RobotType.DRONE);
 					}
 				}
 			}
 			//if enemy builds tanks and launchers
 			else {
 				MapLocation targetTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-				if (numDronesG2 > 20 && targetTower != null) {
-					rc.broadcast(Broadcast.droneGroup2Ch, 1);
+				if (numDronesDefense > 20 && targetTower != null) {
+					rc.broadcast(Broadcast.droneGroupDefenseCh, 1);
 				}
-				else if (numDronesG2 <= 15){
-					rc.setIndicatorString(2, String.valueOf(numDronesG2));
-					rc.broadcast(Broadcast.droneGroup2Ch, 0);
+				else if (numDronesDefense <= 15){
+					rc.setIndicatorString(2, String.valueOf(numDronesDefense));
+					rc.broadcast(Broadcast.droneGroupDefenseCh, 0);
 				}
-				gc.groupUnits(Broadcast.droneGroup2Ch, RobotType.DRONE);
+				gc.groupUnits(Broadcast.droneGroupDefenseCh, RobotType.DRONE);
 			}
 		}
 		

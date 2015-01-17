@@ -14,19 +14,27 @@ public class GroupController {
 	private int strategy;
 	
 	// two group management code
-	int ptA;
-	int[] groupA;
-	int ptB;
-	int[] groupB;
+	int ptTankA;
+	int[] tankGroupA;
+	int ptTankB;
+	int[] tankGroupB;
+	int ptDroneA;
+	int[] droneGroupA;
+	int ptDroneB;
+	int[] droneGroupB;
 	
 	public GroupController(RobotController rc, int strategy) {
 		this.rc = rc;
 		this.strategy = strategy;
 		
-		this.groupA = new int[512];
-		this.groupB = new int[512];
-		this.ptA = 0;
-		this.ptB = 0;
+		this.tankGroupA = new int[256];
+		this.tankGroupB = new int[256];
+		this.ptTankA = 0;
+		this.ptTankB = 0;
+		this.ptDroneA = 0;
+		this.droneGroupA = new int[256];;
+		this.ptDroneB = 0;
+		this.droneGroupB = new int[256];;
 	}
 	public void setAttackGroup(int ID_Broadcast, RobotType rt) {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
@@ -36,8 +44,8 @@ public class GroupController {
 				//if robot is in the hashmap but not in the group
 				if (Hashing.find(r.ID) == 0) {
 					Hashing.put(r.ID, ID_Broadcast);
-					groupA[ptA] = r.ID;
-					ptA++;
+					tankGroupA[ptTankA] = r.ID;
+					ptTankA++;
 				}
 			}
 		}
@@ -74,12 +82,12 @@ public class GroupController {
 						Hashing.put(r.ID, ID_Broadcast);
 						//update the corresponding broadcasted group
 						if (ID_Broadcast == Broadcast.tankGroupDefenseCh) {
-							groupA[ptA] = r.ID;
-							ptA++;
+							tankGroupA[ptTankA] = r.ID;
+							ptTankA++;
 						}
 						else if (ID_Broadcast == Broadcast.tankGroupAttackCh) {
-							groupB[ptB] = r.ID;
-							ptB++;
+							tankGroupB[ptTankB] = r.ID;
+							ptTankB++;
 						}
 					}
 				} 
@@ -94,13 +102,13 @@ public class GroupController {
 					if (Hashing.find(r.ID) == 0) {
 						Hashing.put(r.ID, ID_Broadcast);
 						//update the corresponding broadcasted group
-						if (ID_Broadcast == Broadcast.droneGroup1Ch) {
-							groupA[ptA] = r.ID;
-							ptA++;
+						if (ID_Broadcast == Broadcast.droneGroupAttackCh) {
+							droneGroupB[ptDroneA] = r.ID;
+							ptDroneA++;
 						}
-						else if (ID_Broadcast == Broadcast.droneGroup2Ch) {
-							groupB[ptB] = r.ID;
-							ptB++;
+						else if (ID_Broadcast == Broadcast.droneGroupDefenseCh) {
+							droneGroupB[ptDroneB] = r.ID;
+							ptDroneB++;
 						}
 					}
 				}
@@ -131,36 +139,36 @@ public class GroupController {
 	public void unGroup(int ID_Broadcast) {
 		try {
 			rc.broadcast(ID_Broadcast, -1);
-			if (ID_Broadcast == Broadcast.droneGroup1Ch) {
+			if (ID_Broadcast == Broadcast.droneGroupAttackCh) {
 				int i = 0;
-				while (groupA[i] != 0) {
-					Hashing.put(groupA[i], 0);
-					groupA[i] = 0;
+				while (droneGroupA[i] != 0) {
+					Hashing.put(droneGroupA[i], 0);
+					droneGroupA[i] = 0;
 					i++;
 				}
 			}
-			else if (ID_Broadcast == Broadcast.droneGroup2Ch) {
+			else if (ID_Broadcast == Broadcast.droneGroupDefenseCh) {
 				int i = 0;
-				while (groupB[i] != 0) {
-					Hashing.put(groupB[i], 0);
-					groupB[i] = 0;
+				while (droneGroupB[i] != 0) {
+					Hashing.put(droneGroupB[i], 0);
+					droneGroupB[i] = 0;
 					i++;
 				}
 			}
 			
 			if (ID_Broadcast == Broadcast.tankGroupDefenseCh) {
 				int i = 0;
-				while (groupA[i] != 0) {
-					Hashing.put(groupA[i], 0);
-					groupA[i] = 0;
+				while (tankGroupA[i] != 0) {
+					Hashing.put(tankGroupA[i], 0);
+					tankGroupA[i] = 0;
 					i++;
 				}
 			}
 			else if (ID_Broadcast == Broadcast.tankGroupAttackCh) {
 				int i = 0;
-				while (groupB[i] != 0) {
-					Hashing.put(groupB[i], 0);
-					groupB[i] = 0;
+				while (tankGroupB[i] != 0) {
+					Hashing.put(tankGroupB[i], 0);
+					tankGroupB[i] = 0;
 					i++;
 				}
 			}
@@ -169,9 +177,7 @@ public class GroupController {
 			return;
 		}
 	}
-	
-
-	
+		
 	public void stopGroup(RobotType rt) {
 		int broadcastCh;
 		if (rt == RobotType.TANK) {

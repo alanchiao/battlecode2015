@@ -64,8 +64,8 @@ public class Broadcast {
 	public static final int soldierGroup2Ch = 701;
 	public static final int tankGroupAttackCh = 702;
 	public static final int tankGroupDefenseCh = 703;
-	public static final int droneGroup1Ch = 704;
-	public static final int droneGroup2Ch = 705;
+	public static final int droneGroupAttackCh = 704;
+	public static final int droneGroupDefenseCh = 705;
 	public static final int launcherGroupCh = 706;
 	
 	// Channels 800-812
