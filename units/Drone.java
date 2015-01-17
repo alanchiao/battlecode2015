@@ -45,7 +45,7 @@ public class Drone extends Unit {
 				if (groupTracker.groupID == Broadcast.droneGroup2Ch) {
 					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 					if (hasHQCommand) {
-						MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
+						MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 						navigation.moveToDestination(target, false);
 					} else {
 						groupTracker.spawnRallyInGroup(navigation);

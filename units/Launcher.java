@@ -86,7 +86,7 @@ public class Launcher extends Unit {
 				MapLocation target;
 				boolean hasHQCommand = rc.readBroadcast(Broadcast.launcherGroupCh) == 1;
 				if (hasHQCommand) {
-					 target = Broadcast.readLocation(rc, Broadcast.launcherAttackLocationChs);
+					 target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
 				} else {
 					 target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
 				}

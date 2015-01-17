@@ -120,6 +120,45 @@ public abstract class Unit extends Robot {
 		}
 	}
 
+	public void defensiveMove() {
+		try {
+			boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
+			if (hasHQCommand) {
+				//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
+				MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+				rc.setIndicatorString(1, String.valueOf(rc.readBroadcast(Broadcast.towerAttacked)));
+				boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
+				if (towerAttacked) {
+					target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
+				}
+//				else if (enemyAround) {
+//					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
+//				}			
+				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
+				navigation.moveToDestination(target, false);
+			}
+		}
+		catch (Exception e) {
+			System.out.println(rc.getType());
+            e.printStackTrace();
+		}
+
+	}
+	public void attackMove() {
+		try {
+			boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
+			if (hasHQCommand) {
+				//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
+				MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
+				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
+				navigation.moveToDestination(target, false);
+			}
+		}
+		catch (Exception e) {
+			System.out.println(rc.getType());
+            e.printStackTrace();
+		}
+	}
 	public static MapLocation selectTarget(RobotInfo[] enemies) {
 		MapLocation target = null;
 		double maxPriority = 0;

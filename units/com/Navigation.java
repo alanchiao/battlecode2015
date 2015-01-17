@@ -67,7 +67,7 @@ public class Navigation {
 		}
 		this.isAvoidAllAttack = isAvoidAllAttack;
 		possibleMovesAvoidingEnemies = null;
-		rc.setIndicatorString(1, Boolean.toString(isAvoidingObstacle));
+		//rc.setIndicatorString(1, Boolean.toString(isAvoidingObstacle));
 		if (USE_WALL_HUGGING) {
 			wallHuggingToDestination();
 		} else {

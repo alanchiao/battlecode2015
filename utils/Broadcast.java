@@ -34,9 +34,13 @@ public class Broadcast {
 	public static final int soldierRallyLocationChs = 402; // 402 - 403
 	public static final int droneRallyLocationChs = 404; // 404 - 405
 	public static final int launcherRallyLocationChs = 408; // 408- 409
+	public static final int launcherAttackLocationChs = 410;
 	// target commanded by the HQ
-	public static final int groupTargetLocationChs = 410; // 410 - 411
-	public static final int launcherAttackLocationChs = 412;
+	public static final int enemyTowerTargetLocationChs = 412; // 410 - 411
+	public static final int enemyNearHQLocationChs = 414;
+	// target commanded by the Towers
+	public static final int attackedTowerLocationChs = 416;
+	public static final int enemyNearTowerLocationChs = 418;
 	
 	public static final int groupingSoldiersCh = 501;
 	public static final int groupingTanksCh = 502;
@@ -51,12 +55,14 @@ public class Broadcast {
 	public static final int stopDroneProductionCh = 605;
 	public static final int buildBuildingsCloseCh = 606;
 	public static final int yieldToLaunchers = 607;
+	public static final int towerAttacked = 608;
+	public static final int enemyTowerFound = 609;
 	
 	// Channels 700-799 are used for grouping
 	public static final int soldierGroup1Ch = 700;
 	public static final int soldierGroup2Ch = 701;
-	public static final int tankGroup1Ch = 702;
-	public static final int tankGroup2Ch = 703;
+	public static final int tankGroupAttackCh = 702;
+	public static final int tankGroupDefenseCh = 703;
 	public static final int droneGroup1Ch = 704;
 	public static final int droneGroup2Ch = 705;
 	public static final int launcherGroupCh = 706;

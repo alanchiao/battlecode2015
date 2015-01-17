@@ -206,7 +206,7 @@ public class AerialStrategy extends GameStrategy {
 			
 			//if they don't build tanks and launchers
 			if (!enemyThreat) {
-				MapLocation targetTower = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
+				MapLocation targetTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 				if (numDronesG1 < 15 || targetTower == null) {
 					rc.broadcast(Broadcast.droneGroup1Ch, 1);
 					gc.groupUnits(Broadcast.droneGroup1Ch, RobotType.DRONE);
@@ -227,7 +227,7 @@ public class AerialStrategy extends GameStrategy {
 			}
 			//if enemy builds tanks and launchers
 			else {
-				MapLocation targetTower = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
+				MapLocation targetTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 				if (numDronesG2 > 20 && targetTower != null) {
 					rc.broadcast(Broadcast.droneGroup2Ch, 1);
 				}

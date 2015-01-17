@@ -30,10 +30,11 @@ public class Tank extends Unit {
 			if (attackableEnemies.length == 0) {
 
 				if (groupTracker.isGrouped()) {
-					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-					if (hasHQCommand) {
-						MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
-						navigation.moveToDestination(target, false);
+					if (groupTracker.groupID == Broadcast.tankGroupDefenseCh) {
+						defensiveMove();
+					}
+					else if (groupTracker.groupID == Broadcast.tankGroupAttackCh) {
+						attackMove();
 					}
 				}
 				else {

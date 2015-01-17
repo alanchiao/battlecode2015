@@ -30,7 +30,7 @@ public class Soldier extends Unit {
 			boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 			// just always moveToDestination target?
 			if (groupTracker.isGrouped() && hasHQCommand) {
-				MapLocation target = Broadcast.readLocation(rc, Broadcast.groupTargetLocationChs);
+				MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 				navigation.moveToDestination(target, false);
 			}
 			else {

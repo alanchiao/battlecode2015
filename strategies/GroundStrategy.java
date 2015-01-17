@@ -26,8 +26,8 @@ public class GroundStrategy extends GameStrategy {
 	public void executeStrategy() throws GameActionException {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
 		int numTanks = 0;
-		int numTanksG1 = 0;
-		int numTanksG2 = 0;
+		int numTanksDefense = 0;
+		int numTanksAttack = 0;
 		int numBeavers = 0;
 		int numBarracks = 0;
 		int numMiners = 0;
@@ -41,11 +41,11 @@ public class GroundStrategy extends GameStrategy {
 			RobotType type = r.type;
 			if (type == RobotType.TANK) {
 				numTanks++;
-				if (Hashing.find(r.ID) == Broadcast.tankGroup1Ch) {
-					numTanksG1++;
+				if (Hashing.find(r.ID) == Broadcast.tankGroupDefenseCh) {
+					numTanksDefense++;
 				}							
-				else if (Hashing.find(r.ID)  == Broadcast.tankGroup2Ch) {
-					numTanksG2++;
+				else if (Hashing.find(r.ID)  == Broadcast.tankGroupDefenseCh) {
+					numTanksAttack++;
 				}			
 
 			} else if (type == RobotType.MINER) {
@@ -111,13 +111,23 @@ public class GroundStrategy extends GameStrategy {
 				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
 			}
 
-			int[] groupSize = {numTanksG1, numTanksG2};
-			int[] groupCh = {Broadcast.tankGroup1Ch, Broadcast.tankGroup2Ch};
-			if (numTanksG1 > 0 || numTanksG2 > 0) {
+			int[] groupSize = {numTanksAttack, numTanksDefense};
+			int[] groupCh = {Broadcast.tankGroupAttackCh, Broadcast.tankGroupDefenseCh};
+			if (numTanksAttack > 0 || numTanksDefense > 0) {
 				gc.stopGroup(RobotType.TANK);
 			}
 			rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
 			rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
+			if (groupSize[defendGroup] < 6) {
+				gc.groupUnits(groupCh[defendGroup], RobotType.TANK);
+			}
+			else {
+				rc.broadcast(groupCh[defendGroup], 1);
+				if (groupSize[attackGroup] < 10) {
+					
+				}
+			}
+			
 			if (numTanks - groupSize[defendGroup] > 20 && groupSize[attackGroup] == 0) {
 				gc.groupUnits(groupCh[attackGroup], RobotType.TANK);
 				rc.broadcast(groupCh[attackGroup], 1);
