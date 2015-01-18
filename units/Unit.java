@@ -30,7 +30,7 @@ public abstract class Unit extends Robot {
 		enemyHQ = rc.senseEnemyHQLocation();	
 		distanceBetweenHQ = ownHQ.distanceSquaredTo(enemyHQ);
 		prevHealth = 0;
-		navigation = new Navigation(rc, rand);
+		navigation = new Navigation(rc, rand, enemyHQ);
 		groupTracker = new GroupTracker(rc);
 	}
 
@@ -38,7 +38,7 @@ public abstract class Unit extends Robot {
 	public void move() {
 		try {
 			// get information about surrounding walls and broadcast
-			/** internal map
+			/** internal map - do not delete yet
 			MapLocation locations[] = MapLocation.getAllMapLocationsWithinRadiusSq(rc.getLocation(), 2);
 			for (MapLocation location: locations) {
 				if (rc.senseTerrainTile(location) == TerrainTile.VOID) {
@@ -168,7 +168,7 @@ public abstract class Unit extends Robot {
 				//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
 				MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
-				int approachStrategy = 1;
+				int approachStrategy = 2;
 				moveToLocationWithMicro(target, approachStrategy);
 			}
 		}
@@ -231,7 +231,7 @@ public abstract class Unit extends Robot {
 			}
 			
 			// Get almost in range of an enemy, or get closer (?) to the enemies
-			Direction backupMove = null;
+			boolean[] backupMoves = new boolean[8];
 			MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 			for (Direction d : DirectionHelper.directions) {
 				boolean good = false;
@@ -280,27 +280,63 @@ public abstract class Unit extends Robot {
 						return;
 					}
 					else if (reasonable) {
-						backupMove = d;
+						backupMoves[DirectionHelper.directionToInt(d)] = true;
 					}
 				}
 			}
-			if (backupMove != null) {
-				navigation.stopObstacleTracking();
-				rc.move(backupMove);
+			Direction moveDirection = rc.getLocation().directionTo(enemies[0].location);
+			if (backupMoves[DirectionHelper.directionToInt(moveDirection)] && rc.canMove(moveDirection)) {
+				rc.move(moveDirection);
+			    return;
+			}
+			moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 9) % 8];
+			if (backupMoves[DirectionHelper.directionToInt(moveDirection)] && rc.canMove(moveDirection)) {
+			    rc.move(moveDirection);
+			    return;
+			}
+			moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 6) % 8];
+			if (backupMoves[DirectionHelper.directionToInt(moveDirection)] && rc.canMove(moveDirection)) {
+			    rc.move(moveDirection);
 			}
 		}
 		// Take less damage
 		else {
+			if (approachStrategy == 2) { // approach enemy units
+				RobotInfo[] attackableRobots = rc.senseNearbyRobots(myRange, opponent);
+				if (attackableRobots.length == 0) {
+					for (RobotInfo r : enemies) {
+						if (r.type.attackRadiusSquared > myRange) {
+							navigation.stopObstacleTracking();
+							navigation.moveToDestination(r.location, false);
+							return;
+						}
+					}
+				}
+			}
 			int[] damages = new int[9]; // 9th slot for current position
+			boolean[] inAttackRange = new boolean[8];
 			
 			int initDistance = myLocation.distanceSquaredTo(enemyHQ);
-			int enemyTowers = rc.senseEnemyTowerLocations().length;
-			
-			// Must have enough distance to have been missed by sight radius
-			if (initDistance > rc.getType().sensorRadiusSquared && enemyTowers >= 2) {
-				if (enemyTowers >= 5 && initDistance <= 74) {
+			MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+
+			for (MapLocation tower : enemyTowers) {
+				int towerDistance = myLocation.distanceSquaredTo(tower);
+				if (towerDistance <= 34) {
+					for (int i = 0; i < 8; i++) {
+						int newDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(tower);
+						if (newDistance <= 24) {
+							damages[i] += 8;
+						}
+						if (newDistance <= myRange) {
+							inAttackRange[i] = true;
+						}
+					}
+				}
+			}
+			if (initDistance <= 74) {
+				if (enemyTowers.length >= 5) {
 					int towerDamage;
-					if (enemyTowers == 6) {
+					if (enemyTowers.length == 6) {
 						towerDamage = 240;
 					}
 					else {
@@ -324,13 +360,13 @@ public abstract class Unit extends Robot {
 						}
 					}
 				}
-				else if (initDistance <= 52) {
+				else if (enemyTowers.length >= 2 && initDistance <= 52) {
 					int towerDamage;
-					if (enemyTowers == 2) {
-						towerDamage = 24;
+					if (enemyTowers.length == 2) {
+						towerDamage = 12;
 					}
 					else {
-						towerDamage = 36;
+						towerDamage = 18;
 					}
 					if (initDistance <= 35) {
 						damages[8] += towerDamage;
@@ -338,6 +374,13 @@ public abstract class Unit extends Robot {
 					for (int i = 0; i < 8; i++) {
 						if (myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(enemyHQ) <= 35) {
 							damages[i] += towerDamage;
+						}
+					}
+				}
+				else if (initDistance <= 34) {
+					for (int i = 0; i < 8; i++) {
+						if (myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(enemyHQ) <= 24) {
+							damages[i] += 12;
 						}
 					}
 				}
@@ -349,6 +392,9 @@ public abstract class Unit extends Robot {
 					if (newLocationDistance <= radiusSquared) {
 						damages[i] += r.type.attackPower / Math.max(r.type.attackDelay, 1);
 					}
+					if (newLocationDistance <= myRange) {
+						inAttackRange[i] = true;
+					}
 				}
 				if (myLocation.distanceSquaredTo(r.location) <= radiusSquared) {
 					damages[8] += r.type.attackPower / Math.max(r.type.attackDelay, 1);
@@ -358,7 +404,8 @@ public abstract class Unit extends Robot {
 			int bestDirection = 8;
 			int bestDamage = 999999;
 			for (int i = 0; i < 8; i++) {
-				if (rc.canMove(DirectionHelper.directions[i]) && damages[i] <= bestDamage) {
+				if (rc.canMove(DirectionHelper.directions[i]) &&
+						(approachStrategy != 2 || inAttackRange[i]) && damages[i] <= bestDamage) {
 					bestDirection = i;
 					bestDamage = damages[i];
 				}
