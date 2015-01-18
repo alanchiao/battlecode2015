@@ -60,13 +60,15 @@ public class Broadcast {
 	public static final int enemyNearTower = 610;
 	
 	// Channels 700-799 are used for grouping
-	public static final int soldierGroup1Ch = 700;
-	public static final int soldierGroup2Ch = 701;
+	public static final int soldierGroupAttackCh = 700;
+	public static final int soldierGroupDefenseCh = 701;
 	public static final int tankGroupAttackCh = 702;
 	public static final int tankGroupDefenseCh = 703;
 	public static final int droneGroupAttackCh = 704;
 	public static final int droneGroupDefenseCh = 705;
 	public static final int launcherGroupCh = 706;
+	public static final int launcherGroupAttackCh = 707;
+	public static final int launcherGroupDefenseCh = 708;
 	
 	// Channels 800-812
 	public static final int idealMiningLocation = 800;

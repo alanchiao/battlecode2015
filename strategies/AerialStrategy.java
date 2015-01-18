@@ -218,13 +218,13 @@ public class AerialStrategy extends GameStrategy {
 			//if they don't build tanks and launchers
 			if (!enemyThreat) {
 				if (groupSize[defendGroup] < 10) {
-					gc.groupUnits(groupCh[defendGroup], RobotType.DRONE);
+					gc.groupUnits(RobotType.DRONE, 0);
 					rc.broadcast(groupCh[defendGroup], 1);
 				}
 				else {
 					rc.broadcast(groupCh[attackGroup],1);
 					if (numDrones - groupSize[defendGroup] - groupSize[attackGroup] > 10) {
-						gc.groupUnits(groupCh[attackGroup], RobotType.DRONE);
+						gc.groupUnits(RobotType.DRONE, 1);
 					}
 				}
 			}
@@ -238,7 +238,7 @@ public class AerialStrategy extends GameStrategy {
 					rc.setIndicatorString(2, String.valueOf(numDronesDefense));
 					rc.broadcast(Broadcast.droneGroupDefenseCh, 0);
 				}
-				gc.groupUnits(Broadcast.droneGroupDefenseCh, RobotType.DRONE);
+				gc.groupUnits(RobotType.DRONE, 0);
 			}
 		}
 		
