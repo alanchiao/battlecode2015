@@ -18,10 +18,11 @@ public class AerialStrategy extends GameStrategy {
 	private boolean enemyRush;
 	private boolean enemyThreat;
 	private int pathDifficulty;
-	private int closestBeaver;
-	private int scoutBeaver;
 	private int attackGroup;
 	private int defendGroup;
+	
+	private int builderBeaver;
+	private int scoutMiner;
 	
 	public AerialStrategy(RobotController rc, GroupController gc, Headquarters hq) {
 		super(rc, gc, hq);
@@ -31,8 +32,8 @@ public class AerialStrategy extends GameStrategy {
 		this.enemyRush = false;
 		this.enemyThreat = false;
 		this.pathDifficulty = 0;	
-		this.closestBeaver = 0;
-		this.scoutBeaver = 0;
+		this.builderBeaver = 0;
+		this.scoutMiner = 0;
 	}
 	
 	public void executeStrategy() throws GameActionException {
@@ -52,6 +53,11 @@ public class AerialStrategy extends GameStrategy {
 			RobotType type = r.type;
 			if (type == RobotType.MINER) {
 				numMiners++;
+				// one time broadcast for scouting
+				if (scoutMiner == 0) {
+					scoutMiner = r.ID;
+					rc.broadcast(Broadcast.scoutEnemyHQCh, scoutMiner);
+				}
 			} else if (type == RobotType.DRONE) {
 				numDrones++;
 				if (Hashing.find(r.ID) == Broadcast.droneGroupAttackCh) {
@@ -62,13 +68,7 @@ public class AerialStrategy extends GameStrategy {
 				}		
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
-				if (scoutBeaver == 0 && closestBeaver != 0 && r.ID != closestBeaver) {
-					scoutBeaver = r.ID;
-					rc.broadcast(Broadcast.scoutEnemyHQCh, scoutBeaver);
-				}
-				else if (r.ID != scoutBeaver) {
-					closestBeaver = r.ID;
-				}
+				builderBeaver = r.ID;
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
 			} else if (type == RobotType.SUPPLYDEPOT) {
@@ -114,14 +114,14 @@ public class AerialStrategy extends GameStrategy {
 		
 		if (pathDifficulty == 0) {
 			int possibleDifficulty = rc.readBroadcast(Broadcast.scoutEnemyHQCh);
-			if (possibleDifficulty != scoutBeaver) {
+			if (possibleDifficulty != scoutMiner) {
 				pathDifficulty = possibleDifficulty;
 			}
 		}
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
-			if (numBeavers == 0 || scoutBeaver == 0) {
+			if (numBeavers == 0) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(Direction.EAST);
@@ -135,19 +135,18 @@ public class AerialStrategy extends GameStrategy {
 				if (buildDirection != null && ore >= 100) {
 					rc.spawn(buildDirection, RobotType.BEAVER);
 				}
+			} else if (numMinerFactories == 0) {
+				if (ore >= 500) {
+					rc.broadcast(Broadcast.buildMinerFactoriesCh, builderBeaver);
+				}
 			}
 			else if (numHelipads == 0) {
 				if (ore >= 300) {
-					rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
-				}
-			}
-			else if (numMinerFactories == 0) {
-				if (ore >= 500) {
-					rc.broadcast(Broadcast.buildMinerFactoriesCh, closestBeaver);
+					rc.broadcast(Broadcast.buildHelipadsCh, builderBeaver);
 				}
 			}
 			else if (numSupplyDepots == 0 && ore >= 100) {
-				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
+				rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
 			}
 			else {
 				if (enemyThreat && pathDifficulty < 70) { // Build launchers
@@ -155,7 +154,7 @@ public class AerialStrategy extends GameStrategy {
 						if (ore >= 500) {
 							rc.broadcast(Broadcast.slowMinerProductionCh, 0);
 							rc.broadcast(Broadcast.stopDroneProductionCh, 0);
-							rc.broadcast(Broadcast.buildAerospaceLabsCh, closestBeaver);
+							rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
 						}
 						else {
 							rc.broadcast(Broadcast.slowMinerProductionCh, 1);
@@ -163,10 +162,10 @@ public class AerialStrategy extends GameStrategy {
 						}
 					}
 					else if (ore >= 400 + numAerospaceLabs * 300) {
-						rc.broadcast(Broadcast.buildAerospaceLabsCh, closestBeaver);
+						rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
 					}
 					else if (numSupplyDepots < 3 && ore >= 750) {
-						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
+						rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
 					}
 				}
 				else if (enemyRush) { // Build some launchers
@@ -174,7 +173,7 @@ public class AerialStrategy extends GameStrategy {
 						if (ore >= 500) {
 							rc.broadcast(Broadcast.slowMinerProductionCh, 0);
 							rc.broadcast(Broadcast.stopDroneProductionCh, 0);
-							rc.broadcast(Broadcast.buildAerospaceLabsCh, closestBeaver);
+							rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
 						}
 						else {
 							rc.broadcast(Broadcast.slowMinerProductionCh, 1);
@@ -182,18 +181,18 @@ public class AerialStrategy extends GameStrategy {
 						}
 					}
 					else if (ore >= 500 + numHelipads * 200) {
-						rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
+						rc.broadcast(Broadcast.buildHelipadsCh, builderBeaver);
 					}
 					else if (numSupplyDepots < 3 && ore >= 750) {
-						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
+						rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
 					}
 				}
 				else {
 					if (ore >= 500 + numHelipads * 200) {
-						rc.broadcast(Broadcast.buildHelipadsCh, closestBeaver);
+						rc.broadcast(Broadcast.buildHelipadsCh, builderBeaver);
 					}
 					else if (numSupplyDepots < 3 && ore >= 750) {
-						rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
+						rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
 					}
 				}
 			}

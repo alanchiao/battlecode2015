@@ -15,7 +15,7 @@ public class Helipad extends Building {
 
 	@Override
 	protected void actions() throws GameActionException {
-		int[] offsets = {0,1,-1,2,-2,3,-3,4};
+		
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
 		
 		if (Broadcast.isNotInitiated(rc, Broadcast.droneRallyLocationChs)) {
@@ -29,13 +29,7 @@ public class Helipad extends Building {
 		}
 		int threshold = rc.readBroadcast(Broadcast.yieldToLaunchers) == 1 ? 450 : 125;
 		if (rc.isCoreReady() && rc.getTeamOre() >= threshold && rc.readBroadcast(Broadcast.stopDroneProductionCh) != 1) {
-			int offsetIndex = 0;
-			while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.DRONE)) {
-				offsetIndex++;
-			}
-			if (offsetIndex < 8) {
-				rc.spawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.DRONE);
-			}
+			this.greedySpawn(RobotType.DRONE);
 		}
 	}
 

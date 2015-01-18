@@ -55,8 +55,8 @@ public class Navigation {
 			lastLocation = null;
 		}
 	
-		// let it change its behavior if it hasn't moved for some time.
-		if (timeSinceLastMove >= 8) {
+		// optimization: let it change it go back to its previous location if it hasn't moved for some time.
+		if (timeSinceLastMove >= 4) {
 			lastLocation = null;
 		}
 		
@@ -224,8 +224,7 @@ public class Navigation {
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////
-	// Location analysis methods
-	// - 
+	// Location analysis methods: to be potentially used outside this class
 	
 	// treat as passable or not
 	public boolean isPassable(MapLocation location, Direction movementDirection) {
@@ -383,9 +382,9 @@ public class Navigation {
 			isStationaryBlock = false;
 		}
 		if (isAvoidAllAttack) {
-			return isStationaryBlock || isBuilding(potentialObstacle);
+			return isStationaryBlock;
 		} else {
-			return isStationaryBlock || isBuilding(potentialObstacle) || isNearMultipleEnemyTowers(potentialObstacle);
+			return isStationaryBlock || isNearMultipleEnemyTowers(potentialObstacle);
 		}
 	}
 	

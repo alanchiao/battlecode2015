@@ -15,9 +15,6 @@ public class AerospaceLab extends Building {
 
 	@Override
 	protected void actions() throws GameActionException {
-		int[] offsets = {0,1,-1,2,-2,3,-3,4};
-		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
-
 		MapLocation[] myTowers = rc.senseTowerLocations();
 		int numTowersRemaining = myTowers.length;
 		int[] distances = new int[numTowersRemaining];
@@ -58,14 +55,9 @@ public class AerospaceLab extends Building {
 //			rc.broadcast(Broadcast.launcherRallyYCh, yLoc);
 //			rc.setIndicatorString(0,String.valueOf(rally));
 //		}
+		
 		if (rc.isCoreReady() && rc.getTeamOre() >= 400) {
-			int offsetIndex = 0;
-			while (offsetIndex < 8 && !rc.canSpawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.LAUNCHER)) {
-				offsetIndex++;
-			}
-			if (offsetIndex < 8) {
-				rc.spawn(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8], RobotType.LAUNCHER);
-			}
+			this.greedySpawn(RobotType.LAUNCHER);
 		}
 	}
 

@@ -32,50 +32,17 @@ public class GroupController {
 		this.ptTankA = 0;
 		this.ptTankB = 0;
 		this.ptDroneA = 0;
-		this.droneGroupA = new int[256];;
+		this.droneGroupA = new int[256];
 		this.ptDroneB = 0;
-		this.droneGroupB = new int[256];;
+		this.droneGroupB = new int[256];
 	}
-	public void setAttackGroup(int ID_Broadcast, RobotType rt) {
+
+	public void groupUnits(int ID_Broadcast, RobotType rt) {
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
 			if (type == rt) {
-				//if robot is in the hashmap but not in the group
-				if (Hashing.find(r.ID) == 0) {
-					Hashing.put(r.ID, ID_Broadcast);
-					tankGroupA[ptTankA] = r.ID;
-					ptTankA++;
-				}
-			}
-		}
-		
-		int broadcastCh;
-		if (rt == RobotType.DRONE) {
-			broadcastCh = Broadcast.groupingDronesCh;
-		}
-		else if (rt == RobotType.LAUNCHER) {
-			broadcastCh = Broadcast.groupingLaunchersCh;
-		}
-		else if (rt == RobotType.TANK) {
-			broadcastCh = Broadcast.groupingTanksCh;
-		}
-		else {
-			broadcastCh = 9999;
-		}
-		try {
-			rc.broadcast(broadcastCh, ID_Broadcast);
-		}
-		catch (GameActionException e) {
-			return;
-		}
-	}
-	public void groupUnits(int ID_Broadcast, RobotType rt) {
-		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
-		if (strategy == 1) {
-			for (RobotInfo r : myRobots) {
-				RobotType type = r.type;
-				if (type == RobotType.TANK) {
+				if (rt == RobotType.TANK) {
 					//update hashmap with (id, group id) pair;
 					// if tank is in the hashmap but not in a group
 					if (Hashing.find(r.ID) == 0) {
@@ -91,12 +58,7 @@ public class GroupController {
 						}
 					}
 				} 
-			}
-		} 
-		else if (strategy == 2) {
-			for (RobotInfo r : myRobots) {
-				RobotType type = r.type;
-				if (type == RobotType.DRONE) {
+				else if (rt == RobotType.DRONE) {
 					//update hashmap with (id, group id) pair;
 					// if tank is in the hashmap but not in a group
 					if (Hashing.find(r.ID) == 0) {
