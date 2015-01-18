@@ -18,7 +18,7 @@ if [ $# -ne 0 ]
 fi
 
 rm -rf .git
-find * -type f -exec sed -i 's/team158/oldteam/g' {} \;
+find . -type f -print0 | LANG=C xargs -0 sed -i '' 's/team158/oldteam/g'
 
 cd ..
 

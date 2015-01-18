@@ -47,6 +47,7 @@ public class Navigation {
 	
 	public void moveToDestination(MapLocation nextDestination, boolean isAvoidAllAttack) {
 		rc.setIndicatorString(0, Boolean.toString(isAvoidingObstacle));
+		rc.setIndicatorString(1, Boolean.toString(isAvoidAllAttack));
 		
 		// optimization: stop avoiding current obstacle if destination changes
 		if (!nextDestination.equals(destination)) { // then no longer obstacle
@@ -92,7 +93,6 @@ public class Navigation {
 						return;
 					}
 					// move in that direction. newLocation = attemptedLocation. Handle updating logic
-
 					else if (isPassable(attemptedLocation, attemptedDir)) {
 						// search for next monitored obstacle, which is one of four directions from next location
 						Direction obstacleSearch[] = {Direction.NORTH, Direction.EAST,	Direction.SOUTH, Direction.WEST};
@@ -222,9 +222,7 @@ public class Navigation {
 			if(!isAvoidingAttack(enemies, 5, location)) {
 				return false;
 			}
-		} else {
-			isPassable = isPassable && !isNearMultipleEnemyTowers(location);	
-		}
+		} 
 		return isPassable;
 	}
 	
@@ -345,34 +343,13 @@ public class Navigation {
 		return possibleMovesAvoidingEnemies;
 	}
 	
-	// checks if location is a danger with respect to the number of towers
-	// that can attack a location
-	public boolean isNearMultipleEnemyTowers(MapLocation location) {
-		MapLocation[] enemyTowerLocs = rc.senseEnemyTowerLocations();
-		int numCloseEnemyTowers = 0;
-		for (MapLocation enemyTowerLo: enemyTowerLocs) {
-			if (enemyTowerLo.distanceSquaredTo(location) <= 24) {
-				numCloseEnemyTowers++;
-				if (numCloseEnemyTowers > MAX_TOWERS_IN_RANGE) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
 	
 	// check if the location is somewhere a bot cannot go more or less for the entire game
 	public boolean isStationaryBlock(MapLocation potentialObstacle) throws GameActionException{
-		boolean isStationaryBlock;
-		if (rc.getType() != RobotType.DRONE) {
-			isStationaryBlock = !rc.senseTerrainTile(potentialObstacle).isTraversable();
+		if (rc.getType() == RobotType.DRONE) {
+			return false;
 		} else {
-			isStationaryBlock = false;
-		}
-		if (isAvoidAllAttack) {
-			return isStationaryBlock;
-		} else {
-			return isStationaryBlock || isNearMultipleEnemyTowers(potentialObstacle);
+			return !rc.senseTerrainTile(potentialObstacle).isTraversable();
 		}
 	}
 	
@@ -397,7 +374,6 @@ public class Navigation {
 	}
 	
 	// check if is unit that moves often
-	// MAY NEED TO EDIT
 	public boolean isMobileUnit(MapLocation potentialUnit) throws GameActionException{
 		RobotInfo robot = rc.senseRobotAtLocation(potentialUnit);
 		if (robot == null) {

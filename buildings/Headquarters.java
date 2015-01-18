@@ -9,6 +9,7 @@ import team158.strategies.MinerTest;
 import team158.strategies.NavigationTest;
 import team158.units.Unit;
 import team158.utils.Broadcast;
+import team158.com.InternalMap;
 
 public class Headquarters extends Building {
 	
@@ -33,9 +34,11 @@ public class Headquarters extends Building {
 	// number of enemy towers left
 	private int enemyTowersRemaining;
 	
+	private InternalMap internalMap;
+	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
-		this.strategy = GROUND_STRATEGY;
+		this.strategy = AERIAL_STRATEGY;
 		this.gc = new GroupController(rc, strategy);
 		
 		switch(this.strategy) {
@@ -48,6 +51,7 @@ public class Headquarters extends Building {
 			case NAVIGATION_STRATEGY:	gameStrategy = new NavigationTest(rc, gc, this);
 										break;
 		}
+		
 		towerOrder = new MapLocation[6];
 		numTowersDefeatable = 0;
 		enemyTowersRemaining = 7;

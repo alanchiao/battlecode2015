@@ -15,7 +15,6 @@ public class Helipad extends Building {
 
 	@Override
 	protected void actions() throws GameActionException {
-		
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
 		
 		if (Broadcast.isNotInitiated(rc, Broadcast.droneRallyLocationChs)) {

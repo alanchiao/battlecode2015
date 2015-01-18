@@ -24,6 +24,8 @@ public class NavigationTest extends GameStrategy{
 		int numBeavers = 0;
 		int numMiners = 0;
 		int numMinerFactories = 0;
+		int numHelipads = 0;
+		int numAerospaceLabs = 0;
 		
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
@@ -39,7 +41,11 @@ public class NavigationTest extends GameStrategy{
 				builderBeaver = r.ID;
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
-			}
+			} else if (type == RobotType.HELIPAD) {
+				numHelipads++;
+			} else if (type == RobotType.AEROSPACELAB) {
+				numAerospaceLabs++;
+			} 
 		}
 		
 		rc.broadcast(Broadcast.numMinersCh, numMiners);
@@ -63,6 +69,14 @@ public class NavigationTest extends GameStrategy{
 			} else if (numMinerFactories == 0) {
 				if (ore >= 500) {
 					rc.broadcast(Broadcast.buildMinerFactoriesCh, builderBeaver);
+				}
+			} else if (numHelipads == 0) {
+				if (ore >= 300) {
+					rc.broadcast(Broadcast.buildHelipadsCh, builderBeaver);
+				}
+			} else {
+				if (ore >= 500) {
+					rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
 				}
 			}
 		}

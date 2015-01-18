@@ -29,11 +29,12 @@ public class Builder {
 		this.rc = rc;
 		this.navigation = navigation;
 		this.hqLocation = hqLocation;
+		
 		this.safeLocations = new MapLocation[NUMBER_BUILDINGS_MAX];
+		updateSafeBuildLocations();
+		
 		this.isBuilding = false;
 		this.buildingType = null;
-		
-		updateSafeBuildLocations();
 	}
 	
 	// choose to building a building type

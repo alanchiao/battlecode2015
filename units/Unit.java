@@ -2,6 +2,7 @@ package team158.units;
 import java.util.Random;
 
 import team158.Robot;
+import team158.com.InternalMap;
 import team158.units.com.GroupTracker;
 import team158.units.com.Navigation;
 import team158.utils.Broadcast;
@@ -13,11 +14,13 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.common.TerrainTile;
 
 public abstract class Unit extends Robot {
 		
 	protected Navigation navigation;
 	protected GroupTracker groupTracker;
+	protected InternalMap internalMap;
 	protected double prevHealth;
 	
 	public Unit (RobotController newRC) {
@@ -34,6 +37,15 @@ public abstract class Unit extends Robot {
 	@Override
 	public void move() {
 		try {
+			// get information about surrounding walls and broadcast
+			/** internal map
+			MapLocation locations[] = MapLocation.getAllMapLocationsWithinRadiusSq(rc.getLocation(), 2);
+			for (MapLocation location: locations) {
+				if (rc.senseTerrainTile(location) == TerrainTile.VOID) {
+					internalMap.broadcastLocation(location, 1);
+				}
+			} **/
+			
 			// Transfer supply stage
 			int mySupply = (int) rc.getSupplyLevel();
 			RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
