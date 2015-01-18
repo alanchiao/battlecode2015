@@ -82,7 +82,6 @@ public class Launcher extends Unit {
 				} else {
 					 target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
 				}
-				navigation.moveToDestination(target, false);
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
 				target = this.ownHQ;
 			} else {
