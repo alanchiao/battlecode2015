@@ -77,18 +77,30 @@ public class Launcher extends Unit {
 				// if headquarter says attack, read from attack channel, otherwise
 				// rally normally
 				boolean hasHQCommand = rc.readBroadcast(Broadcast.launcherGroupCh) == 1;
+				rc.setIndicatorString(1, String.valueOf(hasHQCommand));
+				
 				if (hasHQCommand) {
 					 target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
 				} else {
 					 target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
 				}
-				navigation.moveToDestination(target, false);
+				target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+				rc.setIndicatorString(1, String.valueOf(rc.readBroadcast(Broadcast.towerAttacked)));
+				boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
+				boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
+				if (towerAttacked) {
+					target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
+				}
+				else if (enemyNear) {
+					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
+				}	
+				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
 				target = this.ownHQ;
 			} else {
 				target = this.enemyHQ;
 			}
-			moveToLocationWithMicro(target, 0);
+			navigation.moveToDestination(target, false);
 		}
 	}
 

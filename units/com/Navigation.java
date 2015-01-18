@@ -114,8 +114,6 @@ public class Navigation {
 						// if there is a unit there blocking the hug path, move greedily
 						if (isMobileUnit(attemptedLocation)) {
 							isRotateRight = !isRotateRight;
-							// stopObstacleTracking();
-							// greedyMoveToDestination();
 							return;
 						}
 						// move in that direction. newLocation = attemptedLocation. Handle updating logic
