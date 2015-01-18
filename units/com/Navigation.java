@@ -51,7 +51,9 @@ public class Navigation {
 	// main high-level navigational method
 	public void moveToDestination(MapLocation nextDestination, boolean isAvoidAllAttack) {
 		rc.setIndicatorString(0, Boolean.toString(isAvoidingObstacle));
-		rc.setIndicatorString(1, Boolean.toString(isAvoidAllAttack));
+		if (monitoredObstacle != null) {
+			rc.setIndicatorDot(monitoredObstacle, 0, 0, 0);
+		}
 		
 		// optimization: stop avoiding current obstacle if destination changes
 		if (!nextDestination.equals(destination)) { // then no longer obstacle
@@ -87,7 +89,7 @@ public class Navigation {
 				// done with obstacle given this condition:
 				// 1. can move in direction of destination and
 				// 2. closer to destination than before when we first hit the obstacle
-				if(rc.canMove(directDirection) && rc.getLocation().distanceSquaredTo(destination) <= origLocation.distanceSquaredTo(destination)) {
+				if(rc.canMove(directDirection) && rc.getLocation().distanceSquaredTo(destination) < origLocation.distanceSquaredTo(destination)) {
 					stopObstacleTracking();
 					return;
 				}

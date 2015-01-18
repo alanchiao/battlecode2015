@@ -29,7 +29,6 @@ public class Beaver extends Unit {
 				builder.continueBuilding();
 				return;
 			}
-			
 			if (Broadcast.hasSoloCommand(rc, Broadcast.buildAerospaceLabsCh)) {
 				rc.broadcast(Broadcast.buildAerospaceLabsCh, 0);
 				builder.buildBuilding(RobotType.AEROSPACELAB);
