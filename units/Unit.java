@@ -30,7 +30,7 @@ public abstract class Unit extends Robot {
 		enemyHQ = rc.senseEnemyHQLocation();	
 		distanceBetweenHQ = ownHQ.distanceSquaredTo(enemyHQ);
 		prevHealth = 0;
-		navigation = new Navigation(rc, rand);
+		navigation = new Navigation(rc, rand, enemyHQ);
 		groupTracker = new GroupTracker(rc);
 	}
 
@@ -38,7 +38,7 @@ public abstract class Unit extends Robot {
 	public void move() {
 		try {
 			// get information about surrounding walls and broadcast
-			/** internal map
+			/** internal map - do not delete yet
 			MapLocation locations[] = MapLocation.getAllMapLocationsWithinRadiusSq(rc.getLocation(), 2);
 			for (MapLocation location: locations) {
 				if (rc.senseTerrainTile(location) == TerrainTile.VOID) {

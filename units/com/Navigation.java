@@ -15,26 +15,30 @@ public class Navigation {
 	public final boolean USE_WALL_HUGGING = true;
 	public final int MAX_TOWERS_IN_RANGE = 3; // 3 towers that can attack you at once in some maps we win on
 	
+	// information needed from Unit
 	public RobotController rc;
 	public Random rand;
+	public MapLocation enemyHQ;
 	
 	// states
 	public boolean isAvoidingObstacle; // whether in state of avoiding obstacle
 	public boolean isAvoidAllAttack;
 	
+	
 	public MapLocation destination; // desired point to reach
-	public MapLocation origLocation;
-	
+	public MapLocation origLocation; // original location where you encountered obstacle
 	public MapLocation monitoredObstacle; // obstacle tile to move relative to
+	public boolean isRotateRight; // turn right or left relative to obstacle
 	
-	public MapLocation enemyHQ;
+	
+	
 	// precomputation per turn
 	public boolean[] possibleMovesAvoidingEnemies;
 	
-	public Navigation(RobotController r, Random rand) {
-		rc = r;
-		enemyHQ = rc.senseEnemyHQLocation();
+	public Navigation(RobotController rc, Random rand, MapLocation enemyHQ) {
+		this.rc = rc;
 		this.rand = rand;
+		this.enemyHQ = enemyHQ;
 		
 		isAvoidingObstacle = false;
 		isAvoidAllAttack = false;
@@ -43,6 +47,8 @@ public class Navigation {
 		possibleMovesAvoidingEnemies = null;
 	}
 	
+	
+	// main high-level navigational method
 	public void moveToDestination(MapLocation nextDestination, boolean isAvoidAllAttack) {
 		rc.setIndicatorString(0, Boolean.toString(isAvoidingObstacle));
 		rc.setIndicatorString(1, Boolean.toString(isAvoidAllAttack));
@@ -52,13 +58,16 @@ public class Navigation {
 			stopObstacleTracking();
 		}
 		
-		destination = nextDestination;
 		// reached destination
-		if (destination.equals(rc.getLocation())) {
+		if (nextDestination.equals(rc.getLocation())) {
+			stopObstacleTracking();
 			return;
 		}
+		
+		destination = nextDestination;
 		this.isAvoidAllAttack = isAvoidAllAttack;
-		possibleMovesAvoidingEnemies = null;
+		this.possibleMovesAvoidingEnemies = null;
+		
 		if (USE_WALL_HUGGING) {
 			wallHuggingToDestination();
 		} else {
@@ -75,7 +84,9 @@ public class Navigation {
 			MapLocation directLocation = myLocation.add(directDirection);
 			if (isAvoidingObstacle) { // then hug wall in counterclockwise motion
 				
-				// done with obstacle given this condition
+				// done with obstacle given this condition:
+				// 1. can move in direction of destination and
+				// 2. closer to destination than before when we first hit the obstacle
 				if(rc.canMove(directDirection) && rc.getLocation().distanceSquaredTo(destination) <= origLocation.distanceSquaredTo(destination)) {
 					stopObstacleTracking();
 					return;
@@ -84,7 +95,11 @@ public class Navigation {
 				Direction dirToObstacle = rc.getLocation().directionTo(monitoredObstacle);
 				Direction attemptedDir = dirToObstacle;
 				for (int i = 0; i < 4; i++) {
-					attemptedDir = attemptedDir.rotateRight();
+					if (isRotateRight) {
+						attemptedDir = attemptedDir.rotateRight();
+					} else {
+						attemptedDir = attemptedDir.rotateLeft();
+					}
 					MapLocation attemptedLocation = myLocation.add(attemptedDir);
 					if (isObstacle(attemptedLocation, attemptedDir)) {
 						monitoredObstacle = attemptedLocation;
@@ -162,6 +177,13 @@ public class Navigation {
 		isAvoidingObstacle = true;
 		monitoredObstacle = obstacle;
 		origLocation = rc.getLocation();
+		int distanceIfTurnRight = origLocation.add(collisionDirection.rotateRight()).distanceSquaredTo(destination);
+		int distanceIfTurnLeft = origLocation.add(collisionDirection.rotateLeft()).distanceSquaredTo(destination);
+		if (distanceIfTurnRight < distanceIfTurnLeft) {
+			isRotateRight = true;
+		} else {
+			isRotateRight = false;
+		}
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////

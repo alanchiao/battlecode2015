@@ -50,9 +50,11 @@ public class Miner extends Unit {
 				// uses symmetrical properties of map. doubles distance it had to travel
 				// to get there. May be delayed by enemy units, but shouldn't be much
 				// since early game
+				/**
 				if (rc.getLocation().distanceSquaredTo(enemyHQ) <= rc.getLocation().distanceSquaredTo(ownHQ)) {
 					rc.broadcast(Broadcast.scoutEnemyHQCh, stepsUntilEnemyHQ * 2);
 				}
+				**/
 			}
 			else if (myOre >= 10) {
 				int ore = rc.readBroadcast(Broadcast.minerOreX100Ch);
