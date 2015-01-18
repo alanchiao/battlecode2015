@@ -55,4 +55,8 @@ public class Drone extends Unit {
 			moveToLocationWithMicro(target, 1);
 		}
 	}
+	protected void droneMicro(MapLocation target) {
+		RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.DRONE.sensorRadiusSquared, rc.getTeam().opponent());
+		
+	}
 }

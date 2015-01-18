@@ -35,7 +35,7 @@ public class Headquarters extends Building {
 	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
-		this.strategy = GROUND_STRATEGY;
+		this.strategy = AERIAL_STRATEGY;
 		this.gc = new GroupController(rc, strategy);
 		
 		switch(this.strategy) {

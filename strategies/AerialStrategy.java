@@ -215,31 +215,40 @@ public class AerialStrategy extends GameStrategy {
 				}
 			}
 			
-			//if they don't build tanks and launchers
-			if (!enemyThreat) {
-				if (groupSize[defendGroup] < 10) {
-					gc.groupUnits(RobotType.DRONE, 0);
-					rc.broadcast(groupCh[defendGroup], 1);
-				}
-				else {
-					rc.broadcast(groupCh[attackGroup],1);
-					if (numDrones - groupSize[defendGroup] - groupSize[attackGroup] > 10) {
-						gc.groupUnits(RobotType.DRONE, 1);
-					}
-				}
-			}
-			//if enemy builds tanks and launchers
-			else {
-				MapLocation targetTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-				if (numDronesDefense > 20 && targetTower != null) {
-					rc.broadcast(Broadcast.droneGroupDefenseCh, 1);
-				}
-				else if (numDronesDefense <= 15){
-					rc.setIndicatorString(2, String.valueOf(numDronesDefense));
-					rc.broadcast(Broadcast.droneGroupDefenseCh, 0);
-				}
+			if (numDronesAttack < 5) {
 				gc.groupUnits(RobotType.DRONE, 0);
+				rc.broadcast(Broadcast.droneGroupAttackCh, 1);
 			}
+			else {
+				gc.groupUnits(RobotType.DRONE, 1);
+				rc.broadcast(Broadcast.droneGroupDefenseCh, 1);
+			}		
+			//if they don't build tanks and launchers
+//			if (!enemyThreat) {
+//				if (groupSize[defendGroup] < 10) {
+//					gc.groupUnits(RobotType.DRONE, 0);
+//					rc.broadcast(groupCh[defendGroup], 1);
+//				}
+//				else {
+//					rc.broadcast(groupCh[attackGroup],1);
+//					if (numDrones - groupSize[defendGroup] - groupSize[attackGroup] > 10) {
+//						gc.groupUnits(RobotType.DRONE, 1);
+//					}
+//				}
+//			}
+//			//if enemy builds tanks and launchers
+//			else {
+
+//				MapLocation targetTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
+//				if (numDronesDefense > 20 && targetTower != null) {
+//					rc.broadcast(Broadcast.droneGroupDefenseCh, 1);
+//				}
+//				else if (numDronesDefense <= 15){
+//					rc.setIndicatorString(2, String.valueOf(numDronesDefense));
+//					rc.broadcast(Broadcast.droneGroupDefenseCh, 0);
+//				}
+//				gc.groupUnits(RobotType.DRONE, 0);
+//			}
 		}
 		
 	}
