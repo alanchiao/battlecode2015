@@ -93,7 +93,7 @@ public class Navigation {
 						if (isMobileUnit(attemptedLocation)) {
 							stopObstacleTracking();
 							greedyMoveToDestination();
-							rc.setIndicatorDot(monitoredObstacle, 0, 0, 0);
+							//rc.setIndicatorDot(monitoredObstacle, 0, 0, 0);
 							return;
 						}
 						// move in that direction. newLocation = attemptedLocation. Handle updating logic

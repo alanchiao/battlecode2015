@@ -55,8 +55,32 @@ public class Drone extends Unit {
 			moveToLocationWithMicro(target, 1);
 		}
 	}
-	protected void droneMicro(MapLocation target) {
-		RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.DRONE.sensorRadiusSquared, rc.getTeam().opponent());
-		
-	}
+	
+//	protected void droneRushMicro(MapLocation target) {
+//		try {
+//			RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.DRONE.sensorRadiusSquared, rc.getTeam().opponent());
+//			MapLocation myLocation = rc.getLocation();
+//			if (enemies.length == 0) {
+//				rc.move(myLocation.directionTo(target));
+//			}
+//			else if (enemies.length == 1) {
+//				RobotInfo enemy = enemies[0];
+//				enemy.ID 
+//				if (enemy.weaponDelay > 2) {
+//					moveToLocationWithMicro(enemy.location, 1);
+//				}
+//				else {
+//					moveToLocationWithMicro(enemy.location, 0);
+//				}
+//			}
+//			else {
+//				for (RobotInfo r : enemies) {
+//					rc.move();
+//				}
+//			}
+//		}
+//		catch (Exception e) {
+//			return;
+//		}
+//	}
 }

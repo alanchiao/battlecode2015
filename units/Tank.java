@@ -37,6 +37,18 @@ public class Tank extends Unit {
 			}
 			else {
 				target = groupTracker.getRallyPoint();
+				boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
+				boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
+				if (towerAttacked) {
+					target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
+				}
+				else if (enemyNear) {
+					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
+				}
+//				else if (enemyAround) {
+//					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
+//				}			
+				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
 				int approachStrategy = 0;
 				moveToLocationWithMicro(target, approachStrategy);
 			}
