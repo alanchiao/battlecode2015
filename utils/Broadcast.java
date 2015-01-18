@@ -74,6 +74,12 @@ public class Broadcast {
 	public static final int idealMiningLocation = 800;
 	public static final int idealMiningOreAverage = 802;
 	
+	
+	// Channels 8000 -  65121 on for internal map representation (remember 9999 is used somewhere)
+	public static final int internalMapChs = 8000;
+	public static final int internalMapHQCh = 36880;
+	
+	
 	// check if channel has not been initiated yet
 	public static boolean isNotInitiated(RobotController rc, int channelStart) throws GameActionException {
 		return rc.readBroadcast(channelStart) == 0;
