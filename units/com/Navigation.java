@@ -92,6 +92,12 @@ public class Navigation {
 					return;
 				}
 				
+				// wall hugging - consistently hug by rotating right or left until overcome
+				// condition above.
+				//
+				// look at direction to obstacle and rotate one direction until you can move
+				// move in that new direction. Any obstacles you see as you rotate the direction
+				// become the new "monitored obstacle" to hug.
 				Direction dirToObstacle = rc.getLocation().directionTo(monitoredObstacle);
 				Direction attemptedDir = dirToObstacle;
 				for (int i = 0; i < 4; i++) {
@@ -101,14 +107,15 @@ public class Navigation {
 						attemptedDir = attemptedDir.rotateLeft();
 					}
 					MapLocation attemptedLocation = myLocation.add(attemptedDir);
+					
 					if (isObstacle(attemptedLocation, attemptedDir)) {
 						monitoredObstacle = attemptedLocation;
 					} else {
 						// if there is a unit there blocking the hug path, move greedily
 						if (isMobileUnit(attemptedLocation)) {
-							stopObstacleTracking();
-							greedyMoveToDestination();
-							rc.setIndicatorDot(monitoredObstacle, 0, 0, 0);
+							isRotateRight = !isRotateRight;
+							// stopObstacleTracking();
+							// greedyMoveToDestination();
 							return;
 						}
 						// move in that direction. newLocation = attemptedLocation. Handle updating logic
@@ -116,7 +123,6 @@ public class Navigation {
 							if (rc.canMove(attemptedDir)) {
 								rc.move(attemptedDir);
 							}
-							rc.setIndicatorDot(monitoredObstacle, 0, 0, 0);
 							return;
 						}
 					}
@@ -173,17 +179,40 @@ public class Navigation {
 		monitoredObstacle = null;
 	}
 	
-	public void startObstacleTracking(MapLocation obstacle, Direction collisionDirection) {
+	public void startObstacleTracking(MapLocation obstacle, Direction collisionDirection) throws GameActionException {
 		isAvoidingObstacle = true;
 		monitoredObstacle = obstacle;
 		origLocation = rc.getLocation();
-		int distanceIfTurnRight = origLocation.add(collisionDirection.rotateRight()).distanceSquaredTo(destination);
-		int distanceIfTurnLeft = origLocation.add(collisionDirection.rotateLeft()).distanceSquaredTo(destination);
+		
+		// turn in direction that brings it closer to destination, unless
+		// it is blocked by a mobile unit. then, go the other direction (to prevent
+		// blockades)
+		
+		MapLocation locationIfTurnRight = origLocation.add(collisionDirection.rotateRight());
+		MapLocation locationIfTurnLeft = origLocation.add(collisionDirection.rotateLeft());
+		
+		int distanceIfTurnRight = locationIfTurnRight.distanceSquaredTo(destination);
+		int distanceIfTurnLeft = locationIfTurnLeft.distanceSquaredTo(destination);
 		if (distanceIfTurnRight < distanceIfTurnLeft) {
 			isRotateRight = true;
 		} else {
 			isRotateRight = false;
 		}
+		
+		
+		// prevent two groups of units trying to avoid the same obstacle
+		// one that is rotating right and one that is rotating left
+		// from blocking each other out
+		/**
+		if (isRotateRight) {
+			if (isMobileUnit(locationIfTurnRight)) {
+				isRotateRight = false;
+			}
+		} else {
+			if (isMobileUnit(locationIfTurnLeft)) {
+				isRotateRight = true;
+			}
+		} **/
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -361,6 +390,7 @@ public class Navigation {
 			   type == RobotType.DRONE ||
 			   type == RobotType.SOLDIER ||
 			   type == RobotType.LAUNCHER ||
+			   type == RobotType.TANK ||
 			   type == RobotType.MINER;
 	}
 }
