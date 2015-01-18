@@ -12,29 +12,24 @@ import team158.utils.Broadcast;
 import team158.com.InternalMap;
 
 public class Headquarters extends Building {
-	
-	public final static int TIME_UNTIL_LAUNCHERS_GROUP = 1500;
-	public final static int TIME_UNTIL_COLLECT_SUPPLY = 1650;
-	public final static int TIME_UNTIL_FULL_ATTACK = 1800;
-	
+
 	public final static int GROUND_STRATEGY = 1;
 	public final static int AERIAL_STRATEGY = 2;
 	public final static int MINER_STRATEGY = 3;
 	public final static int NAVIGATION_STRATEGY = 4;
 	
-	private int strategy;
+	public final static int TIME_UNTIL_LAUNCHERS_GROUP = 1500;
+	public final static int TIME_UNTIL_COLLECT_SUPPLY = 1650;
+	public final static int TIME_UNTIL_FULL_ATTACK = 1800;
+	
 	private GroupController gc;
 	private GameStrategy gameStrategy;
+	private int strategy;
 
-	// order of which enemy towers can be defeated
-	private MapLocation[] towerOrder;
-	
-	// number of enemy towers defeatable
+	private MapLocation[] towerOrder; // order of which enemy towers can be defeated
+
 	private int numTowersDefeatable;
-	// number of enemy towers left
 	private int enemyTowersRemaining;
-	
-	private InternalMap internalMap;
 	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
@@ -66,7 +61,6 @@ public class Headquarters extends Building {
 		}
 		rc.broadcast(Broadcast.idealMiningOreAverage, 0);
 		broadcastVulnerableEnemyTowerAttack();
-//		/broadcastPotentialTowerAttack();
 		
 		RobotInfo closestEnemy = super.findClosestEnemy(100);
 		MapLocation closestEnemyLocation;
@@ -75,7 +69,6 @@ public class Headquarters extends Building {
 		} else {
 			closestEnemyLocation = closestEnemy.location;
 		}
-		//rc.setIndicatorString(0, String.valueOf(closestEnemyLocation));
 		Broadcast.broadcastLocation(rc,  Broadcast.enemyNearHQLocationChs, closestEnemyLocation);
 		
 		int mySupply = (int) rc.getSupplyLevel();
@@ -288,6 +281,7 @@ public class Headquarters extends Building {
 			}
 		}
 	}
+	
 	protected boolean inTowerOrder(MapLocation m) {
 		for (int i = 0; i < numTowersDefeatable; i++) {
 			if (towerOrder[i] == m) return true;
