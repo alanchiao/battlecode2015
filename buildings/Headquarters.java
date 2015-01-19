@@ -10,7 +10,6 @@ import team158.strategies.MinerTest;
 import team158.strategies.NavigationTest;
 import team158.units.Unit;
 import team158.utils.Broadcast;
-import team158.com.InternalMap;
 
 public class Headquarters extends Building {
 
@@ -23,6 +22,7 @@ public class Headquarters extends Building {
 	public final static int TIME_UNTIL_LAUNCHERS_GROUP = 1500;
 	public final static int TIME_UNTIL_COLLECT_SUPPLY = 1650;
 	public final static int TIME_UNTIL_FULL_ATTACK = 1800;
+	private final static int ORE_WINDOW = 100;
 	
 	private GroupController gc;
 	private GameStrategy gameStrategy;
@@ -32,6 +32,10 @@ public class Headquarters extends Building {
 
 	private int numTowersDefeatable;
 	private int enemyTowersRemaining;
+
+	private double[] oreMined;
+	private double oreRate;
+	private int orePointer;
 	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
@@ -54,6 +58,10 @@ public class Headquarters extends Building {
 		towerOrder = new MapLocation[6];
 		numTowersDefeatable = 0;
 		enemyTowersRemaining = 7;
+		
+		oreMined = new double[ORE_WINDOW];
+		oreRate = 5;
+		orePointer = 0;
 	}
 	
 	@Override
@@ -188,6 +196,10 @@ public class Headquarters extends Building {
 			}
 		}
 
+		// Compute rate of ore generation
+		oreMined[orePointer] = rc.readBroadcast(Broadcast.minerOreX1000Ch) / 1000.0;
+		oreRate = oreRate + (oreMined[orePointer] - oreMined[(orePointer + ORE_WINDOW - 1) % ORE_WINDOW]) / ORE_WINDOW;
+		orePointer = (orePointer + 1) % ORE_WINDOW;
 		this.gameStrategy.executeStrategy();
 	}
 	

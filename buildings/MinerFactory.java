@@ -16,12 +16,9 @@ public class MinerFactory extends Building {
 	protected void actions() throws GameActionException {
 		int numMiners = rc.readBroadcast(Broadcast.numMinersCh);
 		int miners = rc.readBroadcast(Broadcast.minersProducedCh);
-		int oreX100 = rc.readBroadcast(Broadcast.minerOreX100Ch);
-		boolean slowDownMining = rc.readBroadcast(Broadcast.slowMinerProductionCh) == 1;
+		int oreX1000 = rc.readBroadcast(Broadcast.minerOreX1000Ch);
 		double myOre = rc.getTeamOre();
-		int threshold = rc.readBroadcast(Broadcast.numLaunchersCh) > 0 && rc.readBroadcast(Broadcast.numLaunchersCh) < 8 ? 450 : 50;
-		if (rc.isCoreReady() && myOre >= threshold && ((numMiners < 10 && !slowDownMining)
-				|| miners == 0 || (oreX100 / miners >= 4000 && numMiners < hqDistance / 2))) {
+		if (rc.isCoreReady() && myOre >= 50 && (numMiners < 10 || (oreX1000 / miners >= 25000 && numMiners < hqDistance))) {
 			int[] offsets = {0,1,-1,2,-2,3,-3,4};
 			int offsetIndex = 0;
 			int dirint = rand.nextInt(8);
@@ -34,5 +31,4 @@ public class MinerFactory extends Building {
 			}
 		}
 	}
-
 }

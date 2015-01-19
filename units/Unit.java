@@ -7,7 +7,6 @@ import team158.units.com.GroupTracker;
 import team158.units.com.Navigation;
 import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
-import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -272,19 +271,18 @@ public abstract class Unit extends Robot {
 				}
 				
 				boolean isGoodMove = false;
-				boolean isReasonableMove = false;
+				boolean isReasonableMove = true;
 				
 				// sort of strange heuristic?
 				for (RobotInfo r : enemies) {
 					int potentialLocationDistance = potentialLocation.distanceSquaredTo(r.location);
 					if (potentialLocationDistance <= r.type.attackRadiusSquared) {
+						isGoodMove = false;
+						isReasonableMove = false;
 						break;
 					}
 					if (potentialLocationDistance <= rangeConverter(r.type.attackRadiusSquared)) {
 						isGoodMove = true;
-						break;
-					} else {
-						isReasonableMove = true;
 					}
 				}
 

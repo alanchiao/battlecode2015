@@ -8,7 +8,6 @@ import team158.utils.Hashing;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
@@ -48,7 +47,8 @@ public class AerialStrategy extends GameStrategy {
 		int numDronesAttack = 0;
 		int numDronesDefense = 0;
 		int numAerospaceLabs = 0;
-		
+		double oreDepletion = 0;
+
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
 			if (type == RobotType.MINER) {
@@ -152,12 +152,10 @@ public class AerialStrategy extends GameStrategy {
 				if (enemyThreat && pathDifficulty < 70) { // Build launchers
 					if (numAerospaceLabs == 0) {
 						if (ore >= 500) {
-							rc.broadcast(Broadcast.slowMinerProductionCh, 0);
 							rc.broadcast(Broadcast.stopDroneProductionCh, 0);
 							rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
 						}
 						else {
-							rc.broadcast(Broadcast.slowMinerProductionCh, 1);
 							rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 						}
 					}
@@ -171,12 +169,10 @@ public class AerialStrategy extends GameStrategy {
 				else if (enemyRush) { // Build some launchers
 					if (numAerospaceLabs == 0) {
 						if (ore >= 500) {
-							rc.broadcast(Broadcast.slowMinerProductionCh, 0);
 							rc.broadcast(Broadcast.stopDroneProductionCh, 0);
 							rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
 						}
 						else {
-							rc.broadcast(Broadcast.slowMinerProductionCh, 1);
 							rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 						}
 					}

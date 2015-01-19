@@ -3,7 +3,6 @@ package team158.buildings;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
-import team158.utils.DirectionHelper;
 
 public class TankFactory extends Building {
 	

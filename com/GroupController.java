@@ -2,7 +2,6 @@ package team158.com;
 
 import team158.utils.Broadcast;
 import team158.utils.Hashing;
-import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
@@ -12,8 +11,6 @@ public class GroupController {
 	
 	// high-level game information
 	private RobotController rc;
-	private int strategy;
-	
 	
 	// two group management code
 	int ptTankA;
@@ -40,7 +37,6 @@ public class GroupController {
 	
 	public GroupController(RobotController rc, int strategy) {
 		this.rc = rc;
-		this.strategy = strategy;
 
 		this.ptSoldierA = 0;
 		this.ptSoldierB = 0;
@@ -85,7 +81,6 @@ public class GroupController {
 	
 	public void groupUnits(RobotType rt, int position) {
 		//position = 0 => attack | 1 => defense
-		int time = Clock.getBytecodesLeft();
 		RobotInfo[] myRobots = rc.senseNearbyRobots(999999, rc.getTeam());
 		int robotTypeInt = rcToIntConvert(rt);
 		RobotType unitType = roboTypes[robotTypeInt];

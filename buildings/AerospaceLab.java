@@ -1,7 +1,6 @@
 package team158.buildings;
 
 import team158.utils.Broadcast;
-import team158.utils.DirectionHelper;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;

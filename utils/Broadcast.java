@@ -26,7 +26,7 @@ public class Broadcast {
 	public static final int buildTankFactoriesCh = 205;
 	public static final int buildAerospaceLabsCh = 206;
 	
-	public static final int minerOreX100Ch = 301;
+	public static final int minerOreX1000Ch = 301;
 	public static final int minersProducedCh = 302;
 	
 	// target commanded by unit spawning buildings
@@ -51,7 +51,6 @@ public class Broadcast {
 	public static final int enemyRushCh = 600;
 	public static final int enemyThreatCh = 601;
 	public static final int scoutEnemyHQCh = 603;
-	public static final int slowMinerProductionCh = 604;
 	public static final int stopDroneProductionCh = 605;
 	public static final int buildBuildingsCloseCh = 606;
 	public static final int yieldToLaunchers = 607;

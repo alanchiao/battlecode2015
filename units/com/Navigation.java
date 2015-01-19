@@ -3,7 +3,6 @@ package team158.units.com;
 import java.util.Random;
 
 import team158.utils.DirectionHelper;
-import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;

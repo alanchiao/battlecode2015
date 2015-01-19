@@ -1,11 +1,9 @@
 package team158.com;
 
 import team158.utils.Broadcast;
-import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
-import battlecode.common.TerrainTile;
 
 public class InternalMap {
 	
@@ -57,7 +55,6 @@ public class InternalMap {
 	}
 	
 	public void readMap() throws GameActionException {
-		int broadcastChannel = Broadcast.internalMapChs;
 		if (quadrantNumber == 1) {
 			for (int x = 0; x < internalMapWidth; x++) {
 				for (int y = 0; y < internalMapHeight; y++) {
