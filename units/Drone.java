@@ -52,6 +52,7 @@ public class Drone extends Unit {
 			} else {
 				target = this.enemyHQ;
 			}
+			rc.setIndicatorString(2, target.toString());
 			moveToLocationWithMicro(target, 1);
 		}
 	}

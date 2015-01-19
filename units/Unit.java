@@ -140,8 +140,10 @@ public abstract class Unit extends Robot {
 				rc.setIndicatorString(1, String.valueOf(rc.readBroadcast(Broadcast.towerAttacked)));
 				boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
 				boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
+				int approachStrategy = 0;
 				if (towerAttacked) {
 					target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
+					approachStrategy = 2;
 				}
 				else if (enemyNear) {
 					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
@@ -150,7 +152,6 @@ public abstract class Unit extends Robot {
 //					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
 //				}			
 				rc.setIndicatorString(2, target.toString());
-				int approachStrategy = 0;
 				moveToLocationWithMicro(target, approachStrategy);
 			}
 		}
