@@ -1,7 +1,7 @@
 package team158.buildings;
 
+import team158.com.Broadcast;
 import team158.units.Unit;
-import team158.utils.Broadcast;
 import battlecode.common.*;
 
 public class Tower extends Building {

@@ -1,6 +1,7 @@
 package team158.buildings;
 
 import battlecode.common.*;
+import team158.com.Broadcast;
 import team158.com.GroupController;
 import team158.strategies.AerialStrategy;
 import team158.strategies.DroneHarassTest;
@@ -9,7 +10,6 @@ import team158.strategies.GroundStrategy;
 import team158.strategies.MinerTest;
 import team158.strategies.NavigationTest;
 import team158.units.Unit;
-import team158.utils.Broadcast;
 
 public class Headquarters extends Building {
 

@@ -2,10 +2,10 @@ package team158.units;
 import java.util.Random;
 
 import team158.Robot;
+import team158.com.Broadcast;
 import team158.com.InternalMap;
 import team158.units.com.GroupTracker;
 import team158.units.com.Navigation;
-import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;

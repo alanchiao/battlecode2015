@@ -1,8 +1,8 @@
 package team158.strategies;
 
 import team158.buildings.Headquarters;
+import team158.com.Broadcast;
 import team158.com.GroupController;
-import team158.utils.Broadcast;
 import team158.utils.DirectionHelper;
 import team158.utils.Hashing;
 import battlecode.common.Clock;
@@ -159,7 +159,7 @@ public class AerialStrategy extends GameStrategy {
 							rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 						}
 					}
-					else if (ore >= 400 + numAerospaceLabs * 300) {
+					else if (ore >= 700) {
 						rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
 					}
 					else if (numSupplyDepots < 3 && ore >= 750) {
@@ -176,7 +176,7 @@ public class AerialStrategy extends GameStrategy {
 							rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 						}
 					}
-					else if (ore >= 500 + numHelipads * 200) {
+					else if (ore >= 700) {
 						rc.broadcast(Broadcast.buildHelipadsCh, builderBeaver);
 					}
 					else if (numSupplyDepots < 3 && ore >= 750) {
@@ -184,7 +184,7 @@ public class AerialStrategy extends GameStrategy {
 					}
 				}
 				else {
-					if (ore >= 500 + numHelipads * 200) {
+					if (ore >= 700) {
 						rc.broadcast(Broadcast.buildHelipadsCh, builderBeaver);
 					}
 					else if (numSupplyDepots < 3 && ore >= 750) {

@@ -1,7 +1,7 @@
 package team158.units;
 
 import team158.buildings.Headquarters;
-import team158.utils.Broadcast;
+import team158.com.Broadcast;
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;

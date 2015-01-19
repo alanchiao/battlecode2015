@@ -1,4 +1,4 @@
-package team158.utils;
+package team158.com;
 
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
