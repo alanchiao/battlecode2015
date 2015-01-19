@@ -24,13 +24,11 @@ public class Navigation {
 	public boolean isAvoidingObstacle; // whether in state of avoiding obstacle
 	public boolean isAvoidAllAttack;
 	
-	
+	// obstacle monitoring informatoin
 	public MapLocation destination; // desired point to reach
 	public MapLocation origLocation; // original location where you encountered obstacle
 	public MapLocation monitoredObstacle; // obstacle tile to move relative to
 	public boolean isRotateRight; // turn right or left relative to obstacle
-	
-	
 	
 	// precomputation per turn
 	public boolean[] possibleMovesAvoidingEnemies;
@@ -198,21 +196,6 @@ public class Navigation {
 		} else {
 			isRotateRight = false;
 		}
-		
-		
-		// prevent two groups of units trying to avoid the same obstacle
-		// one that is rotating right and one that is rotating left
-		// from blocking each other out
-		/**
-		if (isRotateRight) {
-			if (isMobileUnit(locationIfTurnRight)) {
-				isRotateRight = false;
-			}
-		} else {
-			if (isMobileUnit(locationIfTurnLeft)) {
-				isRotateRight = true;
-			}
-		} **/
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////
