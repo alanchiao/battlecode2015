@@ -3,6 +3,7 @@ package team158.units.com;
 import java.util.Random;
 
 import team158.utils.DirectionHelper;
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -100,7 +101,7 @@ public class Navigation {
 				// become the new "monitored obstacle" to hug.
 				Direction dirToObstacle = rc.getLocation().directionTo(monitoredObstacle);
 				Direction attemptedDir = dirToObstacle;
-				for (int i = 0; i < 4; i++) {
+				for (int i = 0; i < 4; i++) { // max of 4 before starting to go away
 					if (isRotateRight) {
 						attemptedDir = attemptedDir.rotateRight();
 					} else {
@@ -111,7 +112,8 @@ public class Navigation {
 					if (isObstacle(attemptedLocation, attemptedDir)) {
 						monitoredObstacle = attemptedLocation;
 					} else {
-						// if there is a unit there blocking the hug path, move greedily
+						// if blocked by a mobile unit, go the other direction (to prevent
+						// blockades)
 						if (isMobileUnit(attemptedLocation)) {
 							isRotateRight = !isRotateRight;
 							return;
@@ -183,9 +185,6 @@ public class Navigation {
 		origLocation = rc.getLocation();
 		
 		// turn in direction that brings it closer to destination, unless
-		// it is blocked by a mobile unit. then, go the other direction (to prevent
-		// blockades)
-		
 		MapLocation locationIfTurnRight = origLocation.add(collisionDirection.rotateRight());
 		MapLocation locationIfTurnLeft = origLocation.add(collisionDirection.rotateLeft());
 		
@@ -206,7 +205,7 @@ public class Navigation {
 		boolean isPassable = rc.canMove(movementDirection); 
 		if (isAvoidAllAttack) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
-			if(!isAvoidingAttack(enemies, 5, location)) {
+			if(!isOutsideEnemyAttackRange(enemies, 5, location)) {
 				return false;
 			}
 		} 
@@ -227,12 +226,9 @@ public class Navigation {
 		return isStationaryBlock(location);
 	}
 	
-	// get list of directions you can move while avoiding all attacks
-	
-	// set range to infinity -> only avoid towers and HQ
-	// otherwise, also avoid units with attack range greater than rangeSquared
-	
-	public boolean isAvoidingAttack(RobotInfo[] enemies, int rangeSquared, MapLocation loc) {
+	// check if unit is outside the attack range of any enemy units
+	// with greater than rangeSquared range and any enemy buildings
+	public boolean isOutsideEnemyAttackRange(RobotInfo[] enemies, int rangeSquared, MapLocation loc) {
 		// enemies
 		if (enemies != null) {
 			for (RobotInfo enemy : enemies) {
@@ -271,7 +267,7 @@ public class Navigation {
 	public boolean[] moveDirectionsAvoidingAttack(RobotInfo[] enemies, int rangeSquared) {
 		boolean[] possibleMovesAvoidingEnemies = {true,true,true,true,true,true,true,true,true};
 		MapLocation myLocation = rc.getLocation();
-		possibleMovesAvoidingEnemies[8] = isAvoidingAttack(enemies, rangeSquared, myLocation);
+		possibleMovesAvoidingEnemies[8] = isOutsideEnemyAttackRange(enemies, rangeSquared, myLocation);
 		// enemies
 		for (RobotInfo enemy : enemies) {
 			if (enemy.type.attackRadiusSquared > rangeSquared) {

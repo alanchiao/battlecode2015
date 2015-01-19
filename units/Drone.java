@@ -39,7 +39,6 @@ public class Drone extends Unit {
 					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 					if (hasHQCommand) {
 						target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-						// navigation.moveToDestination(target, false);
 					} else {
 						target = groupTracker.getRallyPoint();
 					}
