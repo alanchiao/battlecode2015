@@ -3,6 +3,7 @@ package team158.buildings;
 import battlecode.common.*;
 import team158.com.GroupController;
 import team158.strategies.AerialStrategy;
+import team158.strategies.DroneHarassTest;
 import team158.strategies.GameStrategy;
 import team158.strategies.GroundStrategy;
 import team158.strategies.MinerTest;
@@ -17,6 +18,7 @@ public class Headquarters extends Building {
 	public final static int AERIAL_STRATEGY = 2;
 	public final static int MINER_STRATEGY = 3;
 	public final static int NAVIGATION_STRATEGY = 4;
+	public final static int DRONE_HARASS_STRATEGY = 5;
 	
 	public final static int TIME_UNTIL_LAUNCHERS_GROUP = 1500;
 	public final static int TIME_UNTIL_COLLECT_SUPPLY = 1650;
@@ -44,6 +46,8 @@ public class Headquarters extends Building {
 			case MINER_STRATEGY:		gameStrategy = new MinerTest(rc, gc, this);
 										break;
 			case NAVIGATION_STRATEGY:	gameStrategy = new NavigationTest(rc, gc, this);
+										break;
+			case DRONE_HARASS_STRATEGY: gameStrategy = new DroneHarassTest(rc, gc, this);
 										break;
 		}
 		
