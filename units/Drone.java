@@ -24,7 +24,8 @@ public class Drone extends Unit {
 		}
 
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(RobotType.DRONE.attackRadiusSquared, rc.getTeam().opponent());
-
+		rc.setIndicatorString(0, Integer.toString(enemiesAttackable.length));
+		
 		if (rc.isWeaponReady()) {
 			if (enemiesAttackable.length > 0) {
 				rc.attackLocation(selectTarget(enemiesAttackable));

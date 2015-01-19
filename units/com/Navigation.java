@@ -24,7 +24,7 @@ public class Navigation {
 	public boolean isAvoidingObstacle; // whether in state of avoiding obstacle
 	public boolean isAvoidAllAttack;
 	
-	// obstacle monitoring informatoin
+	// obstacle monitoring information
 	public MapLocation destination; // desired point to reach
 	public MapLocation origLocation; // original location where you encountered obstacle
 	public MapLocation monitoredObstacle; // obstacle tile to move relative to
@@ -48,7 +48,6 @@ public class Navigation {
 	
 	// main high-level navigational method
 	public void moveToDestination(MapLocation nextDestination, boolean isAvoidAllAttack) {
-		rc.setIndicatorString(0, Boolean.toString(isAvoidingObstacle));
 		if (monitoredObstacle != null) {
 			rc.setIndicatorDot(monitoredObstacle, 0, 0, 0);
 		}

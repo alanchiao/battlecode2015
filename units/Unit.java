@@ -199,7 +199,6 @@ public abstract class Unit extends Robot {
 	
 	protected void moveToLocationWithMicro(MapLocation target, int approachStrategy) throws GameActionException {
 		Team opponentTeam = rc.getTeam().opponent();
-	
 		// 25 covers the edge case with tanks if friendly units have vision
 		RobotInfo[] enemies = rc.senseNearbyRobots(25, opponentTeam);
 		// no enemies in range
@@ -226,7 +225,7 @@ public abstract class Unit extends Robot {
 					if (approachStrategy == 0) {
 						return;
 					}
-					else { // approachStrategy == 1
+					else if (rc.getWeaponDelay() <= 1) { // approachStrategy == 1
 						if (r.type.attackRadiusSquared == myAttackRange && navigation.isOutsideEnemyAttackRange(null, myAttackRange, r.location)) {
 							navigation.moveToDestination(r.location, false);
 							return;
@@ -321,8 +320,7 @@ public abstract class Unit extends Robot {
 				RobotInfo[] attackableRobots = rc.senseNearbyRobots(myAttackRange, opponentTeam);
 				if (attackableRobots.length == 0) {
 					for (RobotInfo r : enemies) {
-						// strange criteria to approach units with? shouldn't
-						// it be the opposite
+						// approach enemies that outrange us
 						if (r.type.attackRadiusSquared > myAttackRange) {
 							navigation.stopObstacleTracking();
 							navigation.moveToDestination(r.location, false);

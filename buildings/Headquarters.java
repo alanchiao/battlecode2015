@@ -90,16 +90,13 @@ public class Headquarters extends Building {
 			int distanceFactor = (int) hqDistance;
 
 			MapLocation loc = null;
-			boolean transferred = false;
 			int supplyAmount = 0;
+			int priority = 0;
+
 			for (RobotInfo r : friendlyRobots) {
 				if (r.type == RobotType.LAUNCHER) {
 					if (r.supplyLevel < r.type.supplyUpkeep * 16 * distanceFactor) {
-						if (r.supplyLevel == 0) {
-							rc.transferSupplies(r.type.supplyUpkeep * 24 * distanceFactor, r.location);
-							transferred = true;
-						}
-						else {
+						if (priority == 0 || (r.supplyLevel == 0 && priority < 3)) {
 							loc = r.location;
 							supplyAmount = r.type.supplyUpkeep * 24 * distanceFactor;
 						}
@@ -107,11 +104,7 @@ public class Headquarters extends Building {
 				}
 				else if (r.type == RobotType.MINER) {
 					if (r.supplyLevel < r.type.supplyUpkeep * 16 * distanceFactor) {
-						if (r.supplyLevel == 0) {
-							rc.transferSupplies(r.type.supplyUpkeep * 24 * distanceFactor, r.location);
-							transferred = true;
-						}
-						else {
+						if (priority == 0 || (r.supplyLevel == 0 && priority < 1)) {
 							loc = r.location;
 							supplyAmount = r.type.supplyUpkeep * 24 * distanceFactor;
 						}
@@ -119,11 +112,7 @@ public class Headquarters extends Building {
 				}
 				else if (r.type == RobotType.SOLDIER || r.type == RobotType.TANK || r.type == RobotType.DRONE) {
 					if (r.supplyLevel < r.type.supplyUpkeep * 8 * distanceFactor) {
-						if (r.supplyLevel == 0) {
-							rc.transferSupplies(r.type.supplyUpkeep * 12 * distanceFactor, r.location);
-							transferred = true;
-						}
-						else {
+						if (priority == 0 || (r.supplyLevel == 0 && priority < 4)) {
 							loc = r.location;
 							supplyAmount = r.type.supplyUpkeep * 12 * distanceFactor;
 						}
@@ -131,18 +120,14 @@ public class Headquarters extends Building {
 				}
 				else if (r.type == RobotType.BEAVER) {
 					if (r.supplyLevel < r.type.supplyUpkeep * 100) {
-						if (r.supplyLevel == 0) {
-							rc.transferSupplies(r.type.supplyUpkeep * 200, r.location);
-							transferred = true;
-						}
-						else {
+						if (priority == 0 || (r.supplyLevel == 0 && priority < 2)) {
 							loc = r.location;
 							supplyAmount = r.type.supplyUpkeep * 200;
 						}
 					}
 				}
 			}
-			if (!transferred && loc != null) {
+			if (loc != null) {
 				rc.transferSupplies(supplyAmount, loc);
 			}
 		}
