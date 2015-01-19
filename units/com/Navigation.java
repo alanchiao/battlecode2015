@@ -204,8 +204,8 @@ public class Navigation {
 	public boolean isPassable(MapLocation location, Direction movementDirection) {
 		boolean isPassable = rc.canMove(movementDirection); 
 		if (isAvoidAllAttack) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
-			if(!isOutsideEnemyAttackRange(enemies, 5, location)) {
+			/// RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
+			if(!isOutsideEnemyAttackRange(null, 5, location)) {
 				return false;
 			}
 		} 
@@ -216,8 +216,8 @@ public class Navigation {
 	public boolean isObstacle (MapLocation location, Direction movementDirection) throws GameActionException {
 		if (isAvoidAllAttack) {
 			if (possibleMovesAvoidingEnemies == null) {
-				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
-				possibleMovesAvoidingEnemies = moveDirectionsAvoidingAttack(enemies, 5);
+				// RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
+				possibleMovesAvoidingEnemies = moveDirectionsAvoidingAttack(null, 5);
 			} 
 			if (!possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(movementDirection)]) {
 				return true;
@@ -267,6 +267,7 @@ public class Navigation {
 	public boolean[] moveDirectionsAvoidingAttack(RobotInfo[] enemies, int rangeSquared) {
 		boolean[] possibleMovesAvoidingEnemies = {true,true,true,true,true,true,true,true,true};
 		MapLocation myLocation = rc.getLocation();
+		if (enemies != null) {
 		possibleMovesAvoidingEnemies[8] = isOutsideEnemyAttackRange(enemies, rangeSquared, myLocation);
 		// enemies
 		for (RobotInfo enemy : enemies) {
@@ -277,6 +278,7 @@ public class Navigation {
 					}
 				}
 			}
+		}
 		}
 		// towers
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
