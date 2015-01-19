@@ -151,9 +151,6 @@ public abstract class Unit extends Robot {
 				else if (enemyNear) {
 					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
 				}
-//				else if (enemyAround) {
-//					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
-//				}			
 				rc.setIndicatorString(2, target.toString());
 				moveToLocationWithMicro(target, approachStrategy);
 			}

@@ -221,7 +221,12 @@ public class AerialStrategy extends GameStrategy {
 			}
 			else {
 				gc.groupUnits(RobotType.DRONE, 1);
-				rc.broadcast(Broadcast.droneGroupDefenseCh, 1);
+				if (numDrones - numDronesAttack > 10) {
+					rc.broadcast(Broadcast.droneGroupDefenseCh, 1);
+				}
+				else {
+					rc.broadcast(Broadcast.droneGroupDefenseCh, 0);
+				}
 			}		
 			//if they don't build tanks and launchers
 //			if (!enemyThreat) {

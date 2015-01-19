@@ -33,26 +33,44 @@ public class Drone extends Unit {
 		
 		// Move
 		if (rc.isCoreReady()) {
-			MapLocation target;
+			//default target location
+			MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+			int approachStrategy = 1;
 			if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
-				if (groupTracker.groupID == Broadcast.droneGroupDefenseCh) {
-					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-					if (hasHQCommand) {
-						target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-					} else {
-						target = groupTracker.getRallyPoint();
+				if (groupTracker.isGrouped()) {
+					if (groupTracker.groupID == Broadcast.droneGroupAttackCh) {
+						boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
+						if (hasHQCommand) {
+							target = enemyHQ;
+						} 
 					}
-				}
-				else {
-					target = enemyHQ;
-				}
+					else {	
+						boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
+						if (hasHQCommand) {								
+							approachStrategy = 2;
+							//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
+							target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
+							rc.setIndicatorString(1, String.valueOf(rc.readBroadcast(Broadcast.towerAttacked)));
+							boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
+							boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
+							if (towerAttacked) {
+								target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
+							}
+							else if (enemyNear) {
+								target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
+							}
+							
+						} 
+					}
+				} 
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
 				target = this.ownHQ;
 			} else {
 				target = this.enemyHQ;
+				approachStrategy = 2;
 			}
 			rc.setIndicatorString(2, target.toString());
-			moveToLocationWithMicro(target, 1);
+			moveToLocationWithMicro(target, approachStrategy);
 		}
 	}
 	
