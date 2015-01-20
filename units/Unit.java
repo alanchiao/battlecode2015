@@ -143,7 +143,6 @@ public abstract class Unit extends Robot {
 			if (hasHQCommand) {
 				//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
 				MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
-				rc.setIndicatorString(1, String.valueOf(rc.readBroadcast(Broadcast.towerAttacked)));
 				boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
 				boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
 				int approachStrategy = 0;
@@ -154,7 +153,6 @@ public abstract class Unit extends Robot {
 				else if (enemyNear) {
 					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
 				}
-				rc.setIndicatorString(2, target.toString());
 				moveToLocationWithMicro(target, approachStrategy);
 			}
 		}
@@ -170,7 +168,6 @@ public abstract class Unit extends Robot {
 			if (hasHQCommand) {
 				//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
 				MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-				rc.setIndicatorString(2, target.toString());
 				int approachStrategy = 2;
 				moveToLocationWithMicro(target, approachStrategy);
 			}

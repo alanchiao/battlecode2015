@@ -49,7 +49,6 @@ public class Broadcast {
 	
 	// Channels for signaling
 	public static final int enemyRushCh = 600;
-	public static final int enemyThreatCh = 601;
 	public static final int scoutEnemyHQCh = 603;
 	public static final int stopDroneProductionCh = 605;
 	public static final int requestSupplyDroneCh = 606;

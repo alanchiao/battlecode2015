@@ -33,9 +33,11 @@ public class Headquarters extends Building {
 	private int numTowersDefeated;
 	private int enemyTowersRemaining;
 
+	/*
 	private double[] oreMined;
 	private double oreRate;
 	private int orePointer;
+	*/
 	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
@@ -95,6 +97,7 @@ public class Headquarters extends Building {
 			MapLocation loc = null;
 			int supplyAmount = 0;
 			int priority = 0;
+			double gameFractionLeft = 1.0 - Clock.getRoundNum() / 2000.0;
 
 			for (RobotInfo r : friendlyRobots) {
 				if (r.type == RobotType.LAUNCHER) {
@@ -106,10 +109,10 @@ public class Headquarters extends Building {
 					}
 				}
 				else if (r.type == RobotType.MINER) {
-					if (r.supplyLevel < r.type.supplyUpkeep * 16 * distanceFactor) {
+					if (r.supplyLevel < r.type.supplyUpkeep * 1000 * gameFractionLeft) {
 						if (priority == 0 || (r.supplyLevel == 0 && priority < 1)) {
 							loc = r.location;
-							supplyAmount = r.type.supplyUpkeep * 24 * distanceFactor;
+							supplyAmount = (int) (r.type.supplyUpkeep * 1500 * gameFractionLeft);
 						}
 					}
 				}
@@ -309,12 +312,10 @@ public class Headquarters extends Building {
 				distToEnemyTowers[i] = this.myLocation.distanceSquaredTo(enemyTowersLeft[i]);
 			}
 			int minDistance = 999999;
-			int targetTowerIndex = 0; // to keep track of which tower was chosen
 			for (int i = 0; i < numTowersLeft; i++) {
 				if (distToEnemyTowers[i] < minDistance) {
 					minDistance = distToEnemyTowers[i];
 					targetTower = enemyTowersLeft[i];
-					targetTowerIndex = i;
 				}
 			}
 			towerOrder[numTowersDefeated] = targetTower;
