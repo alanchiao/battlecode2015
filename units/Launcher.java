@@ -14,16 +14,30 @@ import battlecode.common.RobotType;
 public class Launcher extends Unit {
 	
 	public boolean isReloading;
+	public boolean noSupply;
 
 	public Launcher(RobotController newRC) {
 		super(newRC);
 		this.isReloading = false;
+		noSupply = false;
 	}
 
 	@Override
 	protected void actions() throws GameActionException {
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(24, rc.getTeam().opponent());
 		MapLocation myLocation = rc.getLocation();
+
+		if (rc.getSupplyLevel() == 0 && myLocation.distanceSquaredTo(ownHQ) > 15) {
+			if (noSupply) {
+				rc.broadcast(Broadcast.requestSupplyDroneCh, rc.getID());
+			}
+			else {
+				noSupply = true;
+			}
+		}
+		else {
+			noSupply = false;
+		}
 		
 		if (rc.getMissileCount() >= 3) {
 			isReloading = false;

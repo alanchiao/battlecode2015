@@ -360,17 +360,7 @@ public class Navigation {
 			return false;
 		}
 		RobotType type = robot.type;
-		return type == RobotType.AEROSPACELAB || 
-			   type == RobotType.BARRACKS ||
-			   type == RobotType.HANDWASHSTATION ||
-			   type == RobotType.HELIPAD ||
-			   type == RobotType.HQ ||
-			   type == RobotType.MINERFACTORY ||
-			   type == RobotType.SUPPLYDEPOT ||
-			   type == RobotType.TANKFACTORY ||
-			   type == RobotType.TECHNOLOGYINSTITUTE ||
-			   type == RobotType.TOWER ||
-			   type == RobotType.TRAININGFIELD;
+		return type.isBuilding;
 	}
 	
 	// check if is unit that moves often

@@ -22,7 +22,7 @@ public class Headquarters extends Building {
 	public final static int TIME_UNTIL_LAUNCHERS_GROUP = 1500;
 	public final static int TIME_UNTIL_COLLECT_SUPPLY = 1650;
 	public final static int TIME_UNTIL_FULL_ATTACK = 1800;
-	private final static int ORE_WINDOW = 100;
+	//private final static int ORE_WINDOW = 100;
 	
 	private GroupController gc;
 	private GameStrategy gameStrategy;
@@ -59,9 +59,11 @@ public class Headquarters extends Building {
 		numTowersDefeated = 0;
 		enemyTowersRemaining = 7;
 		
+		/*
 		oreMined = new double[ORE_WINDOW];
 		oreRate = 5;
 		orePointer = 0;
+		*/
 	}
 	
 	@Override
@@ -182,10 +184,11 @@ public class Headquarters extends Building {
 			}
 		}
 
-		// Compute rate of ore generation
+		/* Compute rate of ore generation
 		oreMined[orePointer] = rc.readBroadcast(Broadcast.minerOreX1000Ch) / 1000.0;
 		oreRate = oreRate + (oreMined[orePointer] - oreMined[(orePointer + ORE_WINDOW - 1) % ORE_WINDOW]) / ORE_WINDOW;
 		orePointer = (orePointer + 1) % ORE_WINDOW;
+		*/
 		this.gameStrategy.executeStrategy();
 	}
 	

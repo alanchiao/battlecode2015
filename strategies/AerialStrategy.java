@@ -101,7 +101,6 @@ public class AerialStrategy extends GameStrategy {
 				if (r.type == RobotType.DRONE) {
 					enemyRush = true;
 					// Tell helipads to yield
-					rc.broadcast(Broadcast.yieldToLaunchers, 1);
 					rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 					break;
 				}
@@ -111,7 +110,6 @@ public class AerialStrategy extends GameStrategy {
 		if (!enemyThreat && Clock.getRoundNum() < 1200) {
 			if (rc.readBroadcast(Broadcast.enemyThreatCh) > 2) {
 				enemyThreat = true;
-				rc.broadcast(Broadcast.yieldToLaunchers, 1);
 				rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 				gc.unGroup(Broadcast.droneGroupAttackCh);
 			}
