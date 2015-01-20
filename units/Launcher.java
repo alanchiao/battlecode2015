@@ -85,28 +85,58 @@ public class Launcher extends Unit {
 			if (rc.getMissileCount() < 3) {
 				isReloading = true;
 			}
-		} else if (enemiesAttackable.length > 0 && nearbyMissileCount < 2 && !isReloading) {
-			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(selectTarget(enemiesAttackable)));
-			int[] offsets = {0,1,-1,2,-2};
-			int offsetIndex = 0;
-			while (offsetIndex < 5 && !rc.canLaunch(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
-				offsetIndex++;
+		} else if (enemiesAttackable.length > 0 && !isReloading) {
+			MapLocation target =  selectTarget(enemiesAttackable);
+			RobotType targetType = rc.senseRobotAtLocation(target).type;
+			Direction dirToEnemy = myLocation.directionTo(target);
+			
+			int missileDensity;
+			if (targetType == RobotType.MISSILE || targetType == RobotType.LAUNCHER) {
+				missileDensity = 1;
+			} else {
+				missileDensity = 2;
 			}
-			if (offsetIndex < 5) {
-				rc.launchMissile(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8]);
+			
+			Direction dirToFire = dirToEnemy;
+			MapLocation locationToFire = myLocation.add(dirToFire);
+			int nearbyAllyMissiles = 0;
+			RobotInfo[] nearbyPotentialAllyMissiles = rc.senseNearbyRobots(locationToFire, 2, rc.getTeam());
+			for (RobotInfo r: nearbyPotentialAllyMissiles) {
+				if (r.type == RobotType.MISSILE) {
+					nearbyAllyMissiles++;
+				}
 			}
-			while (offsetIndex < 5 && !rc.canLaunch(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
-				offsetIndex++;
+			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles < missileDensity) {
+				rc.launchMissile(dirToFire);
 			}
-			if (offsetIndex < 5) {
-				rc.launchMissile(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8]);
+			
+			dirToFire = dirToEnemy.rotateLeft();
+			locationToFire = myLocation.add(dirToFire);
+			nearbyAllyMissiles = 0;
+			nearbyPotentialAllyMissiles = rc.senseNearbyRobots(locationToFire, 2, rc.getTeam());
+			for (RobotInfo r: nearbyPotentialAllyMissiles) {
+				if (r.type == RobotType.MISSILE) {
+					nearbyAllyMissiles++;
+				}
 			}
-			while (offsetIndex < 5 && !rc.canLaunch(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
-				offsetIndex++;
+			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles < missileDensity) {
+				rc.launchMissile(dirToFire);
 			}
-			if (offsetIndex < 5) {
-				rc.launchMissile(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8]);
+			
+			
+			dirToFire = dirToEnemy.rotateRight();
+			locationToFire = myLocation.add(dirToFire);
+			nearbyAllyMissiles = 0;
+			nearbyPotentialAllyMissiles = rc.senseNearbyRobots(locationToFire, 2, rc.getTeam());
+			for (RobotInfo r: nearbyPotentialAllyMissiles) {
+				if (r.type == RobotType.MISSILE) {
+					nearbyAllyMissiles++;
+				}
 			}
+			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles < missileDensity) {
+				rc.launchMissile(dirToFire);
+			}
+			
 			if (rc.getMissileCount() < 3) {
 				isReloading = true;
 			}
