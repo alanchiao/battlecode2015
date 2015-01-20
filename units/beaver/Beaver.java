@@ -9,7 +9,6 @@ public class Beaver extends Unit {
 	
 	public Builder builder;
 	
-	
 	public Beaver(RobotController newRC) {
 		super(newRC);
 		this.builder = new Builder(rc, ownHQ, navigation);

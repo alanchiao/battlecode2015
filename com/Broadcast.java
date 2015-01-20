@@ -65,7 +65,6 @@ public class Broadcast {
 	public static final int tankGroupDefenseCh = 703;
 	public static final int droneGroupAttackCh = 704;
 	public static final int droneGroupDefenseCh = 705;
-	public static final int launcherGroupCh = 706;
 	public static final int launcherGroupAttackCh = 707;
 	public static final int launcherGroupDefenseCh = 708;
 	
