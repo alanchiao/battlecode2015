@@ -19,7 +19,7 @@ public class Drone extends Unit {
 	@Override
 	protected void actions() throws GameActionException {
 		// Determine if opponent is using tanks/launchers and assess threat
-		if (prevHealth - rc.getHealth() >= 20 && prevHealth - rc.getHealth() != 24) {
+		if (prevHealth - rc.getHealth() >= 20) {
 			int threat = rc.readBroadcast(Broadcast.enemyThreatCh);
 			rc.broadcast(Broadcast.enemyThreatCh, threat + 1);
 		}
@@ -29,12 +29,14 @@ public class Drone extends Unit {
 		
 		
 		// run away from tanks / missiles / and launchers
-		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
-		for (RobotInfo enemy: enemies) {
-			if (enemy.type == RobotType.LAUNCHER || enemy.type == RobotType.TANK || enemy.type == RobotType.MISSILE) {
-				this.navigation.moveToDestination(this.ownHQ, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
-				return;
-			}	
+		if (rc.isCoreReady()) {
+			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
+			for (RobotInfo enemy: enemies) {
+				if (enemy.type == RobotType.LAUNCHER || enemy.type == RobotType.TANK || enemy.type == RobotType.MISSILE || enemy.type == RobotType.COMMANDER) {
+					this.navigation.moveToDestination(this.ownHQ, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
+					return;
+				}	
+			}
 		}
 		
 		if (rc.isWeaponReady()) {

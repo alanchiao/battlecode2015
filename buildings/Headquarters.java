@@ -69,7 +69,6 @@ public class Headquarters extends Building {
 		if (Clock.getRoundNum()==0) {
 			calculateTowerOrder();
 		}
-		rc.broadcast(Broadcast.idealMiningOreAverage, 0);
 		broadcastVulnerableEnemyTowerAttack();
 		
 		RobotInfo closestEnemy = super.findClosestEnemy(100);
