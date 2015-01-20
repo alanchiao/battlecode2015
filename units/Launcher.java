@@ -113,17 +113,18 @@ public class Launcher extends Unit {
 					approachStrategy = 0;
 					target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
 				}
-				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
+				
 			} else {
 				if (groupTracker.groupID == Broadcast.launcherGroupAttackCh) {
-					target = this.enemyHQ;
-					approachStrategy = 2;
-				}
-				else {
 					target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 					approachStrategy = 2;
 				}
+				else {
+					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
+					approachStrategy = 2;
+				}
 			}
+			rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
 			moveToLocationWithMicro(target, approachStrategy);
 		}
 	}
