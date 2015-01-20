@@ -181,13 +181,38 @@ public class Launcher extends Unit {
 				else if (groupTracker.groupID == Broadcast.launcherGroupAttackCh) {
 					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 					if (hasHQCommand) {								
+//						approachStrategy = 2;
+//						//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
+//						target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 						approachStrategy = 2;
-						//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
-						target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
+						MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+						if (enemyTowers.length != 0) {
+							int minDistance = 9999;
+							target = null;
+							for (MapLocation tower : enemyTowers) {
+								int currentDistance = myLocation.distanceSquaredTo(tower);
+								if (currentDistance < minDistance) {
+									target = tower;
+									minDistance = currentDistance;
+								}
+							}
+						}
+						else {
+							target = enemyHQ;
+						}
 					}
 					else {
-						approachStrategy = 0;
-						target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
+						approachStrategy = 2;
+						// enemyNearHQLocationChs defaults to rally location if no enemy around.
+						target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+						boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
+						boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
+						if (towerAttacked) {
+							target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
+						}
+						else if (enemyNear) {
+							target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
+						}
 					}
 				}
 				else {
@@ -201,10 +226,27 @@ public class Launcher extends Unit {
 					approachStrategy = 2;
 				}
 				else {
-					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
+//					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
+//					approachStrategy = 2;
 					approachStrategy = 2;
+					MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+					if (enemyTowers.length != 0) {
+						int minDistance = 9999;
+						target = null;
+						for (MapLocation tower : enemyTowers) {
+							int currentDistance = myLocation.distanceSquaredTo(tower);
+							if (currentDistance < minDistance) {
+								target = tower;
+								minDistance = currentDistance;
+							}
+						}
+					}
+					else {
+						target = enemyHQ;
+					}
 				}
 			}
+			rc.setIndicatorString(0, String.valueOf(target));
 			moveToLocationWithMicro(target, approachStrategy);
 		}
 	}
