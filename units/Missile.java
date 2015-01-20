@@ -24,7 +24,7 @@ public class Missile extends Robot {
 				RobotInfo alliesInAttack[] = rc.senseNearbyRobots(2, rc.getTeam());
 				RobotInfo enemiesInAttack[] = rc.senseNearbyRobots(2, rc.getTeam().opponent());
 				
-				if (alliesInAttack.length == 0 && enemiesInAttack.length > 0) {
+				if (enemiesInAttack.length > 0 && alliesInAttack.length == 0) {
 					rc.explode();
 					return;
 				} 
@@ -46,6 +46,10 @@ public class Missile extends Robot {
 				  moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 6) % 8];
 				  if (rc.canMove(moveDirection)) {
 				          rc.move(moveDirection);
+				          return;
+				  }
+				  if (enemiesInAttack.length - alliesInAttack.length >= 1) {
+					  rc.explode();
 				  }
 			   }
 			}
