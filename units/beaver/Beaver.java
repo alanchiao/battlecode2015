@@ -31,28 +31,22 @@ public class Beaver extends Unit {
 				return;
 			}
 			if (Broadcast.hasSoloCommand(rc, Broadcast.buildAerospaceLabsCh)) {
-				rc.broadcast(Broadcast.buildAerospaceLabsCh, 0);
-				builder.buildBuilding(RobotType.AEROSPACELAB);
+				builder.buildBuilding(RobotType.AEROSPACELAB, Broadcast.buildAerospaceLabsCh);
 			}
 			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildHelipadsCh)) {
-				rc.broadcast(Broadcast.buildHelipadsCh, 0);
-				builder.buildBuilding(RobotType.HELIPAD);
+				builder.buildBuilding(RobotType.HELIPAD, Broadcast.buildHelipadsCh);
 			}
 			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildTankFactoriesCh)) {
-				rc.broadcast(Broadcast.buildTankFactoriesCh, 0);
-				builder.buildBuilding(RobotType.TANKFACTORY);
+				builder.buildBuilding(RobotType.TANKFACTORY, Broadcast.buildTankFactoriesCh);
 			}
 			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildSupplyCh)) {
-				rc.broadcast(Broadcast.buildSupplyCh, 0);
-				builder.buildBuilding(RobotType.SUPPLYDEPOT);
+				builder.buildBuilding(RobotType.SUPPLYDEPOT, Broadcast.buildSupplyCh);
 			}
 			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildMinerFactoriesCh)) {
-				rc.broadcast(Broadcast.buildMinerFactoriesCh, 0);
-				builder.buildBuilding(RobotType.MINERFACTORY);
+				builder.buildBuilding(RobotType.MINERFACTORY, Broadcast.buildMinerFactoriesCh);
 			}
 			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildBarracksCh)) {
-				rc.broadcast(Broadcast.buildBarracksCh, 0);
-				builder.buildBuilding(RobotType.BARRACKS);
+				builder.buildBuilding(RobotType.BARRACKS, Broadcast.buildBarracksCh);
 			}
 			else {
 				MapLocation myLocation = rc.getLocation();

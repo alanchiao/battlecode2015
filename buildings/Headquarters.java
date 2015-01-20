@@ -71,7 +71,6 @@ public class Headquarters extends Building {
 			for (int i = 0; i < numTowersDefeatable; i++) {
 			}
 		}
-		rc.broadcast(Broadcast.idealMiningOreAverage, 0);
 		broadcastVulnerableEnemyTowerAttack();
 		
 		RobotInfo closestEnemy = super.findClosestEnemy(100);
