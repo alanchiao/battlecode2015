@@ -183,20 +183,36 @@ public class AerialStrategy extends GameStrategy {
 				gc.groupUnits(RobotType.DRONE, 0);
 				rc.broadcast(Broadcast.droneGroupAttackCh, 1);
 			}
-			
-			if (numLaunchersDefense < 6) {
+			rc.setIndicatorString(0, String.valueOf(pathDifficulty));
+			if (Clock.getRoundNum() < 2000 - pathDifficulty*4) {
+				if (enemyRush && numLaunchersDefense < 5) {
+					gc.groupUnits(RobotType.LAUNCHER, 1);
+					rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
+				} else	if (numLaunchersAttack >= 6) {
+					gc.groupUnits(RobotType.LAUNCHER, 0);
+					rc.broadcast(Broadcast.launcherGroupAttackCh, 1);
+				} else {
+					gc.groupUnits(RobotType.LAUNCHER, 0);
+					rc.broadcast(Broadcast.launcherGroupAttackCh, 0);				
+				}
+			}
+			else {
 				gc.groupUnits(RobotType.LAUNCHER, 1);
 				rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
 			}
-			else {
-				gc.groupUnits(RobotType.LAUNCHER, 0);
-				if (numLaunchers - numLaunchersDefense >= 8) {
-					rc.broadcast(Broadcast.launcherGroupAttackCh, 1);
-				}
-				else {
-					rc.broadcast(Broadcast.launcherGroupAttackCh, 0);
-				}
-			}		
+//			if (numLaunchersDefense < 6) {
+//				gc.groupUnits(RobotType.LAUNCHER, 1);
+//				rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
+//			}
+//			else {
+//				gc.groupUnits(RobotType.LAUNCHER, 0);
+//				if (numLaunchers - numLaunchersDefense >= 8) {
+//					rc.broadcast(Broadcast.launcherGroupAttackCh, 1);
+//				}
+//				else {
+//					rc.broadcast(Broadcast.launcherGroupAttackCh, 0);
+//				}
+//			}		
 			//if they don't build tanks and launchers
 //			if (!enemyThreat) {
 //				if (groupSize[defendGroup] < 10) {

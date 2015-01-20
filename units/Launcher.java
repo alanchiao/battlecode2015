@@ -76,6 +76,7 @@ public class Launcher extends Unit {
 			MapLocation target;
 			int approachStrategy;
 			if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {
+				rc.setIndicatorString(0, String.valueOf(groupTracker.groupID));
 				if (groupTracker.groupID == Broadcast.launcherGroupDefenseCh) {
 					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 					if (hasHQCommand) {								
@@ -113,12 +114,15 @@ public class Launcher extends Unit {
 					target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
 				}
 				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
-			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
-				target = this.ownHQ;
-				approachStrategy = 0;
 			} else {
-				target = this.enemyHQ;
-				approachStrategy = 2;
+				if (groupTracker.groupID == Broadcast.launcherGroupAttackCh) {
+					target = this.enemyHQ;
+					approachStrategy = 2;
+				}
+				else {
+					target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
+					approachStrategy = 2;
+				}
 			}
 			moveToLocationWithMicro(target, approachStrategy);
 		}
