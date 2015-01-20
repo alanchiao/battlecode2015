@@ -12,12 +12,54 @@ import battlecode.common.RobotType;
 
 public class Drone extends Unit {
 
+	int followingID;
+	MapLocation followingLocation;
 	public Drone(RobotController newRC) {
 		super(newRC);
+		try {
+			followingID = rc.readBroadcast(Broadcast.requestSupplyDroneCh);
+			if (followingID != 0) {
+				autoSupplyTransfer = false;
+				followingLocation = rc.senseRobot(followingID).location;
+				rc.broadcast(Broadcast.requestSupplyDroneCh, 0);
+			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	protected void actions() throws GameActionException {
+		if (!autoSupplyTransfer) { // Must transfer supply to a launcher
+			MapLocation myLocation = rc.getLocation();
+			if (myLocation.distanceSquaredTo(followingLocation) <= 15) {
+				RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
+				if (friendlyRobots.length > 0) {
+					for (RobotInfo r : friendlyRobots) {
+						if (r.type == RobotType.LAUNCHER) {
+							rc.transferSupplies((int) (rc.getSupplyLevel() - rc.getType().supplyUpkeep * 100), r.location);
+							autoSupplyTransfer = true;
+							return;
+						}
+					}
+				}
+				friendlyRobots = rc.senseNearbyRobots(99, rc.getTeam());
+				int minDistance = 999999;
+				for (RobotInfo r : friendlyRobots) {
+					if (r.type == RobotType.LAUNCHER && myLocation.distanceSquaredTo(r.location) < minDistance) {
+						followingLocation = r.location;
+					}
+				}
+				if (minDistance == 999999) {
+					autoSupplyTransfer = true;
+				}
+			}
+			else {
+				navigation.moveToDestination(followingLocation, Navigation.AVOID_ALL);
+			}
+			return;
+		}
+
 		// Determine if opponent is using tanks/launchers and assess threat
 		if (prevHealth - rc.getHealth() >= 20) {
 			int threat = rc.readBroadcast(Broadcast.enemyThreatCh);

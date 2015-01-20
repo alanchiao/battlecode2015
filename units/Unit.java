@@ -21,6 +21,7 @@ public abstract class Unit extends Robot {
 	protected GroupTracker groupTracker;
 	protected InternalMap internalMap;
 	protected double prevHealth;
+	protected boolean autoSupplyTransfer;
 	
 	public Unit (RobotController newRC) {
 		rc = newRC;
@@ -31,6 +32,7 @@ public abstract class Unit extends Robot {
 		distanceBetweenHQ = ownHQ.distanceSquaredTo(enemyHQ);
 		
 		prevHealth = 0;
+		autoSupplyTransfer = true;
 	
 		navigation = new Navigation(rc, rand, enemyHQ);
 		groupTracker = new GroupTracker(rc);
@@ -49,38 +51,40 @@ public abstract class Unit extends Robot {
 			} **/
 			
 			// Transfer supply stage
-			int mySupply = (int) rc.getSupplyLevel();
-			RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
-			if (friendlyRobots.length > 0) {
-				// If predicted to die on this turn
-				if (rc.getHealth() <= prevHealth / 2) {
-					RobotInfo bestFriend = null;
-					double maxHealth = 0;
-					for (RobotInfo r : friendlyRobots) {
-						if (r.health > maxHealth && r.type != RobotType.HQ) {
-							maxHealth = r.health;
-							bestFriend = r;
+			if (autoSupplyTransfer) {
+				int mySupply = (int) rc.getSupplyLevel();
+				RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
+				if (friendlyRobots.length > 0) {
+					// If predicted to die on this turn
+					if (rc.getHealth() <= prevHealth / 2) {
+						RobotInfo bestFriend = null;
+						double maxHealth = 0;
+						for (RobotInfo r : friendlyRobots) {
+							if (r.health > maxHealth && r.type.isBuilding) {
+								maxHealth = r.health;
+								bestFriend = r;
+							}
+						}
+						if (maxHealth > 8) {
+							rc.transferSupplies(mySupply, bestFriend.location);
 						}
 					}
-					if (maxHealth > 8) {
-						rc.transferSupplies(mySupply, bestFriend.location);
-					}
-				}
-				// Get rid of excess supply
-				else if (mySupply > rc.getType().supplyUpkeep * 250) {
-					for (RobotInfo r : friendlyRobots) {
-						if (rc.getType() == r.type && r.supplyLevel < r.type.supplyUpkeep * 150) {
-							rc.transferSupplies(mySupply - rc.getType().supplyUpkeep * 250, r.location);
-							break;
+					// Get rid of excess supply
+					else if (mySupply > rc.getType().supplyUpkeep * 250) {
+						for (RobotInfo r : friendlyRobots) {
+							if (rc.getType() == r.type && r.supplyLevel < r.type.supplyUpkeep * 150) {
+								rc.transferSupplies(mySupply - rc.getType().supplyUpkeep * 250, r.location);
+								break;
+							}
 						}
 					}
-				}
-				// Give supply to robots that really need it
-				else if (mySupply > rc.getType().supplyUpkeep * 100) {
-					for (RobotInfo r : friendlyRobots) {
-						if (rc.getType() == r.type && r.supplyLevel < r.type.supplyUpkeep * 50) {
-							rc.transferSupplies((int)(mySupply - r.supplyLevel) / 2, r.location);
-							break;
+					// Give supply to robots that really need it
+					else if (mySupply > rc.getType().supplyUpkeep * 100) {
+						for (RobotInfo r : friendlyRobots) {
+							if (rc.getType() == r.type && r.supplyLevel < r.type.supplyUpkeep * 50) {
+								rc.transferSupplies((int)(mySupply - r.supplyLevel) / 2, r.location);
+								break;
+							}
 						}
 					}
 				}
