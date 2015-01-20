@@ -35,37 +35,24 @@ public class Drone extends Unit {
 		// Move
 		if (rc.isCoreReady()) {
 			//default target location
-			MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
-			int approachStrategy = 1;
+			int approachStrategy;
+			MapLocation target;
 			if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
-				if (groupTracker.isGrouped()) {
-					if (groupTracker.groupID == Broadcast.droneGroupAttackCh) {
-						boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-						if (hasHQCommand) {
-							target = enemyHQ;
-						} 
-					}
-					else {	
-						boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-						if (hasHQCommand) {								
-							approachStrategy = 2;
-							//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
-							target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-							rc.setIndicatorString(1, String.valueOf(rc.readBroadcast(Broadcast.towerAttacked)));
-							boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
-							boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
-							if (towerAttacked) {
-								target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
-							}
-							else if (enemyNear) {
-								target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
-							}
-							
-						} 
-					}
-				} 
+				if (rc.getSupplyLevel() == 0) {
+					approachStrategy = 0;
+					target = ownHQ;
+				}
+				if (groupTracker.groupID == Broadcast.droneGroupAttackCh) {
+					target = enemyHQ;
+					approachStrategy = 1;
+				}
+				else { // groupTracker.groupID == Broadcast.droneGroupDefenseCh
+					target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+					approachStrategy = 1;
+				}
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
 				target = this.ownHQ;
+				approachStrategy = 1;
 			} else {
 				target = this.enemyHQ;
 				approachStrategy = 2;
