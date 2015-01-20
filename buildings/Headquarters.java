@@ -30,7 +30,7 @@ public class Headquarters extends Building {
 
 	private MapLocation[] towerOrder; // order of which enemy towers can be defeated
 
-	private int numTowersDefeatable;
+	private int numTowersDefeated;
 	private int enemyTowersRemaining;
 
 	private double[] oreMined;
@@ -56,7 +56,7 @@ public class Headquarters extends Building {
 		}
 		
 		towerOrder = new MapLocation[6];
-		numTowersDefeatable = 0;
+		numTowersDefeated = 0;
 		enemyTowersRemaining = 7;
 		
 		oreMined = new double[ORE_WINDOW];
@@ -67,7 +67,7 @@ public class Headquarters extends Building {
 	@Override
 	protected void actions() throws GameActionException {	
 		if (Clock.getRoundNum()==0) {
-			towerDefeatable();
+			calculateTowerOrder();
 		}
 		broadcastVulnerableEnemyTowerAttack();
 		
@@ -203,7 +203,7 @@ public class Headquarters extends Building {
 			this.enemyTowersRemaining = enemyTowersRemaining;
 			if (enemyTowersRemaining > 0) {
 				//index of the tower targetted
-				int index = numTowersDefeatable - enemyTowersRemaining;
+				int index = numTowersDefeated - enemyTowersRemaining;
 				if (towerOrder[index] != null) {
 					targetTower = towerOrder[index];
 				}
@@ -219,14 +219,78 @@ public class Headquarters extends Building {
 		}
 	}	
 	//calculates whether the towers are defeatable down to 3 using ground units. If not, we must build launchers
-	protected void towerDefeatable() throws GameActionException {
+//	protected void towerDefeatable() throws GameActionException {
+//		MapLocation targetTower = null;
+//		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+//		int numEnemyTowers = enemyTowers.length;
+//		//keeps track of the order of the towers defeated so we don't have to recompute
+//		while (numTowersDefeatable < numEnemyTowers) {
+//			//every iteration one tower decreases so we must acount for this
+//			int numTowersLeft = numEnemyTowers - numTowersDefeatable;
+//			// runs the iteration on the number of towers remaining
+//			MapLocation[] enemyTowersLeft = new MapLocation[numTowersLeft];
+//			int index = 0;
+//			for (int i = 0; i < numEnemyTowers; i++) {
+//				if (!inTowerOrder(enemyTowers[i])) {
+//					enemyTowersLeft[index] = enemyTowers[i];
+//					index++;
+//				} 
+//			}
+//			int[] distToEnemyTowers = new int[numTowersLeft];
+//			// keeps track of distance of enemy towers to ourhq
+//			for (int i = 0; i < numTowersLeft; i++) {
+//				distToEnemyTowers[i] = this.myLocation.distanceSquaredTo(enemyTowersLeft[i]);
+//			}
+//			boolean towerExists = false;
+//			int count = 0;
+//			while (count < numEnemyTowers) {
+//				int minDistance = 999999;
+//				int targetTowerIndex = 0; // to keep track of which tower was chosen
+//				for (int i = 0; i < numTowersLeft; i++) {
+//					if (distToEnemyTowers[i] < minDistance) {
+//						minDistance = distToEnemyTowers[i];
+//						targetTower = enemyTowersLeft[i];
+//						targetTowerIndex = i;
+//					}
+//				}
+//				int numNearbyTowers = 0;
+//				for (int j = 0; j < numTowersLeft; j++) {
+//					if (targetTowerIndex != j && targetTower.distanceSquaredTo(enemyTowersLeft[j]) <= 24) {
+//						numNearbyTowers++;
+//					}
+//				}
+//				//valid tower target, add to towerOrder and increment the num towers defeatable
+//				if (numNearbyTowers <= 3) {
+//					towerExists = true;
+//					towerOrder[numTowersDefeatable] = targetTower;
+//					numTowersDefeatable++;
+//					break;
+//				}
+//				//otherwise test next target
+//				else {
+//					distToEnemyTowers[targetTowerIndex] = 999999;
+//					count++;
+//				}
+//			}
+//			// if no isolated tower exists, check if number of towers remaining is <= 3
+//			// if so, attack enemyHQ. otherwise, need to build launchers
+//			boolean buildLaunchers;
+//			if (!towerExists) {
+//				if (numTowersDefeatable >= 3) {
+//					buildLaunchers = true;
+//				}
+//				break;
+//			}
+//		}
+//	}
+	protected void calculateTowerOrder() {
 		MapLocation targetTower = null;
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 		int numEnemyTowers = enemyTowers.length;
 		//keeps track of the order of the towers defeated so we don't have to recompute
-		while (numTowersDefeatable < numEnemyTowers) {
+		while (numTowersDefeated < numEnemyTowers) {
 			//every iteration one tower decreases so we must acount for this
-			int numTowersLeft = numEnemyTowers - numTowersDefeatable;
+			int numTowersLeft = numEnemyTowers - numTowersDefeated;
 			// runs the iteration on the number of towers remaining
 			MapLocation[] enemyTowersLeft = new MapLocation[numTowersLeft];
 			int index = 0;
@@ -241,51 +305,22 @@ public class Headquarters extends Building {
 			for (int i = 0; i < numTowersLeft; i++) {
 				distToEnemyTowers[i] = this.myLocation.distanceSquaredTo(enemyTowersLeft[i]);
 			}
-			boolean towerExists = false;
-			int count = 0;
-			while (count < numEnemyTowers) {
-				int minDistance = 999999;
-				int targetTowerIndex = 0; // to keep track of which tower was chosen
-				for (int i = 0; i < numTowersLeft; i++) {
-					if (distToEnemyTowers[i] < minDistance) {
-						minDistance = distToEnemyTowers[i];
-						targetTower = enemyTowersLeft[i];
-						targetTowerIndex = i;
-					}
-				}
-				int numNearbyTowers = 0;
-				for (int j = 0; j < numTowersLeft; j++) {
-					if (targetTowerIndex != j && targetTower.distanceSquaredTo(enemyTowersLeft[j]) <= 24) {
-						numNearbyTowers++;
-					}
-				}
-				//valid tower target, add to towerOrder and increment the num towers defeatable
-				if (numNearbyTowers <= 3) {
-					towerExists = true;
-					towerOrder[numTowersDefeatable] = targetTower;
-					numTowersDefeatable++;
-					break;
-				}
-				//otherwise test next target
-				else {
-					distToEnemyTowers[targetTowerIndex] = 999999;
-					count++;
+			int minDistance = 999999;
+			int targetTowerIndex = 0; // to keep track of which tower was chosen
+			for (int i = 0; i < numTowersLeft; i++) {
+				if (distToEnemyTowers[i] < minDistance) {
+					minDistance = distToEnemyTowers[i];
+					targetTower = enemyTowersLeft[i];
+					targetTowerIndex = i;
 				}
 			}
-			// if no isolated tower exists, check if number of towers remaining is <= 3
-			// if so, attack enemyHQ. otherwise, need to build launchers
-			boolean buildLaunchers;
-			if (!towerExists) {
-				if (numTowersDefeatable >= 3) {
-					buildLaunchers = true;
-				}
-				break;
-			}
+			towerOrder[numTowersDefeated] = targetTower;
+			numTowersDefeated++;
 		}
 	}
 	
 	protected boolean inTowerOrder(MapLocation m) {
-		for (int i = 0; i < numTowersDefeatable; i++) {
+		for (int i = 0; i < numTowersDefeated; i++) {
 			if (towerOrder[i] == m) return true;
 		}
 		return false;
