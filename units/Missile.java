@@ -58,6 +58,25 @@ public class Missile extends Robot {
 				  if (enemiesInAttack.length - valuableAlliesInAttack >= 1) {
 					  rc.explode();
 				  }
+			   } else {
+				   Direction moveDirection = rc.getLocation().directionTo(enemyHQ);
+				  if (rc.canMove(moveDirection)) {
+				          rc.move(moveDirection);
+				          return;
+				  }
+				  moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 9) % 8];
+				  if (rc.canMove(moveDirection)) {
+				          rc.move(moveDirection);
+				          return;
+				  }
+				  moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 6) % 8];
+				  if (rc.canMove(moveDirection)) {
+				          rc.move(moveDirection);
+				          return;
+				  }
+				  if (enemiesInAttack.length - valuableAlliesInAttack >= 1) {
+					  rc.explode();
+				  }	  
 			   }
 			}
 		} catch (GameActionException e) {
