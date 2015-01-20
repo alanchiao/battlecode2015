@@ -75,8 +75,8 @@ public class Launcher extends Unit {
 			
 			MapLocation target;
 			int approachStrategy;
+			rc.setIndicatorString(0, String.valueOf(groupTracker.groupID));
 			if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {
-				rc.setIndicatorString(0, String.valueOf(groupTracker.groupID));
 				if (groupTracker.groupID == Broadcast.launcherGroupDefenseCh) {
 					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 					if (hasHQCommand) {								

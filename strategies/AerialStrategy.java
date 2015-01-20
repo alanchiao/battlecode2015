@@ -11,6 +11,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.MapLocation;
 
 public class AerialStrategy extends GameStrategy {
 	
@@ -183,8 +184,17 @@ public class AerialStrategy extends GameStrategy {
 				gc.groupUnits(RobotType.DRONE, 0);
 				rc.broadcast(Broadcast.droneGroupAttackCh, 1);
 			}
-			rc.setIndicatorString(0, String.valueOf(pathDifficulty));
-			if (Clock.getRoundNum() < 2000 - pathDifficulty*4) {
+			MapLocation closestTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
+			MapLocation myLocation = rc.getLocation();
+			int distance = myLocation.distanceSquaredTo(closestTower);
+			MapLocation enemyHQ = rc.senseEnemyHQLocation();
+			int hqDistance = myLocation.distanceSquaredTo(enemyHQ);
+			if (hqDistance < distance) {
+				distance = hqDistance; 
+			}
+			rc.setIndicatorString(0, String.valueOf(Math.sqrt(distance)));
+			
+			if (Clock.getRoundNum() < (1900 - Math.sqrt(distance)*4)) {
 				if (enemyRush && numLaunchersDefense < 5) {
 					gc.groupUnits(RobotType.LAUNCHER, 1);
 					rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
