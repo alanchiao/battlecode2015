@@ -2,6 +2,7 @@ package team158.units;
 
 import team158.buildings.Headquarters;
 import team158.com.Broadcast;
+import team158.units.com.Navigation;
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -26,6 +27,16 @@ public class Drone extends Unit {
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(RobotType.DRONE.attackRadiusSquared, rc.getTeam().opponent());
 		rc.setIndicatorString(0, Integer.toString(enemiesAttackable.length));
 		
+		
+		// run away from tanks / missiles / and launchers
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
+		for (RobotInfo enemy: enemies) {
+			if (enemy.type == RobotType.LAUNCHER || enemy.type == RobotType.TANK || enemy.type == RobotType.MISSILE) {
+				this.navigation.moveToDestination(this.ownHQ, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
+				return;
+			}	
+		}
+		
 		if (rc.isWeaponReady()) {
 			if (enemiesAttackable.length > 0) {
 				rc.attackLocation(selectTarget(enemiesAttackable));
@@ -47,7 +58,7 @@ public class Drone extends Unit {
 					approachStrategy = 1;
 				}
 				else { // groupTracker.groupID == Broadcast.droneGroupDefenseCh
-					target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+					target = selectDefensiveTarget();
 					approachStrategy = 1;
 				}
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
@@ -57,11 +68,34 @@ public class Drone extends Unit {
 				target = this.enemyHQ;
 				approachStrategy = 2;
 			}
+			
 			rc.setIndicatorString(2, target.toString());
 			moveToLocationWithMicro(target, approachStrategy);
 		}
 	}
 	
+	protected MapLocation selectDefensiveTarget() {
+		try {
+//			boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
+			boolean enemyNearTower = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
+			boolean enemyNearHQ = rc.readBroadcast(Broadcast.enemyNearHQCh) == 1;
+//			if (towerAttacked) {
+//				return Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
+//			}
+			if (enemyNearHQ) {
+				return Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+			}
+			else if (enemyNearTower) {
+				return Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
+			}
+			else {
+				return Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
+			}
+		}
+		catch (GameActionException e) {
+			return null;
+		}
+	}
 //	protected void droneRushMicro(MapLocation target) {
 //		try {
 //			RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.DRONE.sensorRadiusSquared, rc.getTeam().opponent());

@@ -68,19 +68,21 @@ public class Headquarters extends Building {
 	protected void actions() throws GameActionException {	
 		if (Clock.getRoundNum()==0) {
 			towerDefeatable();
-			for (int i = 0; i < numTowersDefeatable; i++) {
-			}
 		}
 		rc.broadcast(Broadcast.idealMiningOreAverage, 0);
 		broadcastVulnerableEnemyTowerAttack();
 		
 		RobotInfo closestEnemy = super.findClosestEnemy(100);
 		MapLocation closestEnemyLocation;
+		int enemyFound = 0;
 		if (closestEnemy == null) {
-			closestEnemyLocation = myLocation;
+			// hack -- broadcast to Launcher Rally Location 
+			closestEnemyLocation = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
 		} else {
+			enemyFound = 1;
 			closestEnemyLocation = closestEnemy.location;
 		}
+		rc.broadcast(Broadcast.enemyNearHQCh, enemyFound);
 		Broadcast.broadcastLocation(rc,  Broadcast.enemyNearHQLocationChs, closestEnemyLocation);
 		
 		int mySupply = (int) rc.getSupplyLevel();
