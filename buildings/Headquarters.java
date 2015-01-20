@@ -97,10 +97,16 @@ public class Headquarters extends Building {
 			MapLocation loc = null;
 			int supplyAmount = 0;
 			int priority = 0;
+			int supplyRequestID = rc.readBroadcast(Broadcast.requestSupplyFromHQCh);
 			double gameFractionLeft = 1.0 - Clock.getRoundNum() / 2000.0;
 
 			for (RobotInfo r : friendlyRobots) {
-				if (r.type == RobotType.LAUNCHER) {
+				if (r.ID == supplyRequestID) {
+					rc.transferSupplies(30000, r.location);
+					loc = null;
+					break;
+				}
+				else if (r.type == RobotType.LAUNCHER) {
 					if (r.supplyLevel < r.type.supplyUpkeep * 16 * distanceFactor) {
 						if (priority == 0 || (r.supplyLevel == 0 && priority < 3)) {
 							loc = r.location;
