@@ -19,10 +19,15 @@ public class Drone extends Unit {
 		try {
 			followingID = rc.readBroadcast(Broadcast.requestSupplyDroneCh);
 			if (followingID != 0) {
-				rc.setIndicatorString(1, Integer.toString(followingID));
-				autoSupplyTransfer = false;
-				followingLocation = rc.senseRobot(followingID).location;
+				rc.setIndicatorString(1, "Following" + Integer.toString(followingID));
 				rc.broadcast(Broadcast.requestSupplyDroneCh, 0);
+				try {
+					followingLocation = rc.senseRobot(followingID).location;
+					autoSupplyTransfer = false;
+				}
+				catch (GameActionException e) {
+					e.printStackTrace();
+				}
 			}
 		} catch (GameActionException e) {
 			e.printStackTrace();
@@ -62,15 +67,7 @@ public class Drone extends Unit {
 			return;
 		}
 
-		// Determine if opponent is using tanks/launchers and assess threat
-		if (prevHealth - rc.getHealth() >= 20) {
-			int threat = rc.readBroadcast(Broadcast.enemyThreatCh);
-			rc.broadcast(Broadcast.enemyThreatCh, threat + 1);
-		}
-
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(RobotType.DRONE.attackRadiusSquared, rc.getTeam().opponent());
-		rc.setIndicatorString(0, Integer.toString(enemiesAttackable.length));
-		
 		
 		// run away from tanks / missiles / and launchers
 		if (rc.isCoreReady()) {
@@ -99,7 +96,7 @@ public class Drone extends Unit {
 					approachStrategy = 0;
 					target = ownHQ;
 				}
-				if (groupTracker.groupID == Broadcast.droneGroupAttackCh) {
+				else if (groupTracker.groupID == Broadcast.droneGroupAttackCh) {
 					target = enemyHQ;
 					approachStrategy = 1;
 				}
@@ -114,8 +111,6 @@ public class Drone extends Unit {
 				target = this.enemyHQ;
 				approachStrategy = 2;
 			}
-			
-			rc.setIndicatorString(2, target.toString());
 			moveToLocationWithMicro(target, approachStrategy);
 		}
 	}

@@ -16,7 +16,6 @@ import battlecode.common.MapLocation;
 public class AerialStrategy extends GameStrategy {
 	
 	private boolean enemyRush;
-	private boolean enemyThreat;
 	private int pathDifficulty;
 	private int attackGroup;
 	private int defendGroup;
@@ -30,7 +29,6 @@ public class AerialStrategy extends GameStrategy {
 		this.attackGroup = 1;
 		this.defendGroup = 0;
 		this.enemyRush = false;
-		this.enemyThreat = false;
 		this.pathDifficulty = 0;	
 		this.builderBeaver = 0;
 		this.scoutMiner = 0;
@@ -47,10 +45,7 @@ public class AerialStrategy extends GameStrategy {
 		int numLaunchersAttack = 0;
 		int numLaunchersDefense = 0;
 		int numHelipads = 0;
-		int numDronesAttack = 0;
-		int numDronesDefense = 0;
 		int numAerospaceLabs = 0;
-		double oreDepletion = 0;
 
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
@@ -63,12 +58,6 @@ public class AerialStrategy extends GameStrategy {
 				}
 			} else if (type == RobotType.DRONE) {
 				numDrones++;
-				if (Hashing.find(r.ID) == Broadcast.droneGroupAttackCh) {
-					numDronesAttack++;
-				}
-				else if (Hashing.find(r.ID)  == Broadcast.droneGroupDefenseCh) {
-					numDronesDefense++;
-				}
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
 				builderBeaver = r.ID;
@@ -96,7 +85,7 @@ public class AerialStrategy extends GameStrategy {
 		rc.broadcast(Broadcast.numLaunchersCh, numLaunchers);
 		rc.broadcast(Broadcast.numBuildingsCh, numMinerFactories + numSupplyDepots + numHelipads + numAerospaceLabs);
 		
-		if (!enemyRush && Clock.getRoundNum() < 600) {
+		if (!enemyRush && numAerospaceLabs == 0 && Clock.getRoundNum() < 600) {
 			RobotInfo[] enemyRobots = rc.senseNearbyRobots(99, rc.getTeam().opponent());
 			for (RobotInfo r : enemyRobots) {
 				if (r.type == RobotType.DRONE) {
@@ -105,14 +94,6 @@ public class AerialStrategy extends GameStrategy {
 					rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 					break;
 				}
-			}
-		}
-		
-		if (!enemyThreat && Clock.getRoundNum() < 1200) {
-			if (rc.readBroadcast(Broadcast.enemyThreatCh) > 2) {
-				enemyThreat = true;
-				rc.broadcast(Broadcast.stopDroneProductionCh, 1);
-				gc.unGroup(Broadcast.droneGroupAttackCh);
 			}
 		}
 		
@@ -162,15 +143,17 @@ public class AerialStrategy extends GameStrategy {
 						rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
 					}
 				}
+				else if (numSupplyDepots < 3 && ore >= 100) {
+					rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
+				}
+				else if (numAerospaceLabs == 2 && numSupplyDepots < 6 && ore >= 100) {
+					rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
+				}
 				else if (ore >= 700) {
 					rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
 				}
-				else if (numSupplyDepots < 3 && ore >= 750) {
-					rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
-				}
 			}
 			int[] groupSize = {numLaunchersDefense, numLaunchersAttack};
-			int[] groupCh = {Broadcast.launcherGroupDefenseCh, Broadcast.launcherGroupAttackCh};
 			if (numLaunchersAttack > 0 || numLaunchersDefense > 0) {
 				gc.stopGroup(RobotType.LAUNCHER);
 			}

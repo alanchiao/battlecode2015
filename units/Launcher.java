@@ -16,11 +16,13 @@ public class Launcher extends Unit {
 	
 	public boolean isReloading;
 	public boolean noSupply;
+	public boolean broadcasted;
 
 	public Launcher(RobotController newRC) {
 		super(newRC);
 		this.isReloading = false;
 		noSupply = false;
+		broadcasted = false;
 	}
 
 	@Override
@@ -32,6 +34,7 @@ public class Launcher extends Unit {
 		if (rc.getSupplyLevel() == 0 && myLocation.distanceSquaredTo(ownHQ) > 15) {
 			if (noSupply) {
 				if (rc.readBroadcast(Broadcast.requestSupplyDroneCh) == 0) {
+					broadcasted = true;
 					rc.broadcast(Broadcast.requestSupplyDroneCh, rc.getID());
 				}
 			}
@@ -41,6 +44,12 @@ public class Launcher extends Unit {
 		}
 		else {
 			noSupply = false;
+			if (broadcasted) {
+				if (rc.readBroadcast(Broadcast.requestSupplyDroneCh) == rc.getID()) {
+					rc.broadcast(Broadcast.requestSupplyDroneCh, 0);
+				}
+				broadcasted = false;
+			}
 		}
 		
 		if (rc.getMissileCount() >= 3) {
@@ -113,7 +122,6 @@ public class Launcher extends Unit {
 			
 			MapLocation target;
 			int approachStrategy;
-			rc.setIndicatorString(0, String.valueOf(groupTracker.groupID));
 			if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {
 				if (groupTracker.groupID == Broadcast.launcherGroupDefenseCh) {
 					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
@@ -162,7 +170,6 @@ public class Launcher extends Unit {
 					approachStrategy = 2;
 				}
 			}
-			rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
 			moveToLocationWithMicro(target, approachStrategy);
 		}
 	}
