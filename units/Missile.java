@@ -6,6 +6,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import team158.Robot;
+import team158.com.Broadcast;
 import team158.utils.DirectionHelper;
 
 public class Missile extends Robot {
@@ -59,7 +60,7 @@ public class Missile extends Robot {
 					  rc.explode();
 				  }
 			   } else {
-				   Direction moveDirection = rc.getLocation().directionTo(enemyHQ);
+				   Direction moveDirection = rc.getLocation().directionTo(Broadcast.readLocation(rc, Broadcast.enemyHQLocation));
 				  if (rc.canMove(moveDirection)) {
 				          rc.move(moveDirection);
 				          return;
