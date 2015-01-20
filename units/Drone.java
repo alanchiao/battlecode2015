@@ -2,6 +2,7 @@ package team158.units;
 
 import team158.buildings.Headquarters;
 import team158.com.Broadcast;
+import team158.units.com.Navigation;
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -25,6 +26,16 @@ public class Drone extends Unit {
 
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(RobotType.DRONE.attackRadiusSquared, rc.getTeam().opponent());
 		rc.setIndicatorString(0, Integer.toString(enemiesAttackable.length));
+		
+		
+		// run away from tanks / missiles / and launchers
+		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
+		for (RobotInfo enemy: enemies) {
+			if (enemy.type == RobotType.LAUNCHER || enemy.type == RobotType.TANK || enemy.type == RobotType.MISSILE) {
+				this.navigation.moveToDestination(this.ownHQ, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
+				return;
+			}	
+		}
 		
 		if (rc.isWeaponReady()) {
 			if (enemiesAttackable.length > 0) {
@@ -57,6 +68,7 @@ public class Drone extends Unit {
 				target = this.enemyHQ;
 				approachStrategy = 2;
 			}
+			
 			rc.setIndicatorString(2, target.toString());
 			moveToLocationWithMicro(target, approachStrategy);
 		}
