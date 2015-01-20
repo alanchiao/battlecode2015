@@ -19,6 +19,7 @@ public class Drone extends Unit {
 		try {
 			followingID = rc.readBroadcast(Broadcast.requestSupplyDroneCh);
 			if (followingID != 0) {
+				rc.setIndicatorString(1, Integer.toString(followingID));
 				autoSupplyTransfer = false;
 				followingLocation = rc.senseRobot(followingID).location;
 				rc.broadcast(Broadcast.requestSupplyDroneCh, 0);
@@ -37,7 +38,7 @@ public class Drone extends Unit {
 				if (friendlyRobots.length > 0) {
 					for (RobotInfo r : friendlyRobots) {
 						if (r.type == RobotType.LAUNCHER) {
-							rc.transferSupplies((int) (rc.getSupplyLevel() - rc.getType().supplyUpkeep * 100), r.location);
+							rc.transferSupplies((int) (rc.getSupplyLevel()), r.location);
 							autoSupplyTransfer = true;
 							return;
 						}
@@ -52,9 +53,10 @@ public class Drone extends Unit {
 				}
 				if (minDistance == 999999) {
 					autoSupplyTransfer = true;
+					return;
 				}
 			}
-			else {
+			if (rc.isCoreReady()) {
 				navigation.moveToDestination(followingLocation, Navigation.AVOID_ALL);
 			}
 			return;

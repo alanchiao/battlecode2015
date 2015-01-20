@@ -23,5 +23,4 @@ public class Helipad extends Building {
 			this.greedySpawn(RobotType.DRONE);
 		}
 	}
-
 }

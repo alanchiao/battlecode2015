@@ -27,12 +27,13 @@ public class Launcher extends Unit {
 	protected void actions() throws GameActionException {
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(24, rc.getTeam().opponent());
 		
-		
 		MapLocation myLocation = rc.getLocation();
 
 		if (rc.getSupplyLevel() == 0 && myLocation.distanceSquaredTo(ownHQ) > 15) {
 			if (noSupply) {
-				rc.broadcast(Broadcast.requestSupplyDroneCh, rc.getID());
+				if (rc.readBroadcast(Broadcast.requestSupplyDroneCh) == 0) {
+					rc.broadcast(Broadcast.requestSupplyDroneCh, rc.getID());
+				}
 			}
 			else {
 				noSupply = true;
