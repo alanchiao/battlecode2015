@@ -32,7 +32,7 @@ public class Drone extends Unit {
 		if (rc.isCoreReady()) {
 			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
 			for (RobotInfo enemy: enemies) {
-				if (enemy.type == RobotType.LAUNCHER || enemy.type == RobotType.TANK || enemy.type == RobotType.MISSILE) {
+				if (enemy.type == RobotType.LAUNCHER || enemy.type == RobotType.TANK || enemy.type == RobotType.MISSILE || enemy.type == RobotType.COMMANDER) {
 					this.navigation.moveToDestination(this.ownHQ, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
 					return;
 				}	
