@@ -22,7 +22,14 @@ public class Navigation {
 	
 	// states
 	public boolean isAvoidingObstacle; // whether in state of avoiding obstacle
-	public boolean isAvoidAllAttack;
+	
+	
+	// what institutes as an obstacle
+	public int avoidLevel;
+	public int avoidEnemyMinRange;
+	public final static int AVOID_NOTHING = 0;
+	public final static int AVOID_ENEMY_ATTACK_BUILDINGS = 1;
+	public final static int AVOID_ALL = 2;
 	
 	// obstacle monitoring information
 	public MapLocation destination; // desired point to reach
@@ -39,7 +46,7 @@ public class Navigation {
 		this.enemyHQ = enemyHQ;
 		
 		isAvoidingObstacle = false;
-		isAvoidAllAttack = false;
+		avoidLevel = 0;
 		destination = null;
 		monitoredObstacle = null;
 		possibleMovesAvoidingEnemies = null;
@@ -47,7 +54,11 @@ public class Navigation {
 	
 	
 	// main high-level navigational method
-	public void moveToDestination(MapLocation nextDestination, boolean isAvoidAllAttack) {
+	//
+	// avoid level: 0 - avoid nothing
+	// 				1 - avoid towers and HQ
+	//				2 - avoid all enemies with range >= 5
+	public void moveToDestination(MapLocation nextDestination, int avoidLevel) {
 		if (monitoredObstacle != null) {
 			rc.setIndicatorDot(monitoredObstacle, 0, 0, 0);
 		}
@@ -64,7 +75,7 @@ public class Navigation {
 		}
 		
 		destination = nextDestination;
-		this.isAvoidAllAttack = isAvoidAllAttack;
+		this.avoidLevel = avoidLevel;
 		this.possibleMovesAvoidingEnemies = null;
 		
 		if (USE_WALL_HUGGING) {
@@ -200,22 +211,28 @@ public class Navigation {
 	
 	// treat as passable or not
 	public boolean isPassable(MapLocation location, Direction movementDirection) {
-		boolean isPassable = rc.canMove(movementDirection); 
-		if (isAvoidAllAttack) {
-			/// RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
+		if (this.avoidLevel == AVOID_ENEMY_ATTACK_BUILDINGS) {
 			if(!isOutsideEnemyAttackRange(null, 5, location)) {
 				return false;
 			}
-		} 
-		return isPassable;
+		} else if (this.avoidLevel == AVOID_ALL) {
+			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
+			if(!isOutsideEnemyAttackRange(enemies, 5, location)) {
+				return false;
+			}
+		}	
+		return rc.canMove(movementDirection); 
 	}
 	
 	// treat as obstacle or not to wall hug along
 	public boolean isObstacle (MapLocation location, Direction movementDirection) throws GameActionException {
-		if (isAvoidAllAttack) {
+		if (this.avoidLevel == AVOID_ENEMY_ATTACK_BUILDINGS || this.avoidLevel == AVOID_ALL) {
 			if (possibleMovesAvoidingEnemies == null) {
-				// RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
-				possibleMovesAvoidingEnemies = moveDirectionsAvoidingAttack(null, 5);
+				RobotInfo[] enemies = null;
+				if (this.avoidLevel == AVOID_ALL) {
+					enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
+				}
+				possibleMovesAvoidingEnemies = moveDirectionsAvoidingAttack(enemies, 5);
 			} 
 			if (!possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(movementDirection)]) {
 				return true;

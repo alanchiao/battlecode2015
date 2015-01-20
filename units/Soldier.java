@@ -1,6 +1,7 @@
 package team158.units;
 
 import team158.com.Broadcast;
+import team158.units.com.Navigation;
 import battlecode.common.*;
 
 public class Soldier extends Unit {
@@ -27,7 +28,7 @@ public class Soldier extends Unit {
 			// just always moveToDestination target?
 			if (groupTracker.isGrouped() && hasHQCommand) {
 				target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-				navigation.moveToDestination(target, false);
+				navigation.moveToDestination(target, Navigation.AVOID_NOTHING);
 			}
 			else {
 				target = groupTracker.getRallyPoint();

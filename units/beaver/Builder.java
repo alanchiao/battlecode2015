@@ -61,7 +61,7 @@ public class Builder {
 			rc.build(dirToBuildingLocation, this.buildingType);
 			this.isBuilding = false;
 		} else {
-			navigation.moveToDestination(this.buildingLocation.add(Direction.WEST), true);
+			navigation.moveToDestination(this.buildingLocation.add(Direction.WEST), Navigation.AVOID_ALL);
 		}
 	}
 	

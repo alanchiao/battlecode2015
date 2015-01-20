@@ -204,7 +204,7 @@ public abstract class Unit extends Robot {
 		// no enemies in range
 		if (enemies.length == 0) { // then move towards destination safely
 			if (target != null) {
-				navigation.moveToDestination(target, true);
+				navigation.moveToDestination(target, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
 			} else {
 				System.out.println("NO TARGET");
 			}
@@ -216,7 +216,7 @@ public abstract class Unit extends Robot {
 		int myAttackRange = rc.getType() == RobotType.LAUNCHER ? 35 : rc.getType().attackRadiusSquared;
 		if (navigation.isOutsideEnemyAttackRange(enemies, 0, myLocation)) {
 			if (approachStrategy == 2) { // then move closer
-				navigation.moveToDestination(target, false);
+				navigation.moveToDestination(target, Navigation.AVOID_NOTHING);
 				return;
 			}
 			// Check if almost in range of an enemy
@@ -227,7 +227,7 @@ public abstract class Unit extends Robot {
 					}
 					else if (rc.getWeaponDelay() <= 1) { // approachStrategy == 1
 						if (r.type.attackRadiusSquared == myAttackRange && navigation.isOutsideEnemyAttackRange(null, myAttackRange, r.location)) {
-							navigation.moveToDestination(r.location, false);
+							navigation.moveToDestination(r.location, Navigation.AVOID_NOTHING);
 							return;
 						}
 					}
@@ -323,7 +323,7 @@ public abstract class Unit extends Robot {
 						// approach enemies that outrange us
 						if (r.type.attackRadiusSquared > myAttackRange) {
 							navigation.stopObstacleTracking();
-							navigation.moveToDestination(r.location, false);
+							navigation.moveToDestination(r.location, Navigation.AVOID_NOTHING);
 							return;
 						}
 					}

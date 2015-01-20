@@ -1,15 +1,26 @@
 package team158.units;
 import battlecode.common.*;
 import team158.com.Broadcast;
+import team158.units.com.Navigation;
 import team158.utils.*;
 
 public class Miner extends Unit {
 	
+	// ore information propagation
+	public double ORE_THRESHOLD_TO_MOVE = 2;
+	boolean isLeaderMiner;
+	double lastBroadcastedOreCount;
+	
+	// miner scouting
 	private int stepsUntilEnemyHQ;
 	
 	public Miner(RobotController newRC) {
 		super(newRC);
-		stepsUntilEnemyHQ = 0;
+		
+		this.isLeaderMiner = false;
+		this.lastBroadcastedOreCount = 0;
+		
+		this.stepsUntilEnemyHQ = 0;
 	}
 
 	private Direction prevDirection = null;
@@ -46,7 +57,7 @@ public class Miner extends Unit {
 				}
 			}
 			else if (rc.readBroadcast(Broadcast.scoutEnemyHQCh) == rc.getID()) {
-				navigation.moveToDestination(enemyHQ, true);
+				navigation.moveToDestination(enemyHQ, Navigation.AVOID_ALL);
 				stepsUntilEnemyHQ++;
 				// uses symmetrical properties of map. doubles distance it had to travel
 				// to get there. May be delayed by enemy units, but shouldn't be much

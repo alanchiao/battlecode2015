@@ -2,6 +2,7 @@ package team158.units;
 
 import team158.buildings.Headquarters;
 import team158.com.Broadcast;
+import team158.units.com.Navigation;
 import team158.utils.DirectionHelper;
 import battlecode.common.Clock;
 import battlecode.common.GameActionException;
@@ -68,7 +69,7 @@ public class Launcher extends Unit {
 		if (rc.isCoreReady()) {
 			// reloading - retreat ot recover missiles
 			if (isReloading) {
-				navigation.moveToDestination(this.ownHQ, true);
+				navigation.moveToDestination(this.ownHQ, Navigation.AVOID_ALL);
 				return;
 			}
 			
@@ -100,7 +101,7 @@ public class Launcher extends Unit {
 			} else {
 				target = this.enemyHQ;
 			}
-			navigation.moveToDestination(target, false);
+			navigation.moveToDestination(target, Navigation.AVOID_NOTHING);
 		}
 	}
 
