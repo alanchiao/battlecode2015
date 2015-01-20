@@ -48,7 +48,7 @@ public class GroupController {
 		this.ptDroneA = 0;
 		this.ptDroneB = 0;
 		this.droneGroupA = new int[256];
-		this.droneGroupB = new int[256];
+		this.droneGroupB = new int[512];
 		this.ptLauncherA = 0;
 		this.ptLauncherB = 0;
 		this.launcherGroupA = new int[256];
