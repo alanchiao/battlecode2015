@@ -142,8 +142,17 @@ public class Launcher extends Unit {
 						target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 					}
 					else {
-						approachStrategy = 0;
-						target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
+						approachStrategy = 2;
+						// enemyNearHQLocationChs defaults to rally location if no enemy around.
+						target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+						boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
+						boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
+						if (towerAttacked) {
+							target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
+						}
+						else if (enemyNear) {
+							target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
+						}
 					}
 				}
 				else {
