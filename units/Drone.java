@@ -19,7 +19,7 @@ public class Drone extends Unit {
 	@Override
 	protected void actions() throws GameActionException {
 		// Determine if opponent is using tanks/launchers and assess threat
-		if (prevHealth - rc.getHealth() >= 20 && prevHealth - rc.getHealth() != 24) {
+		if (prevHealth - rc.getHealth() >= 20) {
 			int threat = rc.readBroadcast(Broadcast.enemyThreatCh);
 			rc.broadcast(Broadcast.enemyThreatCh, threat + 1);
 		}
@@ -60,7 +60,7 @@ public class Drone extends Unit {
 					approachStrategy = 1;
 				}
 				else { // groupTracker.groupID == Broadcast.droneGroupDefenseCh
-					target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+					target = selectDefensiveTarget();
 					approachStrategy = 1;
 				}
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
@@ -76,6 +76,28 @@ public class Drone extends Unit {
 		}
 	}
 	
+	protected MapLocation selectDefensiveTarget() {
+		try {
+//			boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
+			boolean enemyNearTower = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
+			boolean enemyNearHQ = rc.readBroadcast(Broadcast.enemyNearHQCh) == 1;
+//			if (towerAttacked) {
+//				return Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
+//			}
+			if (enemyNearHQ) {
+				return Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+			}
+			else if (enemyNearTower) {
+				return Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
+			}
+			else {
+				return Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
+			}
+		}
+		catch (GameActionException e) {
+			return null;
+		}
+	}
 //	protected void droneRushMicro(MapLocation target) {
 //		try {
 //			RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.DRONE.sensorRadiusSquared, rc.getTeam().opponent());

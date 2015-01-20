@@ -43,6 +43,8 @@ public class AerialStrategy extends GameStrategy {
 		int numSupplyDepots = 0;
 		int numDrones = 0;
 		int numLaunchers = 0;
+		int numLaunchersAttack = 0;
+		int numLaunchersDefense = 0;
 		int numHelipads = 0;
 		int numDronesAttack = 0;
 		int numDronesDefense = 0;
@@ -62,10 +64,10 @@ public class AerialStrategy extends GameStrategy {
 				numDrones++;
 				if (Hashing.find(r.ID) == Broadcast.droneGroupAttackCh) {
 					numDronesAttack++;
-				}							
+				}
 				else if (Hashing.find(r.ID)  == Broadcast.droneGroupDefenseCh) {
 					numDronesDefense++;
-				}		
+				}
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
 				builderBeaver = r.ID;
@@ -79,8 +81,12 @@ public class AerialStrategy extends GameStrategy {
 				numAerospaceLabs++;
 			} else if (type == RobotType.LAUNCHER) {
 				numLaunchers++;
-			} else if (type == RobotType.DRONE) {
-				numDrones++;
+				if (Hashing.find(r.ID) == Broadcast.launcherGroupAttackCh) {
+					numLaunchersAttack++;
+				}							
+				else if (Hashing.find(r.ID)  == Broadcast.launcherGroupDefenseCh) {
+					numLaunchersDefense++;
+				}	
 			}
 		}
 		
@@ -94,10 +100,9 @@ public class AerialStrategy extends GameStrategy {
 			for (RobotInfo r : enemyRobots) {
 				if (r.type == RobotType.DRONE) {
 					enemyRush = true;
-					// Cancel requested builds
-					rc.broadcast(Broadcast.buildHelipadsCh, 0);
 					// Tell helipads to yield
 					rc.broadcast(Broadcast.yieldToLaunchers, 1);
+					rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 					break;
 				}
 			}
@@ -106,8 +111,8 @@ public class AerialStrategy extends GameStrategy {
 		if (!enemyThreat && Clock.getRoundNum() < 1200) {
 			if (rc.readBroadcast(Broadcast.enemyThreatCh) > 2) {
 				enemyThreat = true;
-				rc.broadcast(Broadcast.buildHelipadsCh, 0);
 				rc.broadcast(Broadcast.yieldToLaunchers, 1);
+				rc.broadcast(Broadcast.stopDroneProductionCh, 1);
 				gc.unGroup(Broadcast.droneGroupAttackCh);
 			}
 		}
@@ -135,7 +140,8 @@ public class AerialStrategy extends GameStrategy {
 				if (buildDirection != null && ore >= 100) {
 					rc.spawn(buildDirection, RobotType.BEAVER);
 				}
-			} else if (numMinerFactories == 0) {
+			}
+			else if (numMinerFactories == 0) {
 				if (ore >= 500) {
 					rc.broadcast(Broadcast.buildMinerFactoriesCh, builderBeaver);
 				}
@@ -145,83 +151,50 @@ public class AerialStrategy extends GameStrategy {
 					rc.broadcast(Broadcast.buildHelipadsCh, builderBeaver);
 				}
 			}
-			else if (numSupplyDepots == 0 && ore >= 100) {
-				rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
+			else if (numSupplyDepots == 0) {
+				if (ore >= 100) {
+					rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
+				}
 			}
 			else {
-				if (enemyThreat && pathDifficulty < 70) { // Build launchers
-					if (numAerospaceLabs == 0) {
-						if (ore >= 500) {
-							rc.broadcast(Broadcast.stopDroneProductionCh, 0);
-							rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
-						}
-						else {
-							rc.broadcast(Broadcast.stopDroneProductionCh, 1);
-						}
-					}
-					else if (ore >= 700) {
+				if (numAerospaceLabs == 0) {
+					if (ore >= 500) {
+						rc.broadcast(Broadcast.stopDroneProductionCh, 0);
 						rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
 					}
-					else if (numSupplyDepots < 3 && ore >= 750) {
-						rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
-					}
 				}
-				else if (enemyRush) { // Build some launchers
-					if (numAerospaceLabs == 0) {
-						if (ore >= 500) {
-							rc.broadcast(Broadcast.stopDroneProductionCh, 0);
-							rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
-						}
-						else {
-							rc.broadcast(Broadcast.stopDroneProductionCh, 1);
-						}
-					}
-					else if (ore >= 700) {
-						rc.broadcast(Broadcast.buildHelipadsCh, builderBeaver);
-					}
-					else if (numSupplyDepots < 3 && ore >= 750) {
-						rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
-					}
+				else if (ore >= 700) {
+					rc.broadcast(Broadcast.buildAerospaceLabsCh, builderBeaver);
 				}
-				else {
-					if (ore >= 700) {
-						rc.broadcast(Broadcast.buildHelipadsCh, builderBeaver);
-					}
-					else if (numSupplyDepots < 3 && ore >= 750) {
-						rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
-					}
+				else if (numSupplyDepots < 3 && ore >= 750) {
+					rc.broadcast(Broadcast.buildSupplyCh, builderBeaver);
 				}
 			}
-			int[] groupSize = {numDronesDefense, numDronesAttack};
-			int[] groupCh = {Broadcast.droneGroupDefenseCh, Broadcast.droneGroupAttackCh};
-			if (numDronesAttack > 0 || numDronesDefense > 0) {
-				gc.stopGroup(RobotType.DRONE);
+			int[] groupSize = {numLaunchersDefense, numLaunchersAttack};
+			int[] groupCh = {Broadcast.launcherGroupDefenseCh, Broadcast.launcherGroupAttackCh};
+			if (numLaunchersAttack > 0 || numLaunchersDefense > 0) {
+				gc.stopGroup(RobotType.LAUNCHER);
 			}
 			
 			rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
 			rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
-	
-			if (numLaunchers > 0) {
-				if (numLaunchers > 5) {
-					rc.broadcast(Broadcast.launcherGroupCh, 1);
-				}
-				else {
-					rc.broadcast(Broadcast.launcherGroupCh, 0);
-					//groupUnits(Broadcast.launcherGroupCh, RobotType.LAUNCHER);
-				}
-			}
-			
-			if (numDronesAttack < 5) {
+
+			if (numDrones > 0) {
 				gc.groupUnits(RobotType.DRONE, 0);
 				rc.broadcast(Broadcast.droneGroupAttackCh, 1);
 			}
+			
+			if (numLaunchersDefense < 6) {
+				gc.groupUnits(RobotType.LAUNCHER, 1);
+				rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
+			}
 			else {
-				gc.groupUnits(RobotType.DRONE, 1);
-				if (numDrones - numDronesAttack > 10) {
-					rc.broadcast(Broadcast.droneGroupDefenseCh, 1);
+				gc.groupUnits(RobotType.LAUNCHER, 0);
+				if (numLaunchers - numLaunchersDefense >= 8) {
+					rc.broadcast(Broadcast.launcherGroupAttackCh, 1);
 				}
 				else {
-					rc.broadcast(Broadcast.droneGroupDefenseCh, 0);
+					rc.broadcast(Broadcast.launcherGroupAttackCh, 0);
 				}
 			}		
 			//if they don't build tanks and launchers

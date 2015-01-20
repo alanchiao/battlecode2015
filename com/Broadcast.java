@@ -57,6 +57,7 @@ public class Broadcast {
 	public static final int towerAttacked = 608;
 	public static final int enemyTowerFound = 609;
 	public static final int enemyNearTower = 610;
+	public static final int enemyNearHQCh = 611;
 	
 	// Channels 700-799 are used for grouping
 	public static final int soldierGroupAttackCh = 700;
@@ -65,7 +66,6 @@ public class Broadcast {
 	public static final int tankGroupDefenseCh = 703;
 	public static final int droneGroupAttackCh = 704;
 	public static final int droneGroupDefenseCh = 705;
-	public static final int launcherGroupCh = 706;
 	public static final int launcherGroupAttackCh = 707;
 	public static final int launcherGroupDefenseCh = 708;
 	
