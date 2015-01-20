@@ -5,6 +5,7 @@ import team158.com.Broadcast;
 import team158.units.com.Navigation;
 import team158.utils.DirectionHelper;
 import battlecode.common.Clock;
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -14,16 +15,32 @@ import battlecode.common.RobotType;
 public class Launcher extends Unit {
 	
 	public boolean isReloading;
+	public boolean noSupply;
 
 	public Launcher(RobotController newRC) {
 		super(newRC);
 		this.isReloading = false;
+		noSupply = false;
 	}
 
 	@Override
 	protected void actions() throws GameActionException {
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(24, rc.getTeam().opponent());
+		
+		
 		MapLocation myLocation = rc.getLocation();
+
+		if (rc.getSupplyLevel() == 0 && myLocation.distanceSquaredTo(ownHQ) > 15) {
+			if (noSupply) {
+				rc.broadcast(Broadcast.requestSupplyDroneCh, rc.getID());
+			}
+			else {
+				noSupply = true;
+			}
+		}
+		else {
+			noSupply = false;
+		}
 		
 		if (rc.getMissileCount() >= 3) {
 			isReloading = false;
@@ -38,7 +55,27 @@ public class Launcher extends Unit {
 			}
 		}
 		
-		if (enemiesAttackable.length > 0 && nearbyMissileCount < 1 && !isReloading) {
+		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+		boolean isTargetTowerOrHq = false;
+		for (MapLocation enemyTower: enemyTowers) {
+			if (enemyTower.equals(this.navigation.destination)) {
+				isTargetTowerOrHq = true;
+			}
+		}
+		
+		if (enemyHQ.equals(this.navigation.destination)) {
+			isTargetTowerOrHq = true;
+		}
+		
+		if (isTargetTowerOrHq && myLocation.distanceSquaredTo(this.navigation.destination) <= 36) {
+			Direction directionToTarget = myLocation.directionTo(this.navigation.destination);
+			if (rc.canLaunch(directionToTarget)) {
+				rc.launchMissile(directionToTarget);
+			}
+			if (rc.getMissileCount() < 3) {
+				isReloading = true;
+			}
+		} else if (enemiesAttackable.length > 0 && nearbyMissileCount < 2 && !isReloading) {
 			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(selectTarget(enemiesAttackable)));
 			int[] offsets = {0,1,-1,2,-2};
 			int offsetIndex = 0;
@@ -113,17 +150,18 @@ public class Launcher extends Unit {
 					approachStrategy = 0;
 					target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
 				}
-				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
+				
 			} else {
 				if (groupTracker.groupID == Broadcast.launcherGroupAttackCh) {
-					target = this.enemyHQ;
-					approachStrategy = 2;
-				}
-				else {
 					target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 					approachStrategy = 2;
 				}
+				else {
+					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
+					approachStrategy = 2;
+				}
 			}
+			rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
 			moveToLocationWithMicro(target, approachStrategy);
 		}
 	}
