@@ -5,6 +5,7 @@ import team158.com.Broadcast;
 import team158.units.com.Navigation;
 import team158.utils.DirectionHelper;
 import battlecode.common.Clock;
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -25,6 +26,8 @@ public class Launcher extends Unit {
 	@Override
 	protected void actions() throws GameActionException {
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(24, rc.getTeam().opponent());
+		
+		
 		MapLocation myLocation = rc.getLocation();
 
 		if (rc.getSupplyLevel() == 0 && myLocation.distanceSquaredTo(ownHQ) > 15) {
@@ -52,7 +55,27 @@ public class Launcher extends Unit {
 			}
 		}
 		
-		if (enemiesAttackable.length > 0 && nearbyMissileCount < 1 && !isReloading) {
+		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+		boolean isTargetTowerOrHq = false;
+		for (MapLocation enemyTower: enemyTowers) {
+			if (enemyTower.equals(this.navigation.destination)) {
+				isTargetTowerOrHq = true;
+			}
+		}
+		
+		if (enemyHQ.equals(this.navigation.destination)) {
+			isTargetTowerOrHq = true;
+		}
+		
+		if (isTargetTowerOrHq && myLocation.distanceSquaredTo(this.navigation.destination) <= 36) {
+			Direction directionToTarget = myLocation.directionTo(this.navigation.destination);
+			if (rc.canLaunch(directionToTarget)) {
+				rc.launchMissile(directionToTarget);
+			}
+			if (rc.getMissileCount() < 3) {
+				isReloading = true;
+			}
+		} else if (enemiesAttackable.length > 0 && nearbyMissileCount < 2 && !isReloading) {
 			int dirint = DirectionHelper.directionToInt(myLocation.directionTo(selectTarget(enemiesAttackable)));
 			int[] offsets = {0,1,-1,2,-2};
 			int offsetIndex = 0;

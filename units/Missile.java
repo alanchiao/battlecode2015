@@ -4,6 +4,7 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
 import team158.Robot;
 import team158.utils.DirectionHelper;
 
@@ -23,8 +24,14 @@ public class Missile extends Robot {
 			if (rc.isCoreReady()) {
 				RobotInfo alliesInAttack[] = rc.senseNearbyRobots(2, rc.getTeam());
 				RobotInfo enemiesInAttack[] = rc.senseNearbyRobots(2, rc.getTeam().opponent());
+				int valuableAlliesInAttack = 0;
+				for (RobotInfo ally: alliesInAttack) {
+					if (ally.type != RobotType.MISSILE) {
+						valuableAlliesInAttack++;
+					}
+				}
 				
-				if (enemiesInAttack.length > 0 && alliesInAttack.length == 0) {
+				if (enemiesInAttack.length > 0 && valuableAlliesInAttack == 0) {
 					rc.explode();
 					return;
 				} 
@@ -48,7 +55,7 @@ public class Missile extends Robot {
 				          rc.move(moveDirection);
 				          return;
 				  }
-				  if (enemiesInAttack.length - alliesInAttack.length >= 1) {
+				  if (enemiesInAttack.length - valuableAlliesInAttack >= 1) {
 					  rc.explode();
 				  }
 			   }
