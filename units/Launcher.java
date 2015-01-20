@@ -65,27 +65,7 @@ public class Launcher extends Unit {
 			}
 		}
 		
-		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-		boolean isTargetTowerOrHq = false;
-		for (MapLocation enemyTower: enemyTowers) {
-			if (enemyTower.equals(this.navigation.destination)) {
-				isTargetTowerOrHq = true;
-			}
-		}
-		
-		if (enemyHQ.equals(this.navigation.destination)) {
-			isTargetTowerOrHq = true;
-		}
-		
-		if (isTargetTowerOrHq && myLocation.distanceSquaredTo(this.navigation.destination) <= 36) {
-			Direction directionToTarget = myLocation.directionTo(this.navigation.destination);
-			if (rc.canLaunch(directionToTarget)) {
-				rc.launchMissile(directionToTarget);
-			}
-			if (rc.getMissileCount() < 3) {
-				isReloading = true;
-			}
-		} else if (enemiesAttackable.length > 0 && !isReloading) {
+		if (enemiesAttackable.length > 0 && !isReloading) {
 			MapLocation target =  selectTarget(enemiesAttackable);
 			RobotType targetType = rc.senseRobotAtLocation(target).type;
 			Direction dirToEnemy = myLocation.directionTo(target);
@@ -139,6 +119,31 @@ public class Launcher extends Unit {
 			
 			if (rc.getMissileCount() < 3) {
 				isReloading = true;
+			}
+        } else {
+			MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+			boolean isNextToTowerOrHQ = false;
+			MapLocation target = null;
+			for (MapLocation enemyTower: enemyTowers) {
+				if (enemyTower.distanceSquaredTo(myLocation) <= 36) {
+					isNextToTowerOrHQ = true;
+					target = enemyTower;
+				}
+			}
+			
+			if (enemyHQ.distanceSquaredTo(myLocation) <= 36) {
+				isNextToTowerOrHQ = true;
+				target = enemyHQ;
+			}
+			
+			if (isNextToTowerOrHQ) {
+				Direction directionToTarget = myLocation.directionTo(target);
+				if (rc.canLaunch(directionToTarget)) {
+					rc.launchMissile(directionToTarget);
+				} 
+				if (rc.getMissileCount() < 3) {
+					isReloading = true;
+				}
 			}
         }
 		
