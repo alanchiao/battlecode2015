@@ -46,8 +46,7 @@ public class Tank extends Unit {
 					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
 				}	
 				rc.setIndicatorString(2, "[ " + target.x + ", " + target.y + " ]");
-				int approachStrategy = 0;
-				moveToLocationWithMicro(target, approachStrategy);
+				moveToLocationWithMicro(target, true);
 			}
 		}	
 	}

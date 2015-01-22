@@ -35,8 +35,6 @@ public class GroundStrategy extends GameStrategy {
 		int numSupplyDepots = 0;
 		int numTankFactories = 0;
 		
-		int closestBeaver = 0;
-		
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
 			if (type == RobotType.TANK) {
@@ -52,7 +50,6 @@ public class GroundStrategy extends GameStrategy {
 				numMiners++;
 			} else if (type == RobotType.BEAVER) {
 				numBeavers++;
-				closestBeaver = r.ID;
 			} else if (type == RobotType.TANKFACTORY) {
 				numTankFactories++;
 			}
@@ -71,7 +68,7 @@ public class GroundStrategy extends GameStrategy {
 		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numMinerFactoriesCh, numMinerFactories);
 		rc.broadcast(Broadcast.numSupplyDepotsCh, numSupplyDepots);
-		rc.broadcast(Broadcast.numTankFactoriesCh, numTanks);
+		rc.broadcast(Broadcast.numTankFactoriesCh, numTankFactories);
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
@@ -91,58 +88,26 @@ public class GroundStrategy extends GameStrategy {
 					rc.spawn(buildDirection, RobotType.BEAVER);
 				}
 			}
-			// Broadcast to build structures
-			else if (numMinerFactories == 0) {
-				if (ore >= 500) {
-					rc.broadcast(Broadcast.buildMinerFactoriesCh, closestBeaver);
-				}
-			}
-			else if (numSupplyDepots == 0 && ore >= 100) {
-				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
-			}
-			else if (numBarracks == 0) {
-				rc.broadcast(Broadcast.buildBarracksCh, closestBeaver);
-				// tell closest beaver to build barracks
-			}
-			else if (ore >= 500 + numTankFactories * 300) {
-				rc.broadcast(Broadcast.buildTankFactoriesCh, closestBeaver);
-			}
-			else if (numSupplyDepots < 3 && ore >= 500) {
-				rc.broadcast(Broadcast.buildSupplyCh, closestBeaver);
-			}
-
-			int[] groupSize = {numTanksDefense, numTanksAttack};
-			int[] groupCh = {Broadcast.tankGroupDefenseCh, Broadcast.tankGroupAttackCh};
-			if (numTanksAttack > 0 || numTanksDefense > 0) {
-				gc.stopGroup(RobotType.TANK);
-			}
-			rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
-			rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
-			if (groupSize[defendGroup] < 6) {
-				//1 -> defense, 0 -> attack
-				gc.groupUnits(RobotType.TANK, 1);
-				rc.broadcast(groupCh[defendGroup], 1);
-			}
-			else {
-				rc.broadcast(groupCh[attackGroup],1);
-				if (numTanks - groupSize[defendGroup] - groupSize[attackGroup] > 8) {
-					gc.groupUnits(RobotType.TANK, 0);
-				}
-			}
-			
-//			if (numTanks - groupSize[defendGroup] > 20 && groupSize[attackGroup] == 0) {
-//				gc.groupUnits(groupCh[attackGroup], RobotType.TANK);
-//				rc.broadcast(groupCh[attackGroup], 1);
-//			}
-//			else if (rc.readBroadcast(groupCh[attackGroup]) == 1 && groupSize[attackGroup] < 10) {
-//				rc.broadcast(groupCh[attackGroup], 0);
-//				attackGroup = 1 - attackGroup;
-//				defendGroup = 1 - defendGroup;
-//			}
-//			else if (rc.readBroadcast(groupCh[defendGroup]) == -1) {
-//				gc.unGroup(groupCh[defendGroup]);
-//			}
-			
 		}
+
+		int[] groupSize = {numTanksDefense, numTanksAttack};
+		int[] groupCh = {Broadcast.tankGroupDefenseCh, Broadcast.tankGroupAttackCh};
+		if (numTanksAttack > 0 || numTanksDefense > 0) {
+			gc.stopGroup(RobotType.TANK);
+		}
+		rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
+		rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
+		if (groupSize[defendGroup] < 6) {
+			//1 -> defense, 0 -> attack
+			gc.groupUnits(RobotType.TANK, 1);
+			rc.broadcast(groupCh[defendGroup], 1);
+		}
+		else {
+			rc.broadcast(groupCh[attackGroup],1);
+			if (numTanks - groupSize[defendGroup] - groupSize[attackGroup] > 8) {
+				gc.groupUnits(RobotType.TANK, 0);
+			}
+		}
+			
 	}	
 }

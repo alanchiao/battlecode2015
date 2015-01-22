@@ -215,7 +215,7 @@ public class Headquarters extends Building {
 		if (this.enemyTowersRemaining != enemyTowersRemaining) {
 			this.enemyTowersRemaining = enemyTowersRemaining;
 			if (enemyTowersRemaining > 0) {
-				//index of the tower targetted
+				// index of the tower targeted
 				int index = numTowersDefeated - enemyTowersRemaining;
 				if (towerOrder[index] != null) {
 					targetTower = towerOrder[index];
