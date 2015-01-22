@@ -89,7 +89,7 @@ public class Drone extends Unit {
 		
 		// run away from tanks / missiles / and launchers
 		if (rc.isCoreReady()) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
+			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared * 2, rc.getTeam().opponent());
 			for (RobotInfo enemy: enemies) {
 				if (enemy.type == RobotType.LAUNCHER || enemy.type == RobotType.TANK || enemy.type == RobotType.MISSILE || enemy.type == RobotType.COMMANDER) {
 					this.navigation.moveToDestination(this.ownHQ, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);

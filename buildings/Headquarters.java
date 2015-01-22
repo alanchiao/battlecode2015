@@ -72,6 +72,7 @@ public class Headquarters extends Building {
 	protected void actions() throws GameActionException {	
 		if (Clock.getRoundNum()==0) {
 			calculateTowerOrder();
+			Broadcast.broadcastLocation(rc, Broadcast.enemyHQLocation, enemyHQ);
 		}
 		broadcastVulnerableEnemyTowerAttack();
 		

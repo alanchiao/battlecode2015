@@ -66,6 +66,9 @@ public class Broadcast {
 	public static final int idealMiningLocation = 800;
 	public static final int idealMiningOreAverage = 802;
 	
+	// Channels 900 - 1000 info
+	public static final int enemyHQLocation = 900;
+	
 	
 	// Channels 8000 -  65121 on for internal map representation (remember 9999 is used somewhere)
 	public static final int internalMapChs = 8000;
