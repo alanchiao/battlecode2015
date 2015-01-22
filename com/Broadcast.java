@@ -13,18 +13,12 @@ public class Broadcast {
 	public static final int numTanksCh = 4;
 	public static final int numLaunchersCh = 5;
 
-	public static final int numBuildingsCh = 100;
 	public static final int numBarracksCh = 101;
 	public static final int numMinerFactoriesCh = 102;
 	public static final int numSupplyDepotsCh = 103;
 	public static final int numTankFactoriesCh = 104;
-	
-	public static final int buildBarracksCh = 201;
-	public static final int buildMinerFactoriesCh = 202;
-	public static final int buildSupplyCh = 203;
-	public static final int buildHelipadsCh = 204;
-	public static final int buildTankFactoriesCh = 205;
-	public static final int buildAerospaceLabsCh = 206;
+	public static final int numHelipadsCh = 105;
+	public static final int numAerospaceLabsCh = 106;
 	
 	public static final int minerOreX1000Ch = 301;
 	public static final int minersProducedCh = 302;

@@ -29,46 +29,65 @@ public class Beaver extends Unit {
 				builder.continueBuilding();
 				return;
 			}
-			if (Broadcast.hasSoloCommand(rc, Broadcast.buildAerospaceLabsCh)) {
-				builder.buildBuilding(RobotType.AEROSPACELAB, Broadcast.buildAerospaceLabsCh);
+			double ore = rc.getTeamOre();
+			int numMinerFactories = rc.readBroadcast(Broadcast.numMinerFactoriesCh);
+			int numHelipads = rc.readBroadcast(Broadcast.numHelipadsCh);
+			int numSupplyDepots = rc.readBroadcast(Broadcast.numSupplyDepotsCh);
+			int numAerospaceLabs = rc.readBroadcast(Broadcast.numAerospaceLabsCh);
+			if (numMinerFactories == 0) {
+				if (ore >= 500) {
+					builder.buildBuilding(RobotType.MINERFACTORY);
+				}
 			}
-			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildHelipadsCh)) {
-				builder.buildBuilding(RobotType.HELIPAD, Broadcast.buildHelipadsCh);
+			else if (numHelipads == 0) {
+				if (ore >= 300) {
+					builder.buildBuilding(RobotType.HELIPAD);
+				}
 			}
-			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildTankFactoriesCh)) {
-				builder.buildBuilding(RobotType.TANKFACTORY, Broadcast.buildTankFactoriesCh);
-			}
-			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildSupplyCh)) {
-				builder.buildBuilding(RobotType.SUPPLYDEPOT, Broadcast.buildSupplyCh);
-			}
-			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildMinerFactoriesCh)) {
-				builder.buildBuilding(RobotType.MINERFACTORY, Broadcast.buildMinerFactoriesCh);
-			}
-			else if (Broadcast.hasSoloCommand(rc, Broadcast.buildBarracksCh)) {
-				builder.buildBuilding(RobotType.BARRACKS, Broadcast.buildBarracksCh);
+			else if (numSupplyDepots == 0) {
+				if (ore >= 100) {
+					builder.buildBuilding(RobotType.SUPPLYDEPOT);
+				}
 			}
 			else {
-				MapLocation myLocation = rc.getLocation();
-				double currentOre = rc.senseOre(myLocation);
-				double maxOre = -2;
-				Direction bestDirection = null;
-				boolean[] avoidMoves = navigation.moveDirectionsAvoidingAttack(rc.senseNearbyRobots(24, rc.getTeam().opponent()), 5);
-				// looks around for an ore concentration that is bigger than its current location by a certain fraction
-				for (Direction dir: DirectionHelper.directions) {
-					MapLocation possibleLocation = myLocation.add(dir);
-					if (possibleLocation.distanceSquaredTo(ownHQ) < 15) {
-						double possibleOre = rc.senseOre(possibleLocation);
-						if (possibleOre > maxOre && rc.canMove(dir) && avoidMoves[DirectionHelper.directionToInt(dir)]) {
-							maxOre = possibleOre;
-							bestDirection = dir;
-						}
+				if (numAerospaceLabs == 0) {
+					if (ore >= 500) {
+						rc.broadcast(Broadcast.stopDroneProductionCh, 0);
+						builder.buildBuilding(RobotType.AEROSPACELAB);
 					}
 				}
-				if (maxOre > 1.5 * currentOre && bestDirection != null) {
-					rc.move(bestDirection);
+				else if (numSupplyDepots < 3 && ore >= 100) {
+					builder.buildBuilding(RobotType.SUPPLYDEPOT);
+				}
+				else if (numAerospaceLabs == 2 && numSupplyDepots < 6 && ore >= 100) {
+					builder.buildBuilding(RobotType.SUPPLYDEPOT);
+				}
+				else if (ore >= 700) {
+					builder.buildBuilding(RobotType.AEROSPACELAB);
 				}
 				else {
-					rc.mine();
+					MapLocation myLocation = rc.getLocation();
+					double currentOre = rc.senseOre(myLocation);
+					double maxOre = -2;
+					Direction bestDirection = null;
+					boolean[] avoidMoves = navigation.moveDirectionsAvoidingAttack(rc.senseNearbyRobots(24, rc.getTeam().opponent()), 5);
+					// looks around for an ore concentration that is bigger than its current location by a certain fraction
+					for (Direction dir: DirectionHelper.directions) {
+						MapLocation possibleLocation = myLocation.add(dir);
+						if (possibleLocation.distanceSquaredTo(ownHQ) < 15) {
+							double possibleOre = rc.senseOre(possibleLocation);
+							if (possibleOre > maxOre && rc.canMove(dir) && avoidMoves[DirectionHelper.directionToInt(dir)]) {
+								maxOre = possibleOre;
+								bestDirection = dir;
+							}
+						}
+					}
+					if (maxOre > 1.5 * currentOre && bestDirection != null) {
+						rc.move(bestDirection);
+					}
+					else {
+						rc.mine();
+					}
 				}
 			}
 		}

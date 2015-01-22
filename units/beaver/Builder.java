@@ -24,7 +24,6 @@ public class Builder {
 	public boolean isBuilding;
 	public RobotType buildingType;
 	public MapLocation buildingLocation;
-	public int broadcastChannel;
 	
 	public Builder(RobotController rc, MapLocation hqLocation, Navigation navigation) {
 		this.rc = rc;
@@ -39,10 +38,9 @@ public class Builder {
 	}
 	
 	// choose to building a building type
-	public void buildBuilding(RobotType buildingType, int broadcastChannel) throws GameActionException {
+	public void buildBuilding(RobotType buildingType) throws GameActionException {
 		this.isBuilding = true;
 		this.buildingType = buildingType;
-		this.broadcastChannel = broadcastChannel;
 		for (int i = 0; i < NUMBER_BUILDINGS_MAX; i++) {
 			MapLocation attemptedLocation = this.safeLocations[i];
 			boolean isBuildable = !navigation.isBuilding(attemptedLocation);
@@ -61,7 +59,6 @@ public class Builder {
 		boolean isNextToBuildingLocation = rc.getLocation().distanceSquaredTo(this.buildingLocation) <= 2;
 		if (isNextToBuildingLocation && rc.canBuild(dirToBuildingLocation, this.buildingType)) {
 			rc.build(dirToBuildingLocation, this.buildingType);
-			rc.broadcast(broadcastChannel, 0); // reset channel at this point when building starts
 			this.isBuilding = false;
 		} else {
 			navigation.moveToDestination(this.buildingLocation.add(Direction.WEST), Navigation.AVOID_ALL);
