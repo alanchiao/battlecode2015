@@ -26,6 +26,7 @@ public abstract class Unit extends Robot {
 	protected boolean autoSupplyTransfer;
 	protected int[] damages;
 	protected boolean[] inRange;
+	protected boolean[] safeSpots;
 	
 	public Unit (RobotController newRC) {
 		rc = newRC;
@@ -39,7 +40,8 @@ public abstract class Unit extends Robot {
 		autoSupplyTransfer = true;
 		
 		damages = new int[9];
-		inRange = new boolean[8];
+		inRange = new boolean[9];
+		safeSpots = new boolean[9];
 	
 		navigation = new Navigation(rc, rand, enemyHQ);
 		groupTracker = new GroupTracker(rc);
@@ -201,38 +203,45 @@ public abstract class Unit extends Robot {
 	}
 	
 	// Computes the amount of damage that could be taken before unit's next turn ONLY
-	public void computePotentialDamage() {
+	public void computeStuff() {
 		MapLocation myLocation = rc.getLocation();
 		int myAttackRange = rc.getType() == RobotType.LAUNCHER ? 35 : rc.getType().attackRadiusSquared;
 		
-		// reset damages and range
-		for (int i = 0; i < 8; i++) {
+		// reset
+		for (int i = 0; i < 9; i++) {
 			damages[i] = 0;
 			inRange[i] = false;
+			safeSpots[i] = true;
 		}
-		damages[8] = 0;
 		
 		// factor in towers
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 		for (MapLocation tower : enemyTowers) {
 			int towerDistance = myLocation.distanceSquaredTo(tower);
 			if (towerDistance <= 34) {
+				int newDistance;
 				for (int i = 0; i < 8; i++) {
-					int newDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(tower);
+					newDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(tower);
 					if (newDistance <= 24) {
 						damages[i] += 8;
+						safeSpots[i] = false;
 					}
 					if (newDistance <= myAttackRange) {
 						inRange[i] = true;
 					}
 				}
-				if (myLocation.distanceSquaredTo(tower) <= 24) {
+				newDistance = myLocation.distanceSquaredTo(tower);
+				if (newDistance <= 24) {
 					damages[8] += 8;
+					safeSpots[8] = false;
+				}
+				if (newDistance <= myAttackRange) {
+					inRange[8] = true;
 				}
 			}
 		}
 		
-		// factor in hq
+		// factor in hq INRANGE IS NOT UPDATED
 		int initDistance = myLocation.distanceSquaredTo(enemyHQ);
 		if (initDistance <= 74) {
 			if (enemyTowers.length >= 5) {
@@ -246,17 +255,21 @@ public abstract class Unit extends Robot {
 
 				if (initDistance <= 35) {
 					damages[8] += towerDamage;
+					safeSpots[8] = false;
 				}
 				else if (myLocation.add(myLocation.directionTo(enemyHQ)).distanceSquaredTo(enemyHQ) <= 35) {
 					damages[8] += splashDamage;
+					safeSpots[8] = false;
 				}
 				for (int i = 0; i < 8; i++) {
 					MapLocation newLocation = myLocation.add(DirectionHelper.directions[i]);
 					if (newLocation.distanceSquaredTo(enemyHQ) <= 35) {
 						damages[i] += towerDamage;
+						safeSpots[i] = false;
 					}
 					else if (newLocation.add(newLocation.directionTo(enemyHQ)).distanceSquaredTo(enemyHQ) <= 35) {
 						damages[i] += splashDamage;
+						safeSpots[i] = false;
 					}
 				}
 			}
@@ -270,10 +283,12 @@ public abstract class Unit extends Robot {
 				}
 				if (initDistance <= 35) {
 					damages[8] += towerDamage;
+					safeSpots[8] = false;
 				}
 				for (int i = 0; i < 8; i++) {
 					if (myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(enemyHQ) <= 35) {
 						damages[i] += towerDamage;
+						safeSpots[i] = false;
 					}
 				}
 			}
@@ -281,6 +296,7 @@ public abstract class Unit extends Robot {
 				for (int i = 0; i < 8; i++) {
 					if (myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(enemyHQ) <= 24) {
 						damages[i] += 12;
+						safeSpots[i] = false;
 					}
 				}
 			}
@@ -294,17 +310,24 @@ public abstract class Unit extends Robot {
 			}
 			int radiusSquared = r.type != RobotType.MISSILE ? r.type.attackRadiusSquared : 5;
 			boolean canAttack = r.weaponDelay < (r.supplyLevel == 0 ? 1.5 : 2);
+			int newLocationDistance;
 			for (int i = 0; i < 8; i++) {
-				int newLocationDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(r.location);
+				newLocationDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(r.location);
 				if (newLocationDistance <= radiusSquared && canAttack) {
 					damages[i] += r.type.attackPower;
+					safeSpots[i] = false;
 				}
 				if (newLocationDistance <= myAttackRange) {
 					inRange[i] = true;
 				}
 			}
-			if (myLocation.distanceSquaredTo(r.location) <= radiusSquared && canAttack) {
+			newLocationDistance = myLocation.distanceSquaredTo(r.location);
+			if (newLocationDistance <= radiusSquared && canAttack) {
 				damages[8] += r.type.attackPower;
+				safeSpots[8] = false;
+			}
+			if (newLocationDistance <= myAttackRange) {
+				inRange[8] = true;
 			}
 		}
 		rc.setIndicatorString(0, Arrays.toString(damages));
@@ -327,8 +350,8 @@ public abstract class Unit extends Robot {
 			return;
 		}
 
-		MapLocation myLocation = rc.getLocation();
-		if (navigation.isOutsideEnemyAttackRange(enemies, 0, myLocation)) {
+		computeStuff();
+		if (safeSpots[8]) {
 			navigation.moveToDestination(target, Navigation.AVOID_NOTHING);
 			return;
 		}
@@ -340,7 +363,6 @@ public abstract class Unit extends Robot {
 			for (RobotInfo r : enemies) {
 				// approach enemies that outrange us
 				if (r.type.attackRadiusSquared > myAttackRange) {
-					navigation.stopObstacleTracking();
 					navigation.moveToDestination(r.location, Navigation.AVOID_NOTHING);
 					return;
 				}
@@ -351,8 +373,6 @@ public abstract class Unit extends Robot {
 		
 		// Take less damage
 		else {
-			computePotentialDamage();
-			
 			int bestDirection = 8;
 			int bestDamage = 999999;
 			for (int i = 0; i < 8; i++) {
@@ -385,10 +405,10 @@ public abstract class Unit extends Robot {
 		// set range arbitrarily if robot is a launcher
 		int myAttackRange = rc.getType() == RobotType.LAUNCHER ? 35 : rc.getType().attackRadiusSquared;
 
-		computePotentialDamage();
+		computeStuff();
 
 		rc.setIndicatorString(1, "in range");
-		if (navigation.isOutsideEnemyAttackRange(enemies, 0, myLocation)) {
+		if (safeSpots[8]) {
 			rc.setIndicatorString(1, "out of range");
 			// Check if almost in range of an enemy
 			boolean almostInRange = false;
@@ -440,26 +460,27 @@ public abstract class Unit extends Robot {
 					}
 				}
 			}
-			/*
 			Direction dirToEnemy = rc.getLocation().directionTo(enemies[0].location);
 			Direction moveDirection = dirToEnemy;
 			if (reasonableMoves[DirectionHelper.directionToInt(moveDirection)]) {
+				navigation.stopObstacleTracking();
 				rc.move(moveDirection);
 			    return;
 			}
 			
 			moveDirection = dirToEnemy.rotateLeft();
 			if (reasonableMoves[DirectionHelper.directionToInt(moveDirection)]) {
+				navigation.stopObstacleTracking();
 			    rc.move(moveDirection);
 			    return;
 			}
 			
 			moveDirection = dirToEnemy.rotateRight();
 			if (reasonableMoves[DirectionHelper.directionToInt(moveDirection)]) {
+				navigation.stopObstacleTracking();
 			    rc.move(moveDirection);
 			    return;
 			}
-			*/
 		}
 		// Take less damage
 		else {
