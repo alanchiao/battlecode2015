@@ -16,54 +16,53 @@ public class Beaver extends Unit {
 
 	@Override
 	protected void actions() throws GameActionException {
-		if (rc.isWeaponReady()) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
-			if (enemies.length > 0) { 
-				rc.attackLocation(selectTarget(enemies));
-			}
-		}
-		
 		if (rc.isCoreReady()) {
 			// continue building current building
-			if (builder.isBuilding) {
-				builder.continueBuilding();
+			if (builder.isNavigating) {
+				builder.continueNavigating();
+				return;
+			} else if (!builder.isBuildingComplete()){
 				return;
 			}
+			builder.buildingLocation = null;
+			rc.setIndicatorString(0, "");
+			
 			double ore = rc.getTeamOre();
 			int numMinerFactories = rc.readBroadcast(Broadcast.numMinerFactoriesCh);
 			int numHelipads = rc.readBroadcast(Broadcast.numHelipadsCh);
 			int numSupplyDepots = rc.readBroadcast(Broadcast.numSupplyDepotsCh);
 			int numAerospaceLabs = rc.readBroadcast(Broadcast.numAerospaceLabsCh);
+			
 			if (numMinerFactories == 0) {
 				if (ore >= 500) {
-					builder.buildBuilding(RobotType.MINERFACTORY);
+					builder.buildBuilding(RobotType.MINERFACTORY, numMinerFactories);
 				}
 			}
 			else if (numHelipads == 0) {
 				if (ore >= 300) {
-					builder.buildBuilding(RobotType.HELIPAD);
+					builder.buildBuilding(RobotType.HELIPAD, numHelipads);
 				}
 			}
 			else if (numSupplyDepots == 0) {
 				if (ore >= 100) {
-					builder.buildBuilding(RobotType.SUPPLYDEPOT);
+					builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
 				}
 			}
 			else {
 				if (numAerospaceLabs == 0) {
 					if (ore >= 500) {
 						rc.broadcast(Broadcast.stopDroneProductionCh, 0);
-						builder.buildBuilding(RobotType.AEROSPACELAB);
+						builder.buildBuilding(RobotType.AEROSPACELAB, numAerospaceLabs);
 					}
 				}
 				else if (numSupplyDepots < 3 && ore >= 100) {
-					builder.buildBuilding(RobotType.SUPPLYDEPOT);
+					builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
 				}
 				else if (numAerospaceLabs == 2 && numSupplyDepots < 6 && ore >= 100) {
-					builder.buildBuilding(RobotType.SUPPLYDEPOT);
+					builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
 				}
 				else if (ore >= 700) {
-					builder.buildBuilding(RobotType.AEROSPACELAB);
+					builder.buildBuilding(RobotType.AEROSPACELAB, numAerospaceLabs);
 				}
 				else {
 					MapLocation myLocation = rc.getLocation();

@@ -5,11 +5,13 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 
 public class Builder {
 	
-	public final static int NUMBER_BUILDINGS_MAX = 30;
+	public final static int NUMBER_BUILDINGS_MAX = 50;
+	public final static int SQUARE_RADIUS_MAX = 36;
 	
 	// necessary information from Beaver
 	private RobotController rc;
@@ -21,9 +23,10 @@ public class Builder {
 	
 	// variables stored to track command
 	// to building a particular building
-	public boolean isBuilding;
+	public boolean isNavigating;
 	public RobotType buildingType;
 	public MapLocation buildingLocation;
+	public int expectedCount;
 	
 	public Builder(RobotController rc, MapLocation hqLocation, Navigation navigation) {
 		this.rc = rc;
@@ -33,36 +36,60 @@ public class Builder {
 		this.safeLocations = new MapLocation[NUMBER_BUILDINGS_MAX];
 		updateSafeBuildLocations();
 		
-		this.isBuilding = false;
+		this.isNavigating = false;
 		this.buildingType = null;
 	}
 	
 	// choose to building a building type
-	public void buildBuilding(RobotType buildingType) throws GameActionException {
-		this.isBuilding = true;
+	public void buildBuilding(RobotType buildingType, int expectedCount) throws GameActionException {
+		this.isNavigating = true;
+		this.expectedCount = expectedCount;
 		this.buildingType = buildingType;
 		for (int i = 0; i < NUMBER_BUILDINGS_MAX; i++) {
 			MapLocation attemptedLocation = this.safeLocations[i];
 			boolean isBuildable = !navigation.isBuilding(attemptedLocation);
 			if (isBuildable) {
 				this.buildingLocation = attemptedLocation;
-				break;
+				this.continueNavigating();
+				return;
 			}
 		}
-		this.continueBuilding();
+		this.isNavigating = false;
+		
 	}
 	
 	
 	// continue building the current building
-	public void continueBuilding() throws GameActionException {
+	public void continueNavigating() throws GameActionException {
 		Direction dirToBuildingLocation = rc.getLocation().directionTo(this.buildingLocation);
-		boolean isNextToBuildingLocation = rc.getLocation().distanceSquaredTo(this.buildingLocation) <= 2;
-		if (isNextToBuildingLocation && rc.canBuild(dirToBuildingLocation, this.buildingType)) {
-			rc.build(dirToBuildingLocation, this.buildingType);
-			this.isBuilding = false;
+		// excessive computations
+		if (this.expectedCount != countBuildings(this.buildingType)) {
+			this.isNavigating = false;
+			return;
+		}
+		
+		
+		boolean isNextToBuildingLocation = rc.getLocation().distanceSquaredTo(this.buildingLocation) == 1;
+		if (isNextToBuildingLocation) {
+			if (rc.canBuild(dirToBuildingLocation, this.buildingType)) {
+				rc.build(dirToBuildingLocation, this.buildingType);
+				this.isNavigating = false;
+			}
 		} else {
 			navigation.moveToDestination(this.buildingLocation.add(Direction.WEST), Navigation.AVOID_ALL);
 		}
+	}
+	
+	public boolean isBuildingComplete() throws GameActionException {
+		if (this.buildingLocation == null) {
+			return true;
+		} else {
+			RobotInfo potentialBuilding = rc.senseRobotAtLocation(this.buildingLocation);
+			if (potentialBuilding == null || potentialBuilding.builder == null) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	// available build locations are in spiral around HQ
@@ -79,7 +106,7 @@ public class Builder {
 		
 		int safeLocationCount = 0;
 		
-		for (int k = 0; k < NUMBER_BUILDINGS_MAX * 2; k++) {
+		for (int k = 0; k < NUMBER_BUILDINGS_MAX * 4; k++) {
 			///////////////////////////////////
 			// Spiraling logic
 			
@@ -110,6 +137,21 @@ public class Builder {
 		        safeLocations[safeLocationCount] = potentialSafeLocation;
 		        safeLocationCount++;
  			}
+ 			
+ 			if (safeLocationCount == NUMBER_BUILDINGS_MAX) {
+ 				return;
+ 			}
 	    }
+	}
+	
+	public int countBuildings(RobotType buildingType) {
+		int count = 0;
+		RobotInfo[] nearbyAllyRobots = rc.senseNearbyRobots(this.hqLocation, SQUARE_RADIUS_MAX, rc.getTeam());
+		for (RobotInfo ally: nearbyAllyRobots){
+			if (ally.type.equals(buildingType)) {
+				count++;
+			}
+		}
+		return count;
 	}
 }

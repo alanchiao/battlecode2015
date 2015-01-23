@@ -44,7 +44,6 @@ public class AerialStrategy extends GameStrategy {
 		int numLaunchersDefense = 0;
 		int numHelipads = 0;
 		int numAerospaceLabs = 0;
-
 		for (RobotInfo r : myRobots) {
 			RobotType type = r.type;
 			if (type == RobotType.MINER) {
@@ -107,7 +106,7 @@ public class AerialStrategy extends GameStrategy {
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
-			if (numBeavers == 0) {
+			if (numBeavers == 0 || (numBeavers == 1 && numMinerFactories >= 1)) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(Direction.EAST);
