@@ -85,18 +85,6 @@ public class AerialStrategy extends GameStrategy {
 		rc.broadcast(Broadcast.numLaunchersCh, numLaunchers);
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
 		
-		if (!enemyRush && numAerospaceLabs == 0 && Clock.getRoundNum() < 600) {
-			RobotInfo[] enemyRobots = rc.senseNearbyRobots(99, rc.getTeam().opponent());
-			for (RobotInfo r : enemyRobots) {
-				if (r.type == RobotType.DRONE) {
-					enemyRush = true;
-					// Tell helipads to yield
-					rc.broadcast(Broadcast.stopDroneProductionCh, 1);
-					break;
-				}
-			}
-		}
-		
 		if (pathDifficulty == 0) {
 			int possibleDifficulty = rc.readBroadcast(Broadcast.scoutEnemyHQCh);
 			if (possibleDifficulty != scoutMiner) {
@@ -131,10 +119,6 @@ public class AerialStrategy extends GameStrategy {
 		rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
 		rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
 
-		if (numDrones > 0) {
-			gc.groupUnits(RobotType.DRONE, 0);
-			rc.broadcast(Broadcast.droneGroupAttackCh, 1);
-		}
 		MapLocation closestTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 		MapLocation myLocation = rc.getLocation();
 		int distance = myLocation.distanceSquaredTo(closestTower);
@@ -144,7 +128,7 @@ public class AerialStrategy extends GameStrategy {
 			distance = hqDistance; 
 		}
 		
-		if (Clock.getRoundNum() < (1900 - Math.sqrt(distance)*4)) {
+		if (Clock.getRoundNum() < (rc.getRoundLimit() - 100 - Math.sqrt(distance)*4)) {
 			if (enemyRush && numLaunchersDefense < 5) {
 				gc.groupUnits(RobotType.LAUNCHER, 1);
 				rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);

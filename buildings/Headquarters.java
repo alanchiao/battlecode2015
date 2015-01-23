@@ -18,10 +18,9 @@ public class Headquarters extends Building {
 	public final static int MINER_STRATEGY = 3;
 	public final static int NAVIGATION_STRATEGY = 4;
 	public final static int DRONE_HARASS_STRATEGY = 5;
-	
-	public final static int TIME_UNTIL_LAUNCHERS_GROUP = 1500;
-	public final static int TIME_UNTIL_COLLECT_SUPPLY = 1650;
-	public final static int TIME_UNTIL_FULL_ATTACK = 1800;
+
+	public final static int TIME_COLLECT_SUPPLY = 350;
+	public final static int TIME_FULL_ATTACK = 200;
 	//private final static int ORE_WINDOW = 100;
 	
 	private GroupController gc;
@@ -89,68 +88,64 @@ public class Headquarters extends Building {
 		rc.broadcast(Broadcast.enemyNearHQCh, enemyFound);
 		Broadcast.broadcastLocation(rc,  Broadcast.enemyNearHQLocationChs, closestEnemyLocation);
 		
-		int mySupply = (int) rc.getSupplyLevel();
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
 
-		if (Clock.getRoundNum() < TIME_UNTIL_LAUNCHERS_GROUP) {
-			int distanceFactor = (int) hqDistance;
+		int distanceFactor = (int) hqDistance;
 
-			MapLocation loc = null;
-			int supplyAmount = 0;
-			int priority = 0;
-			int supplyRequestID = rc.readBroadcast(Broadcast.requestSupplyFromHQCh);
-			double gameFractionLeft = 1.0 - Clock.getRoundNum() / 2000.0;
+		MapLocation loc = null;
+		int supplyAmount = 0;
+		int priority = 0;
+		double gameFractionLeft = 1.0 - (double)Clock.getRoundNum() / rc.getRoundLimit();
 
-			for (RobotInfo r : friendlyRobots) {
-				if (r.ID == supplyRequestID && r.supplyLevel < 20000) {
-					rc.transferSupplies(30000, r.location);
-					loc = null;
-					break;
-				}
-				else if (r.type == RobotType.LAUNCHER) {
-					if (r.supplyLevel < r.type.supplyUpkeep * 16 * distanceFactor) {
-						if (priority == 0 || (r.supplyLevel == 0 && priority < 3)) {
-							loc = r.location;
-							supplyAmount = r.type.supplyUpkeep * 24 * distanceFactor;
-						}
-					}
-				}
-				else if (r.type == RobotType.MINER) {
-					if (r.supplyLevel < r.type.supplyUpkeep * 1000 * gameFractionLeft) {
-						if (priority == 0 || (r.supplyLevel == 0 && priority < 1)) {
-							loc = r.location;
-							supplyAmount = (int) (r.type.supplyUpkeep * 1500 * gameFractionLeft);
-						}
-					}
-				}
-				else if (r.type == RobotType.SOLDIER || r.type == RobotType.TANK || r.type == RobotType.DRONE) {
-					if (r.supplyLevel < r.type.supplyUpkeep * 8 * distanceFactor) {
-						if (priority == 0 || (r.supplyLevel == 0 && priority < 4)) {
-							loc = r.location;
-							supplyAmount = r.type.supplyUpkeep * 12 * distanceFactor;
-						}
-					}
-				}
-				else if (r.type == RobotType.BEAVER) {
-					if (r.supplyLevel < r.type.supplyUpkeep * 100) {
-						if (priority == 0 || (r.supplyLevel == 0 && priority < 2)) {
-							loc = r.location;
-							supplyAmount = r.type.supplyUpkeep * 200;
-						}
+		for (RobotInfo r : friendlyRobots) {
+			if (r.type == RobotType.LAUNCHER) {
+				if (r.supplyLevel < r.type.supplyUpkeep * 16 * distanceFactor) {
+					if (priority == 0 || (r.supplyLevel == 0 && priority < 3)) {
+						loc = r.location;
+						supplyAmount = r.type.supplyUpkeep * 24 * distanceFactor;
+						priority = 3;
 					}
 				}
 			}
-			if (loc != null) {
-				rc.transferSupplies(supplyAmount, loc);
+			else if (r.type == RobotType.MINER) {
+				if (r.supplyLevel < r.type.supplyUpkeep * 1000 * gameFractionLeft) {
+					if (priority == 0 || (r.supplyLevel == 0 && priority < 2)) {
+						loc = r.location;
+						supplyAmount = (int) (r.type.supplyUpkeep * 1500 * gameFractionLeft);
+						priority = 2;
+					}
+				}
+			}
+			else if (r.type == RobotType.DRONE) {
+				if (r.supplyLevel < 20000) {
+					if (priority < 1) {
+						loc = r.location;
+						supplyAmount = 30000;
+						priority = 1;
+					}
+				}
+			}
+			else if (r.type == RobotType.SOLDIER || r.type == RobotType.TANK) {
+				if (r.supplyLevel < r.type.supplyUpkeep * 8 * distanceFactor) {
+					if (priority == 0 || (r.supplyLevel == 0 && priority < 4)) {
+						loc = r.location;
+						supplyAmount = r.type.supplyUpkeep * 12 * distanceFactor;
+						priority = 4;
+					}
+				}
+			}
+			else if (r.type == RobotType.BEAVER) {
+				if (r.supplyLevel < r.type.supplyUpkeep * 100) {
+					if (priority == 0 || (r.supplyLevel == 0 && priority < 2)) {
+						loc = r.location;
+						supplyAmount = r.type.supplyUpkeep * 200;
+						priority = 2;
+					}
+				}
 			}
 		}
-		else {
-			for (RobotInfo r : friendlyRobots) {
-				if (r.type == RobotType.DRONE || r.type == RobotType.LAUNCHER || r.type == RobotType.TANK) {
-					rc.transferSupplies(mySupply, r.location);
-					break;
-				}
-			}
+		if (loc != null) {
+			rc.transferSupplies(supplyAmount, loc);
 		}
 
 		// Headquarters attack strategy

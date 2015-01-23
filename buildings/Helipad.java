@@ -19,7 +19,9 @@ public class Helipad extends Building {
 			MapLocation rallyLocation = myLocation.add(myLocation.directionTo(enemyHQ), 6);
 			Broadcast.broadcastLocation(rc, Broadcast.droneRallyLocationChs, rallyLocation);
 		}
-		if (rc.isCoreReady() && rc.getTeamOre() >= 125 && rc.readBroadcast(Broadcast.stopDroneProductionCh) != 1) {
+		int numLaunchers = rc.readBroadcast(Broadcast.numLaunchersCh);
+		int numDrones = rc.readBroadcast(Broadcast.numDronesCh);
+		if (rc.isCoreReady() && numLaunchers > 2 && numDrones < 2 && rc.getTeamOre() >= 125) {
 			this.greedySpawn(RobotType.DRONE);
 		}
 	}
