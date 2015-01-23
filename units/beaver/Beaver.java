@@ -1,5 +1,7 @@
 package team158.units.beaver;
 
+import team158.units.beaver.Builder;
+import team158.utils.DirectionHelper;
 import team158.com.Broadcast;
 import team158.units.Unit;
 import team158.utils.*;
@@ -31,6 +33,7 @@ public class Beaver extends Unit {
 			int numHelipads = rc.readBroadcast(Broadcast.numHelipadsCh);
 			int numSupplyDepots = rc.readBroadcast(Broadcast.numSupplyDepotsCh);
 			int numAerospaceLabs = rc.readBroadcast(Broadcast.numAerospaceLabsCh);
+			int numBarracks = rc.readBroadcast(Broadcast.numBarracksCh);
 			int estimatedSupplyNeeded = rc.readBroadcast(Broadcast.numLaunchersCh) * 25;
 
 			if (numMinerFactories == 0) {
@@ -38,6 +41,13 @@ public class Beaver extends Unit {
 					builder.buildBuilding(RobotType.MINERFACTORY, numMinerFactories);
 				}
 			}
+			//added for testing
+			else if (numBarracks == 0) {
+				if (ore >= 300) {
+					builder.buildBuilding(RobotType.BARRACKS, numBarracks);
+				}
+			}
+			//////
 			else if (numHelipads == 0) {
 				if (ore >= 300) {
 					builder.buildBuilding(RobotType.HELIPAD, numHelipads);
@@ -56,7 +66,7 @@ public class Beaver extends Unit {
 			else {
 				if (numAerospaceLabs == 0) {
 					if (ore >= 500) {
-						rc.broadcast(Broadcast.stopDroneProductionCh, 0);
+						//rc.broadcast(Broadcast.stopDroneProductionCh, 0);
 						builder.buildBuilding(RobotType.AEROSPACELAB, numAerospaceLabs);
 					}
 				}

@@ -115,6 +115,9 @@ public class GroupController {
 		else if (rt == RobotType.TANK) {
 			broadcastCh = Broadcast.groupingTanksCh;
 		}
+		else if (rt == RobotType.SOLDIER) {
+			broadcastCh = Broadcast.groupingSoldiersCh;
+		}
 		else {
 			broadcastCh = 9999;
 		}

@@ -23,17 +23,23 @@ public class Soldier extends Unit {
         }
 
 		if (rc.isCoreReady()) {
-			MapLocation target;
-			boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-			// just always moveToDestination target?
-			if (groupTracker.isGrouped() && hasHQCommand) {
-				target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-				navigation.moveToDestination(target, Navigation.AVOID_NOTHING);
-			}
-			else {
-				target = groupTracker.getRallyPoint();
-			}
-			moveToLocationWithMicro(target, true);
-		}	
+			rc.setIndicatorString(0, String.valueOf(groupTracker.groupID));
+			if (rc.isCoreReady()) {
+				MapLocation target = groupTracker.getRallyPoint();
+				// just always moveToDestination target?
+				if (groupTracker.isGrouped()) {
+					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
+					rc.setIndicatorString(1, String.valueOf(hasHQCommand));
+					if (hasHQCommand){
+						target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
+						navigation.moveToDestination(target, Navigation.AVOID_NOTHING);
+					}
+				}
+				else {
+					target = groupTracker.getRallyPoint();
+				}
+				moveToLocationWithMicro(target, true);
+			}	
+		}
 	}
 }
