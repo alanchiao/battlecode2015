@@ -95,36 +95,42 @@ public class Headquarters extends Building {
 		MapLocation loc = null;
 		int supplyAmount = 0;
 		int priority = 0;
-		int supplyRequestID = rc.readBroadcast(Broadcast.requestSupplyFromHQCh);
 		double gameFractionLeft = 1.0 - (double)Clock.getRoundNum() / rc.getRoundLimit();
 
 		for (RobotInfo r : friendlyRobots) {
-			if (r.ID == supplyRequestID && r.supplyLevel < 20000) {
-				rc.transferSupplies(30000, r.location);
-				loc = null;
-				break;
-			}
-			else if (r.type == RobotType.LAUNCHER) {
+			if (r.type == RobotType.LAUNCHER) {
 				if (r.supplyLevel < r.type.supplyUpkeep * 16 * distanceFactor) {
 					if (priority == 0 || (r.supplyLevel == 0 && priority < 3)) {
 						loc = r.location;
 						supplyAmount = r.type.supplyUpkeep * 24 * distanceFactor;
+						priority = 3;
 					}
 				}
 			}
 			else if (r.type == RobotType.MINER) {
 				if (r.supplyLevel < r.type.supplyUpkeep * 1000 * gameFractionLeft) {
-					if (priority == 0 || (r.supplyLevel == 0 && priority < 1)) {
+					if (priority == 0 || (r.supplyLevel == 0 && priority < 2)) {
 						loc = r.location;
 						supplyAmount = (int) (r.type.supplyUpkeep * 1500 * gameFractionLeft);
+						priority = 2;
 					}
 				}
 			}
-			else if (r.type == RobotType.SOLDIER || r.type == RobotType.TANK || r.type == RobotType.DRONE) {
+			else if (r.type == RobotType.DRONE) {
+				if (r.supplyLevel < 20000) {
+					if (priority < 1) {
+						loc = r.location;
+						supplyAmount = 30000;
+						priority = 1;
+					}
+				}
+			}
+			else if (r.type == RobotType.SOLDIER || r.type == RobotType.TANK) {
 				if (r.supplyLevel < r.type.supplyUpkeep * 8 * distanceFactor) {
 					if (priority == 0 || (r.supplyLevel == 0 && priority < 4)) {
 						loc = r.location;
 						supplyAmount = r.type.supplyUpkeep * 12 * distanceFactor;
+						priority = 4;
 					}
 				}
 			}
@@ -133,6 +139,7 @@ public class Headquarters extends Building {
 					if (priority == 0 || (r.supplyLevel == 0 && priority < 2)) {
 						loc = r.location;
 						supplyAmount = r.type.supplyUpkeep * 200;
+						priority = 2;
 					}
 				}
 			}

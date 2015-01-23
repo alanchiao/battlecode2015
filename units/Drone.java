@@ -1,9 +1,7 @@
 package team158.units;
 
-import team158.buildings.Headquarters;
 import team158.com.Broadcast;
 import team158.units.com.Navigation;
-import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -18,23 +16,6 @@ public class Drone extends Unit {
 
 	public Drone(RobotController newRC) {
 		super(newRC);
-		try {
-			followingID = rc.readBroadcast(Broadcast.requestSupplyDroneCh);
-			if (followingID != 0) {
-				rc.setIndicatorString(1, "Following" + Integer.toString(followingID));
-				rc.broadcast(Broadcast.requestSupplyDroneCh, 0);
-				try {
-					followingLocation = rc.senseRobot(followingID).location;
-					autoSupplyTransfer = false;
-					gotSupply = false;
-				}
-				catch (GameActionException e) {
-					e.printStackTrace();
-				}
-			}
-		} catch (GameActionException e) {
-			e.printStackTrace();
-		}
 	}
 
 	@Override
@@ -48,6 +29,7 @@ public class Drone extends Unit {
 						for (RobotInfo r : friendlyRobots) {
 							if (r.type == RobotType.LAUNCHER) {
 								rc.transferSupplies((int) (rc.getSupplyLevel()), r.location);
+								gotSupply = false;
 								autoSupplyTransfer = true;
 								return;
 							}
@@ -84,84 +66,16 @@ public class Drone extends Unit {
 			}
 			return;
 		}
-
-		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(RobotType.DRONE.attackRadiusSquared, rc.getTeam().opponent());
-		
-		if (rc.isWeaponReady()) {
-			if (enemiesAttackable.length > 0) {
-				rc.attackLocation(selectTarget(enemiesAttackable));
-			}
-        }
-		
+		followingID = rc.readBroadcast(Broadcast.requestSupplyDroneCh);
+		if (followingID != 0) {
+			rc.broadcast(Broadcast.requestSupplyDroneCh, 0);
+			followingLocation = rc.senseRobot(followingID).location;
+			autoSupplyTransfer = false;
+			gotSupply = false;
+		}
 		// Move
-		rc.setIndicatorString(1, "can't move");
-		if (rc.isCoreReady()) {
-			// default target location
-			if (Clock.getRoundNum() < rc.getRoundLimit() - Headquarters.TIME_COLLECT_SUPPLY) {
-				if (rc.getSupplyLevel() == 0) {
-					moveToLocationWithMicro(ownHQ, true);
-				}
-				else if (groupTracker.groupID == Broadcast.droneGroupAttackCh) {
-					moveToLocationWithMicro(enemyHQ, false);
-				}
-				else { // groupTracker.groupID == Broadcast.droneGroupDefenseCh
-					moveToLocationWithMicro(selectDefensiveTarget(), false);
-				}
-			} else if (Clock.getRoundNum() < rc.getRoundLimit() - Headquarters.TIME_FULL_ATTACK) {
-				moveToLocationWithMicro(ownHQ, false);
-			} else {
-				chargeToLocation(enemyHQ);
-			}
+		else if (rc.isCoreReady()) {
+			navigation.moveToDestination(ownHQ, Navigation.AVOID_ALL);
 		}
 	}
-	
-	protected MapLocation selectDefensiveTarget() {
-		try {
-//			boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
-			boolean enemyNearTower = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
-			boolean enemyNearHQ = rc.readBroadcast(Broadcast.enemyNearHQCh) == 1;
-//			if (towerAttacked) {
-//				return Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
-//			}
-			if (enemyNearHQ) {
-				return Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
-			}
-			else if (enemyNearTower) {
-				return Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
-			}
-			else {
-				return Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-			}
-		}
-		catch (GameActionException e) {
-			return null;
-		}
-	}
-//	protected void droneRushMicro(MapLocation target) {
-//		try {
-//			RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.DRONE.sensorRadiusSquared, rc.getTeam().opponent());
-//			MapLocation myLocation = rc.getLocation();
-//			if (enemies.length == 0) {
-//				rc.move(myLocation.directionTo(target));
-//			}
-//			else if (enemies.length == 1) {
-//				RobotInfo enemy = enemies[0];
-//				enemy.ID 
-//				if (enemy.weaponDelay > 2) {
-//					moveToLocationWithMicro(enemy.location, 1);
-//				}
-//				else {
-//					moveToLocationWithMicro(enemy.location, 0);
-//				}
-//			}
-//			else {
-//				for (RobotInfo r : enemies) {
-//					rc.move();
-//				}
-//			}
-//		}
-//		catch (Exception e) {
-//			return;
-//		}
-//	}
 }
