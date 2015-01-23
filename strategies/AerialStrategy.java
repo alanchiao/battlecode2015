@@ -143,7 +143,6 @@ public class AerialStrategy extends GameStrategy {
 		if (hqDistance < distance) {
 			distance = hqDistance; 
 		}
-		rc.setIndicatorString(0, String.valueOf(Math.sqrt(distance)));
 		
 		if (Clock.getRoundNum() < (1900 - Math.sqrt(distance)*4)) {
 			if (enemyRush && numLaunchersDefense < 5) {

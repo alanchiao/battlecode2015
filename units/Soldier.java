@@ -33,7 +33,7 @@ public class Soldier extends Unit {
 			else {
 				target = groupTracker.getRallyPoint();
 			}
-			moveToLocationWithMicro(target, 0);
+			moveToLocationWithMicro(target, true);
 		}	
 	}
 }

@@ -25,14 +25,14 @@ public class Beaver extends Unit {
 				return;
 			}
 			builder.buildingLocation = null;
-			rc.setIndicatorString(0, "");
 			
 			double ore = rc.getTeamOre();
 			int numMinerFactories = rc.readBroadcast(Broadcast.numMinerFactoriesCh);
 			int numHelipads = rc.readBroadcast(Broadcast.numHelipadsCh);
 			int numSupplyDepots = rc.readBroadcast(Broadcast.numSupplyDepotsCh);
 			int numAerospaceLabs = rc.readBroadcast(Broadcast.numAerospaceLabsCh);
-			
+			int estimatedSupplyNeeded = rc.readBroadcast(Broadcast.numLaunchersCh) * 25;
+
 			if (numMinerFactories == 0) {
 				if (ore >= 500) {
 					builder.buildBuilding(RobotType.MINERFACTORY, numMinerFactories);
@@ -46,6 +46,11 @@ public class Beaver extends Unit {
 			else if (numSupplyDepots == 0) {
 				if (ore >= 100) {
 					builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
+				}
+			}
+			else if (numHelipads == 0) {
+				if (ore >= 300) {
+					builder.buildBuilding(RobotType.HELIPAD, numHelipads);
 				}
 			}
 			else {
@@ -63,6 +68,9 @@ public class Beaver extends Unit {
 				}
 				else if (ore >= 700) {
 					builder.buildBuilding(RobotType.AEROSPACELAB, numAerospaceLabs);
+				}
+				else if (estimatedSupplyNeeded > 200 + 100 * Math.pow(numSupplyDepots, 0.6)) {
+					builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
 				}
 				else {
 					MapLocation myLocation = rc.getLocation();

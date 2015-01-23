@@ -102,7 +102,7 @@ public class Headquarters extends Building {
 			double gameFractionLeft = 1.0 - Clock.getRoundNum() / 2000.0;
 
 			for (RobotInfo r : friendlyRobots) {
-				if (r.ID == supplyRequestID) {
+				if (r.ID == supplyRequestID && r.supplyLevel < 20000) {
 					rc.transferSupplies(30000, r.location);
 					loc = null;
 					break;
@@ -215,7 +215,7 @@ public class Headquarters extends Building {
 		if (this.enemyTowersRemaining != enemyTowersRemaining) {
 			this.enemyTowersRemaining = enemyTowersRemaining;
 			if (enemyTowersRemaining > 0) {
-				//index of the tower targetted
+				// index of the tower targeted
 				int index = numTowersDefeated - enemyTowersRemaining;
 				if (towerOrder[index] != null) {
 					targetTower = towerOrder[index];

@@ -87,17 +87,6 @@ public class Drone extends Unit {
 
 		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(RobotType.DRONE.attackRadiusSquared, rc.getTeam().opponent());
 		
-		// run away from tanks / missiles / and launchers
-		if (rc.isCoreReady()) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared * 2, rc.getTeam().opponent());
-			for (RobotInfo enemy: enemies) {
-				if (enemy.type == RobotType.LAUNCHER || enemy.type == RobotType.TANK || enemy.type == RobotType.MISSILE || enemy.type == RobotType.COMMANDER) {
-					this.navigation.moveToDestination(this.ownHQ, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
-					return;
-				}	
-			}
-		}
-		
 		if (rc.isWeaponReady()) {
 			if (enemiesAttackable.length > 0) {
 				rc.attackLocation(selectTarget(enemiesAttackable));
@@ -105,31 +94,24 @@ public class Drone extends Unit {
         }
 		
 		// Move
+		rc.setIndicatorString(1, "can't move");
 		if (rc.isCoreReady()) {
-			//default target location
-			int approachStrategy;
-			MapLocation target;
+			// default target location
 			if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
 				if (rc.getSupplyLevel() == 0) {
-					approachStrategy = 0;
-					target = ownHQ;
+					moveToLocationWithMicro(ownHQ, true);
 				}
 				else if (groupTracker.groupID == Broadcast.droneGroupAttackCh) {
-					target = enemyHQ;
-					approachStrategy = 1;
+					moveToLocationWithMicro(enemyHQ, false);
 				}
 				else { // groupTracker.groupID == Broadcast.droneGroupDefenseCh
-					target = selectDefensiveTarget();
-					approachStrategy = 1;
+					moveToLocationWithMicro(selectDefensiveTarget(), false);
 				}
 			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
-				target = this.ownHQ;
-				approachStrategy = 1;
+				moveToLocationWithMicro(ownHQ, false);
 			} else {
-				target = this.enemyHQ;
-				approachStrategy = 2;
+				chargeToLocation(enemyHQ);
 			}
-			moveToLocationWithMicro(target, approachStrategy);
 		}
 	}
 	

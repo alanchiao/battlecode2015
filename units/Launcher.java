@@ -3,7 +3,6 @@ package team158.units;
 import team158.buildings.Headquarters;
 import team158.com.Broadcast;
 import team158.units.com.Navigation;
-import team158.utils.DirectionHelper;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -57,13 +56,13 @@ public class Launcher extends Unit {
 		}
 		// launch 3 missiles at a time, then retreat. Do not launch
 		// 3 missiles if already surrounded by more than 1 missile
-		RobotInfo[] nearbyAlliedUnits = rc.senseNearbyRobots(2, rc.getTeam());
+		/*RobotInfo[] nearbyAlliedUnits = rc.senseNearbyRobots(2, rc.getTeam());
 		int nearbyMissileCount = 0;
 		for (RobotInfo ally: nearbyAlliedUnits) {
 			if (ally.type == RobotType.MISSILE) {
 				nearbyMissileCount++;
 			}
-		}
+		}*/
 		
 		if (enemiesAttackable.length > 0 && !isReloading) {
 			MapLocation target =  selectTarget(enemiesAttackable);
@@ -149,21 +148,18 @@ public class Launcher extends Unit {
 		
 		// Move
 		if (rc.isCoreReady()) {
-			// reloading - retreat ot recover missiles
+			// reloading - retreat to recover missiles
 			if (isReloading) {
 				navigation.moveToDestination(this.ownHQ, Navigation.AVOID_ALL);
 				return;
 			}
-			
-			MapLocation target;
-			int approachStrategy;
+
 			if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {
 				if (groupTracker.groupID == Broadcast.launcherGroupDefenseCh) {
 					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-					if (hasHQCommand) {								
-						approachStrategy = 2;
+					if (hasHQCommand) {			
 						// enemyNearHQLocationChs defaults to rally location if no enemy around.
-						target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+						MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
 						boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
 						boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
 						if (towerAttacked) {
@@ -172,20 +168,18 @@ public class Launcher extends Unit {
 						else if (enemyNear) {
 							target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
 						}
+						chargeToLocation(target);
 					}
 					else {
-						approachStrategy = 0;
-						target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
+						moveToLocationWithMicro(Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs), true);
 					}
 				}
 				else if (groupTracker.groupID == Broadcast.launcherGroupAttackCh) {
 					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-					if (hasHQCommand) {								
-//						approachStrategy = 2;
-//						//enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
-//						target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-						approachStrategy = 2;
+					if (hasHQCommand) {
+						// enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
 						MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+						MapLocation target;
 						if (enemyTowers.length != 0) {
 							int minDistance = 9999;
 							target = null;
@@ -200,11 +194,11 @@ public class Launcher extends Unit {
 						else {
 							target = enemyHQ;
 						}
+						chargeToLocation(target);
 					}
 					else {
-						approachStrategy = 2;
 						// enemyNearHQLocationChs defaults to rally location if no enemy around.
-						target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+						MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
 						boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
 						boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
 						if (towerAttacked) {
@@ -213,22 +207,20 @@ public class Launcher extends Unit {
 						else if (enemyNear) {
 							target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
 						}
+						chargeToLocation(target);
 					}
 				}
 				else {
-					approachStrategy = 0;
-					target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
+					moveToLocationWithMicro(Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs), true);
 				}
 				
-			} else {
+			}
+			else {
 				if (groupTracker.groupID == Broadcast.launcherGroupAttackCh) {
-					target = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-					approachStrategy = 2;
+					chargeToLocation(Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs));
 				}
 				else {
-//					target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
-//					approachStrategy = 2;
-					approachStrategy = 2;
+					MapLocation target;
 					MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 					if (enemyTowers.length != 0) {
 						int minDistance = 9999;
@@ -244,10 +236,9 @@ public class Launcher extends Unit {
 					else {
 						target = enemyHQ;
 					}
+					chargeToLocation(target);
 				}
 			}
-			rc.setIndicatorString(0, String.valueOf(target));
-			moveToLocationWithMicro(target, approachStrategy);
 		}
 	}
 
