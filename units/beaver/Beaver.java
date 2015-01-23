@@ -56,7 +56,6 @@ public class Beaver extends Unit {
 			else {
 				if (numAerospaceLabs == 0) {
 					if (ore >= 500) {
-						rc.broadcast(Broadcast.stopDroneProductionCh, 0);
 						builder.buildBuilding(RobotType.AEROSPACELAB, numAerospaceLabs);
 					}
 				}
