@@ -4,7 +4,6 @@ import java.util.Random;
 
 import team158.Robot;
 import team158.com.Broadcast;
-import team158.com.InternalMap;
 import team158.units.com.GroupTracker;
 import team158.units.com.Navigation;
 import team158.utils.DirectionHelper;
@@ -21,7 +20,6 @@ public abstract class Unit extends Robot {
 		
 	protected Navigation navigation;
 	protected GroupTracker groupTracker;
-	protected InternalMap internalMap;
 	protected double prevHealth;
 	protected boolean autoSupplyTransfer;
 	protected int[] damages;
@@ -66,10 +64,11 @@ public abstract class Unit extends Robot {
 				if (friendlyRobots.length > 0) {
 					// If predicted to die on this turn
 					if (rc.getHealth() <= prevHealth / 2) {
+						rc.setIndicatorString(2, "almost dead");
 						RobotInfo bestFriend = null;
 						double maxHealth = 0;
 						for (RobotInfo r : friendlyRobots) {
-							if (r.health > maxHealth && r.type.isBuilding) {
+							if (r.health > maxHealth && !r.type.isBuilding) {
 								maxHealth = r.health;
 								bestFriend = r;
 							}

@@ -145,7 +145,7 @@ public class AerialStrategy extends GameStrategy {
 			distance = hqDistance; 
 		}
 		
-		if (Clock.getRoundNum() < (1900 - Math.sqrt(distance)*4)) {
+		if (Clock.getRoundNum() < (rc.getRoundLimit() - 100 - Math.sqrt(distance)*4)) {
 			if (enemyRush && numLaunchersDefense < 5) {
 				gc.groupUnits(RobotType.LAUNCHER, 1);
 				rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);

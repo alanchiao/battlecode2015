@@ -1,6 +1,5 @@
 package team158.units;
 
-import team158.buildings.Headquarters;
 import team158.com.Broadcast;
 import team158.units.com.Navigation;
 import battlecode.common.Clock;
@@ -154,7 +153,7 @@ public class Launcher extends Unit {
 				return;
 			}
 
-			if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_LAUNCHERS_GROUP) {
+			if (Clock.getRoundNum() < rc.getRoundLimit() - 500) {
 				if (groupTracker.groupID == Broadcast.launcherGroupDefenseCh) {
 					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
 					if (hasHQCommand) {			

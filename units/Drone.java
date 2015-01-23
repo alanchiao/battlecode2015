@@ -97,7 +97,7 @@ public class Drone extends Unit {
 		rc.setIndicatorString(1, "can't move");
 		if (rc.isCoreReady()) {
 			// default target location
-			if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_COLLECT_SUPPLY) {
+			if (Clock.getRoundNum() < rc.getRoundLimit() - Headquarters.TIME_COLLECT_SUPPLY) {
 				if (rc.getSupplyLevel() == 0) {
 					moveToLocationWithMicro(ownHQ, true);
 				}
@@ -107,7 +107,7 @@ public class Drone extends Unit {
 				else { // groupTracker.groupID == Broadcast.droneGroupDefenseCh
 					moveToLocationWithMicro(selectDefensiveTarget(), false);
 				}
-			} else if (Clock.getRoundNum() < Headquarters.TIME_UNTIL_FULL_ATTACK) {
+			} else if (Clock.getRoundNum() < rc.getRoundLimit() - Headquarters.TIME_FULL_ATTACK) {
 				moveToLocationWithMicro(ownHQ, false);
 			} else {
 				chargeToLocation(enemyHQ);
