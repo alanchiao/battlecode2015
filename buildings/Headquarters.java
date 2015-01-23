@@ -4,11 +4,8 @@ import battlecode.common.*;
 import team158.com.Broadcast;
 import team158.com.GroupController;
 import team158.strategies.AerialStrategy;
-import team158.strategies.DroneHarassTest;
 import team158.strategies.GameStrategy;
 import team158.strategies.GroundStrategy;
-import team158.strategies.MinerTest;
-import team158.strategies.NavigationTest;
 import team158.units.Unit;
 
 public class Headquarters extends Building {
@@ -47,12 +44,6 @@ public class Headquarters extends Building {
 			case GROUND_STRATEGY:		gameStrategy = new GroundStrategy(rc, gc, this);
 										break;
 			case AERIAL_STRATEGY:		gameStrategy = new AerialStrategy(rc, gc, this);
-										break;
-			case MINER_STRATEGY:		gameStrategy = new MinerTest(rc, gc, this);
-										break;
-			case NAVIGATION_STRATEGY:	gameStrategy = new NavigationTest(rc, gc, this);
-										break;
-			case DRONE_HARASS_STRATEGY: gameStrategy = new DroneHarassTest(rc, gc, this);
 										break;
 		}
 		

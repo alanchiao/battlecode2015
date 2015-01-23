@@ -149,7 +149,8 @@ public class Launcher extends Unit {
 		if (rc.isCoreReady()) {
 			// reloading - retreat to recover missiles
 			if (isReloading) {
-				navigation.moveToDestination(this.ownHQ, Navigation.AVOID_ALL);
+				Direction enemyToUs = this.enemyHQ.directionTo(this.ownHQ);
+				navigation.moveToDestination(rc.getLocation().add(enemyToUs, 4), Navigation.AVOID_ALL);
 				return;
 			}
 
