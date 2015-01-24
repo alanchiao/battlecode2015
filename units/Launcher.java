@@ -50,7 +50,7 @@ public class Launcher extends Unit {
 			}
 		}
 		
-		if (rc.getMissileCount() >= 2) {
+		if (rc.getMissileCount() >= 4) {
 			isReloading = false;
 		}
 		// launch 3 missiles at a time, then retreat. Do not launch
@@ -69,6 +69,7 @@ public class Launcher extends Unit {
 			Direction dirToEnemy = myLocation.directionTo(target);
 			
 			int missileDensity;
+			int missilesFired = 0;
 			if (targetType == RobotType.MISSILE || targetType == RobotType.LAUNCHER) {
 				missileDensity = 1;
 			} else {
@@ -84,10 +85,10 @@ public class Launcher extends Unit {
 					nearbyAllyMissiles++;
 				}
 			}
-			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles < missileDensity) {
+			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles <= missileDensity) {
 				rc.launchMissile(dirToFire);
+				missilesFired++;
 			}
-			
 			dirToFire = dirToEnemy.rotateLeft();
 			locationToFire = myLocation.add(dirToFire);
 			nearbyAllyMissiles = 0;
@@ -97,8 +98,9 @@ public class Launcher extends Unit {
 					nearbyAllyMissiles++;
 				}
 			}
-			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles < missileDensity) {
+			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles + missilesFired <= missileDensity) {
 				rc.launchMissile(dirToFire);
+				missilesFired++;
 			}
 			
 			
@@ -111,11 +113,11 @@ public class Launcher extends Unit {
 					nearbyAllyMissiles++;
 				}
 			}
-			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles < missileDensity) {
+			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles + missilesFired <= missileDensity) {
 				rc.launchMissile(dirToFire);
 			}
 			
-			if (rc.getMissileCount() < 3) {
+			if (rc.getMissileCount() <= 5) {
 				isReloading = true;
 			}
         } else {
