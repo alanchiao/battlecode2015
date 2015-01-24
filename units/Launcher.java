@@ -50,7 +50,7 @@ public class Launcher extends Unit {
 			}
 		}
 		
-		if (rc.getMissileCount() >= 3) {
+		if (rc.getMissileCount() >= 2) {
 			isReloading = false;
 		}
 		// launch 3 missiles at a time, then retreat. Do not launch
@@ -68,13 +68,25 @@ public class Launcher extends Unit {
 			RobotType targetType = rc.senseRobotAtLocation(target).type;
 			Direction dirToEnemy = myLocation.directionTo(target);
 			
-			int missileDensity = 1;
+			int missileDensity;
+			if (targetType == RobotType.MISSILE || targetType == RobotType.LAUNCHER) {
+				missileDensity = 1;
+			} else {
+				missileDensity = 2;
+			}
 			
 			Direction dirToFire = dirToEnemy;
 			MapLocation locationToFire = myLocation.add(dirToFire);
 			int nearbyAllyMissiles = 0;
-			RobotInfo[] nearbyPotentialAllyMissiles;
-			
+			RobotInfo[] nearbyPotentialAllyMissiles = rc.senseNearbyRobots(locationToFire, 2, rc.getTeam());
+			for (RobotInfo r: nearbyPotentialAllyMissiles) {
+				if (r.type == RobotType.MISSILE) {
+					nearbyAllyMissiles++;
+				}
+			}
+			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles < missileDensity) {
+				rc.launchMissile(dirToFire);
+			}
 			
 			dirToFire = dirToEnemy.rotateLeft();
 			locationToFire = myLocation.add(dirToFire);
