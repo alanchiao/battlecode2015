@@ -50,8 +50,9 @@ public class Launcher extends Unit {
 			}
 		}
 		
-		if (rc.getMissileCount() >= 4) {
+		if (rc.getMissileCount() >= 4 && isReloading) {
 			isReloading = false;
+			navigation.stopObstacleTracking();
 		}
 		// launch 3 missiles at a time, then retreat. Do not launch
 		// 3 missiles if already surrounded by more than 1 missile
