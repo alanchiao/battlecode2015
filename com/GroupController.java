@@ -47,7 +47,7 @@ public class GroupController {
 		this.launcherGroupB = new int[256];
 
 		// roboTypes contains the robotType in a list
-		this.roboTypes = new RobotType[] {RobotType.SOLDIER, RobotType.TANK, RobotType.DRONE, RobotType.LAUNCHER};
+		this.roboTypes = new RobotType[] {RobotType.SOLDIER, RobotType.DRONE, RobotType.LAUNCHER};
 		// attackGroups and defenseGroups contains the different groups
 		this.attackGroups = new int[][] {this.soldierGroupA, this.droneGroupA, this.launcherGroupA};
 		this.defenseGroups = new int[][] {this.soldierGroupB, this.droneGroupB, this.launcherGroupB};
