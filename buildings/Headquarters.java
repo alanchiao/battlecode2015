@@ -6,15 +6,14 @@ import team158.com.GroupController;
 import team158.strategies.AerialStrategy;
 import team158.strategies.GameStrategy;
 import team158.strategies.GroundStrategy;
+import team158.strategies.SoldierLauncherComboStrategy;
 import team158.units.Unit;
 
 public class Headquarters extends Building {
 
 	public final static int GROUND_STRATEGY = 1;
 	public final static int AERIAL_STRATEGY = 2;
-	public final static int MINER_STRATEGY = 3;
-	public final static int NAVIGATION_STRATEGY = 4;
-	public final static int DRONE_HARASS_STRATEGY = 5;
+	public final static int DUAL_STRATEGY = 3;
 
 	public final static int TIME_COLLECT_SUPPLY = 350;
 	public final static int TIME_FULL_ATTACK = 200;
@@ -37,7 +36,7 @@ public class Headquarters extends Building {
 	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
-		this.strategy = AERIAL_STRATEGY;
+		this.strategy = DUAL_STRATEGY;
 		this.gc = new GroupController(rc, strategy);
 		
 		switch(this.strategy) {
@@ -45,6 +44,7 @@ public class Headquarters extends Building {
 										break;
 			case AERIAL_STRATEGY:		gameStrategy = new AerialStrategy(rc, gc, this);
 										break;
+			case DUAL_STRATEGY:			gameStrategy = new SoldierLauncherComboStrategy(rc, gc, this);
 		}
 		
 		towerOrder = new MapLocation[6];

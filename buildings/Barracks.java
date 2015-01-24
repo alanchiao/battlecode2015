@@ -5,6 +5,7 @@ import team158.utils.DirectionHelper;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotType;
 
 public class Barracks extends Building {
 
@@ -33,6 +34,11 @@ public class Barracks extends Building {
 				}
 			}
 			Broadcast.broadcastLocation(rc, Broadcast.soldierRallyLocationChs, rally);
+		}
+		
+		int numSoldiers = rc.readBroadcast(Broadcast.numSoldiersCh);
+		if (rc.isCoreReady() && numSoldiers <= 5 && rc.getTeamOre() >= 60) {
+			this.greedySpawn(RobotType.SOLDIER);
 		}
 	}
 }

@@ -13,7 +13,7 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.MapLocation;
 
-public class SoldierLauncherComboTest extends GameStrategy {
+public class SoldierLauncherComboStrategy extends GameStrategy {
 	
 	private boolean enemyRush;
 	private int pathDifficulty;
@@ -22,7 +22,7 @@ public class SoldierLauncherComboTest extends GameStrategy {
 	
 	private int scoutMiner;
 	
-	public SoldierLauncherComboTest(RobotController rc, GroupController gc, Headquarters hq) {
+	public SoldierLauncherComboStrategy(RobotController rc, GroupController gc, Headquarters hq) {
 		super(rc, gc, hq);
 		
 		this.attackGroup = 1;
@@ -40,9 +40,10 @@ public class SoldierLauncherComboTest extends GameStrategy {
 		int numSupplyDepots = 0;
 		int numDrones = 0;
 		int numLaunchers = 0;
-		int numSoldiers = 0;
 		int numLaunchersAttack = 0;
 		int numLaunchersDefense = 0;
+		int numSoldiers = 0;
+		int numSoldiersAttack = 0;
 		int numHelipads = 0;
 		int numAerospaceLabs = 0;
 		int numBarracks = 0;
@@ -61,6 +62,9 @@ public class SoldierLauncherComboTest extends GameStrategy {
 				numBeavers++;
 			} else if (type == RobotType.SOLDIER) {
 				numSoldiers++;
+				if (Hashing.find(r.ID) == Broadcast.soldierGroupAttackCh) {
+					numSoldiersAttack++;
+				}	
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
 			} else if (type == RobotType.SUPPLYDEPOT) {
@@ -93,6 +97,13 @@ public class SoldierLauncherComboTest extends GameStrategy {
 		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
 
+		if (pathDifficulty == 0) {
+			int possibleDifficulty = rc.readBroadcast(Broadcast.scoutEnemyHQCh);
+			if (possibleDifficulty != scoutMiner) {
+				pathDifficulty = possibleDifficulty;
+			}
+		}
+
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
 			if (numBeavers == 0 || (numBeavers == 1 && numMinerFactories >= 1)) {
@@ -113,30 +124,47 @@ public class SoldierLauncherComboTest extends GameStrategy {
 		}
 		
 		int[] groupSize = {numLaunchersDefense, numLaunchersAttack};
-//		if (numLaunchersAttack > 0 || numLaunchersDefense > 0) {
-//			gc.stopGroup(RobotType.LAUNCHER);
-//		}
+		if (numLaunchersAttack > 0 || numLaunchersDefense > 0) {
+			gc.stopGroup(RobotType.LAUNCHER);
+		}
 		
 		rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
 		rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
 
 		MapLocation closestTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 		MapLocation myLocation = rc.getLocation();
-
+		int distance = myLocation.distanceSquaredTo(closestTower);
+		MapLocation enemyHQ = rc.senseEnemyHQLocation();
+		int hqDistance = myLocation.distanceSquaredTo(enemyHQ);
+		if (hqDistance < distance) {
+			distance = hqDistance; 
+		}
 		
-		if (numSoldiers < 20) {
-			gc.groupUnits(RobotType.SOLDIER, 0);
-			rc.broadcast(Broadcast.launcherGroupAttackCh, 0);
+		if (Clock.getRoundNum() < (rc.getRoundLimit() - 100 - Math.sqrt(distance)*4)) {
+			// launcher grouping logic
+			if (enemyRush && numLaunchersDefense < 5) {
+				gc.groupUnits(RobotType.LAUNCHER, 1);
+				rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
+			} else	if (numLaunchersAttack >= 6) {
+				gc.groupUnits(RobotType.LAUNCHER, 0);
+				rc.broadcast(Broadcast.launcherGroupAttackCh, 1);
+			} else {
+				gc.groupUnits(RobotType.LAUNCHER, 0);
+				rc.broadcast(Broadcast.launcherGroupAttackCh, 0);				
+			}
+			
+			// soldier grouping logic
+			if (numSoldiersAttack < 6) {
+				gc.groupUnits(RobotType.SOLDIER, 0);
+				rc.broadcast(Broadcast.soldierGroupAttackCh, 0);
+			} else {
+				gc.groupUnits(RobotType.SOLDIER, 0);
+				rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
+			}
 		}
-		if (numLaunchers < 5) {
-			gc.groupUnits(RobotType.LAUNCHER, 0);
-			rc.broadcast(Broadcast.launcherGroupAttackCh, 0);
+		else {
+			gc.groupUnits(RobotType.LAUNCHER, 1);
+			rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
 		}
-		if (numSoldiers >= 20  && numLaunchers >= 5){
-			rc.broadcast(Broadcast.launcherGroupAttackCh, 1);
-			rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
-		}
-	
-		
 	}
 }
