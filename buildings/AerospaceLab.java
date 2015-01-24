@@ -15,6 +15,7 @@ public class AerospaceLab extends Building {
 
 	@Override
 	protected void actions() throws GameActionException {
+//
 //		MapLocation[] myTowers = rc.senseTowerLocations();
 //		int numTowersRemaining = myTowers.length;
 //		int[] distances = new int[numTowersRemaining];
