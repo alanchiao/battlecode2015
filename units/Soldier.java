@@ -162,10 +162,19 @@ public class Soldier extends Unit {
 				boolean isGoodMove = false;
 				
 				for (RobotInfo r : enemies) {
-					int potentialLocationDistance = potentialLocation.distanceSquaredTo(r.location);
-					// Assume enemy can move immediately
-					if (potentialLocationDistance <= rangeFunction(r.type.attackRadiusSquared)) {
-						isGoodMove = true;
+					if (r.type == RobotType.COMMANDER) {
+						if (potentialLocation.distanceSquaredTo(r.location) <= 20) {
+							isGoodMove = false;
+							reasonableMoves[i] = false;
+							break;
+						}
+					}
+					else {
+						int potentialLocationDistance = potentialLocation.distanceSquaredTo(r.location);
+						// Assume enemy can move immediately
+						if (potentialLocationDistance <= rangeFunction(r.type.attackRadiusSquared)) {
+							isGoodMove = true;
+						}
 					}
 				}
 				
