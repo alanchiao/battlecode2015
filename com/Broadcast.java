@@ -10,13 +10,11 @@ public class Broadcast {
 	public static final int numSoldiersCh = 1;
 	public static final int numDronesCh = 2;
 	public static final int numMinersCh = 3;
-	public static final int numTanksCh = 4;
 	public static final int numLaunchersCh = 5;
 
 	public static final int numBarracksCh = 101;
 	public static final int numMinerFactoriesCh = 102;
 	public static final int numSupplyDepotsCh = 103;
-	public static final int numTankFactoriesCh = 104;
 	public static final int numHelipadsCh = 105;
 	public static final int numAerospaceLabsCh = 106;
 	
@@ -24,7 +22,6 @@ public class Broadcast {
 	public static final int minersProducedCh = 302;
 	
 	// target commanded by unit spawning buildings
-	public static final int tankRallyLocationChs = 400; // 400 - 401
 	public static final int soldierRallyLocationChs = 402; // 402 - 403
 	public static final int droneRallyLocationChs = 404; // 404 - 405
 	public static final int launcherRallyLocationChs = 408; // 408- 409
@@ -37,7 +34,6 @@ public class Broadcast {
 	public static final int enemyNearTowerLocationChs = 418;
 	
 	public static final int groupingSoldiersCh = 501;
-	public static final int groupingTanksCh = 502;
 	public static final int groupingDronesCh = 503;
 	public static final int groupingLaunchersCh = 504;
 	
@@ -54,8 +50,6 @@ public class Broadcast {
 	// Channels 700-799 are used for grouping
 	public static final int soldierGroupAttackCh = 700;
 	public static final int soldierGroupDefenseCh = 701;
-	public static final int tankGroupAttackCh = 702;
-	public static final int tankGroupDefenseCh = 703;
 	public static final int droneGroupAttackCh = 704;
 	public static final int droneGroupDefenseCh = 705;
 	public static final int launcherGroupAttackCh = 707;

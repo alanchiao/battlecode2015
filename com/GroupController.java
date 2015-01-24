@@ -12,10 +12,6 @@ public class GroupController {
 	private RobotController rc;
 	
 	// two group management code
-	int ptTankA;
-	int ptTankB;
-	int[] tankGroupA;
-	int[] tankGroupB;
 	int ptDroneA;
 	int ptDroneB;
 	int[] droneGroupA;
@@ -41,10 +37,6 @@ public class GroupController {
 		this.ptSoldierB = 0;
 		this.soldierGroupA = new int[256];
 		this.soldierGroupB = new int[256];
-		this.ptTankA = 0;
-		this.ptTankB = 0;
-		this.tankGroupA = new int[256];
-		this.tankGroupB = new int[256];
 		this.ptDroneA = 0;
 		this.ptDroneB = 0;
 		this.droneGroupA = new int[256];
@@ -57,14 +49,12 @@ public class GroupController {
 		// roboTypes contains the robotType in a list
 		this.roboTypes = new RobotType[] {RobotType.SOLDIER, RobotType.TANK, RobotType.DRONE, RobotType.LAUNCHER};
 		// attackGroups and defenseGroups contains the different groups
-		this.attackGroups = new int[][] {this.soldierGroupA, this.tankGroupA, this.droneGroupA, this.launcherGroupA};
-		this.defenseGroups = new int[][] {this.soldierGroupB, this.tankGroupB, this.droneGroupB, this.launcherGroupB};
+		this.attackGroups = new int[][] {this.soldierGroupA, this.droneGroupA, this.launcherGroupA};
+		this.defenseGroups = new int[][] {this.soldierGroupB, this.droneGroupB, this.launcherGroupB};
 		this.broadcastChannels = new int[][] {{Broadcast.soldierGroupAttackCh, Broadcast.soldierGroupDefenseCh},
-												{Broadcast.tankGroupAttackCh, Broadcast.tankGroupDefenseCh},
 												{Broadcast.droneGroupAttackCh, Broadcast.droneGroupDefenseCh},
 												{Broadcast.launcherGroupAttackCh, Broadcast.launcherGroupDefenseCh}};
 		this.pointers = new int[][] {{ptSoldierA, ptSoldierB},
-										{ptTankA, ptTankB},
 										{ptDroneA, ptDroneB},
 										{ptLauncherA, ptLauncherB}};
 		
@@ -72,9 +62,8 @@ public class GroupController {
 	
 	public int rcToIntConvert(RobotType rt) {
 		if (rt == RobotType.SOLDIER) return 0;
-		else if (rt == RobotType.TANK) return 1;
-		else if (rt == RobotType.DRONE) return 2;
-		else if (rt == RobotType.LAUNCHER) return 3;
+		else if (rt == RobotType.DRONE) return 1;
+		else if (rt == RobotType.LAUNCHER) return 2;
 		else return -1;
 	}
 	
@@ -112,9 +101,6 @@ public class GroupController {
 		else if (rt == RobotType.LAUNCHER) {
 			broadcastCh = Broadcast.groupingLaunchersCh;
 		}
-		else if (rt == RobotType.TANK) {
-			broadcastCh = Broadcast.groupingTanksCh;
-		}
 		else if (rt == RobotType.SOLDIER) {
 			broadcastCh = Broadcast.groupingSoldiersCh;
 		}
@@ -148,23 +134,6 @@ public class GroupController {
 					i++;
 				}
 			}
-			
-			if (ID_Broadcast == Broadcast.tankGroupDefenseCh) {
-				int i = 0;
-				while (tankGroupA[i] != 0) {
-					Hashing.put(tankGroupA[i], 0);
-					tankGroupA[i] = 0;
-					i++;
-				}
-			}
-			else if (ID_Broadcast == Broadcast.tankGroupAttackCh) {
-				int i = 0;
-				while (tankGroupB[i] != 0) {
-					Hashing.put(tankGroupB[i], 0);
-					tankGroupB[i] = 0;
-					i++;
-				}
-			}
 		}
 		catch (GameActionException e) {
 			return;
@@ -173,10 +142,7 @@ public class GroupController {
 		
 	public void stopGroup(RobotType rt) {
 		int broadcastCh;
-		if (rt == RobotType.TANK) {
-			broadcastCh = Broadcast.groupingTanksCh;
-		}
-		else if (rt == RobotType.DRONE) {
+		if (rt == RobotType.DRONE) {
 			broadcastCh = Broadcast.groupingDronesCh;
 		}
 		else {

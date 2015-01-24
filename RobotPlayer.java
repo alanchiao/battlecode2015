@@ -6,14 +6,12 @@ import team158.buildings.Headquarters;
 import team158.buildings.Helipad;
 import team158.buildings.MinerFactory;
 import team158.buildings.SupplyDepot;
-import team158.buildings.TankFactory;
 import team158.buildings.Tower;
 import team158.units.Drone;
 import team158.units.Launcher;
 import team158.units.Miner;
 import team158.units.Missile;
 import team158.units.Soldier;
-import team158.units.Tank;
 import team158.units.beaver.Beaver;
 import battlecode.common.*;
 
@@ -49,12 +47,6 @@ public class RobotPlayer {
 		}
 		else if (rc.getType() == RobotType.HELIPAD) {
         	robot = new Helipad(rc);
-        }
-		else if (rc.getType() == RobotType.TANK) {
-        	robot = new Tank(rc);
-        }
-		else if (rc.getType() == RobotType.TANKFACTORY) {
-        	robot = new TankFactory(rc);
         }
 		else if (rc.getType() == RobotType.SUPPLYDEPOT) {
 			robot = new SupplyDepot(rc);

@@ -39,13 +39,6 @@ public class GroundStrategy extends GameStrategy {
 			RobotType type = r.type;
 			if (type == RobotType.TANK) {
 				numTanks++;
-				if (Hashing.find(r.ID) == Broadcast.tankGroupDefenseCh) {
-					numTanksDefense++;
-				}							
-				else if (Hashing.find(r.ID)  == Broadcast.tankGroupAttackCh) {
-					numTanksAttack++;
-				}			
-
 			} else if (type == RobotType.MINER) {
 				numMiners++;
 			} else if (type == RobotType.BEAVER) {
@@ -63,12 +56,10 @@ public class GroundStrategy extends GameStrategy {
 		}
 		
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
-		rc.broadcast(Broadcast.numTanksCh, numTanks);
 		rc.broadcast(Broadcast.numMinersCh, numMiners);
 		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numMinerFactoriesCh, numMinerFactories);
 		rc.broadcast(Broadcast.numSupplyDepotsCh, numSupplyDepots);
-		rc.broadcast(Broadcast.numTankFactoriesCh, numTankFactories);
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
@@ -88,26 +79,6 @@ public class GroundStrategy extends GameStrategy {
 					rc.spawn(buildDirection, RobotType.BEAVER);
 				}
 			}
-		}
-
-		int[] groupSize = {numTanksDefense, numTanksAttack};
-		int[] groupCh = {Broadcast.tankGroupDefenseCh, Broadcast.tankGroupAttackCh};
-		if (numTanksAttack > 0 || numTanksDefense > 0) {
-			gc.stopGroup(RobotType.TANK);
-		}
-		rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
-		rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
-		if (groupSize[defendGroup] < 6) {
-			//1 -> defense, 0 -> attack
-			gc.groupUnits(RobotType.TANK, 1);
-			rc.broadcast(groupCh[defendGroup], 1);
-		}
-		else {
-			rc.broadcast(groupCh[attackGroup],1);
-			if (numTanks - groupSize[defendGroup] - groupSize[attackGroup] > 8) {
-				gc.groupUnits(RobotType.TANK, 0);
-			}
-		}
-			
+		}			
 	}	
 }

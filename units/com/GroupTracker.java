@@ -47,8 +47,6 @@ public class GroupTracker {
 								break;
 				case SOLDIER:	target = Broadcast.readLocation(rc, Broadcast.soldierRallyLocationChs);
 								break;
-				case TANK:		target = Broadcast.readLocation(rc, Broadcast.tankRallyLocationChs);
-								break;
 				case LAUNCHER:	target = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
 								break;
 				default:		// should never happen

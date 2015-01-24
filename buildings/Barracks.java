@@ -17,7 +17,7 @@ public class Barracks extends Building {
         // get information broadcasted by the HQ
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
-		if (Broadcast.isNotInitiated(rc, Broadcast.tankRallyLocationChs)) {
+		if (Broadcast.isNotInitiated(rc, Broadcast.soldierRallyLocationChs)) {
 			MapLocation rally = myLocation;
 			// Move 5 squares away
 			int rallyDistance = (int)hqDistance / 6;
@@ -32,7 +32,7 @@ public class Barracks extends Building {
 					offsetIndex++;
 				}
 			}
-			Broadcast.broadcastLocation(rc, Broadcast.tankRallyLocationChs, rally);
+			Broadcast.broadcastLocation(rc, Broadcast.soldierRallyLocationChs, rally);
 		}
 	}
 }
