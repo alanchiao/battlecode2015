@@ -42,12 +42,12 @@ public class Beaver extends Unit {
 				}
 			}
 			//added for testing
-			else if (numBarracks == 0) {
-				if (ore >= 300) {
-					builder.buildBuilding(RobotType.BARRACKS, numBarracks);
-				}
-			}
-			//////
+//			else if (numBarracks == 0) {
+//				if (ore >= 300) {
+//					builder.buildBuilding(RobotType.BARRACKS, numBarracks);
+//				}
+//			}
+//			//////
 			else if (numHelipads == 0) {
 				if (ore >= 300) {
 					builder.buildBuilding(RobotType.HELIPAD, numHelipads);
@@ -66,7 +66,6 @@ public class Beaver extends Unit {
 			else {
 				if (numAerospaceLabs == 0) {
 					if (ore >= 500) {
-						//rc.broadcast(Broadcast.stopDroneProductionCh, 0);
 						builder.buildBuilding(RobotType.AEROSPACELAB, numAerospaceLabs);
 					}
 				}

@@ -50,8 +50,9 @@ public class Launcher extends Unit {
 			}
 		}
 		
-		if (rc.getMissileCount() >= 3) {
+		if (rc.getMissileCount() >= 4 && isReloading) {
 			isReloading = false;
+			navigation.stopObstacleTracking();
 		}
 		// launch 3 missiles at a time, then retreat. Do not launch
 		// 3 missiles if already surrounded by more than 1 missile
@@ -69,6 +70,7 @@ public class Launcher extends Unit {
 			Direction dirToEnemy = myLocation.directionTo(target);
 			
 			int missileDensity;
+			int missilesFired = 0;
 			if (targetType == RobotType.MISSILE || targetType == RobotType.LAUNCHER) {
 				missileDensity = 1;
 			} else {
@@ -84,10 +86,10 @@ public class Launcher extends Unit {
 					nearbyAllyMissiles++;
 				}
 			}
-			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles < missileDensity) {
+			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles <= missileDensity) {
 				rc.launchMissile(dirToFire);
+				missilesFired++;
 			}
-			
 			dirToFire = dirToEnemy.rotateLeft();
 			locationToFire = myLocation.add(dirToFire);
 			nearbyAllyMissiles = 0;
@@ -97,8 +99,9 @@ public class Launcher extends Unit {
 					nearbyAllyMissiles++;
 				}
 			}
-			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles < missileDensity) {
+			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles + missilesFired <= missileDensity) {
 				rc.launchMissile(dirToFire);
+				missilesFired++;
 			}
 			
 			
@@ -111,11 +114,11 @@ public class Launcher extends Unit {
 					nearbyAllyMissiles++;
 				}
 			}
-			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles < missileDensity) {
+			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles + missilesFired <= missileDensity) {
 				rc.launchMissile(dirToFire);
 			}
 			
-			if (rc.getMissileCount() < 3) {
+			if (rc.getMissileCount() <= 5) {
 				isReloading = true;
 			}
         } else {
@@ -149,7 +152,8 @@ public class Launcher extends Unit {
 		if (rc.isCoreReady()) {
 			// reloading - retreat to recover missiles
 			if (isReloading) {
-				navigation.moveToDestination(this.ownHQ, Navigation.AVOID_ALL);
+				Direction enemyToUs = this.enemyHQ.directionTo(this.ownHQ);
+				navigation.moveToDestination(rc.getLocation().add(enemyToUs, 4), Navigation.AVOID_ALL);
 				return;
 			}
 
@@ -216,7 +220,23 @@ public class Launcher extends Unit {
 			}
 			else {
 				if (groupTracker.groupID == Broadcast.launcherGroupAttackCh) {
-					chargeToLocation(Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs));
+					MapLocation target;
+					MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+					if (enemyTowers.length != 0) {
+						int minDistance = 9999;
+						target = null;
+						for (MapLocation tower : enemyTowers) {
+							int currentDistance = myLocation.distanceSquaredTo(tower);
+							if (currentDistance < minDistance) {
+								target = tower;
+								minDistance = currentDistance;
+							}
+						}
+					}
+					else {
+						target = enemyHQ;
+					}
+					chargeToLocation(target);
 				}
 				else {
 					MapLocation target;
