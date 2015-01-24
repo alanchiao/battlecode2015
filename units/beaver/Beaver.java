@@ -4,7 +4,6 @@ import team158.units.beaver.Builder;
 import team158.utils.DirectionHelper;
 import team158.com.Broadcast;
 import team158.units.Unit;
-import team158.utils.*;
 import battlecode.common.*;
 
 public class Beaver extends Unit {

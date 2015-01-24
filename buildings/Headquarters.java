@@ -5,7 +5,6 @@ import team158.com.Broadcast;
 import team158.com.GroupController;
 import team158.strategies.AerialStrategy;
 import team158.strategies.GameStrategy;
-import team158.strategies.GroundStrategy;
 import team158.strategies.SoldierLauncherComboStrategy;
 import team158.units.Unit;
 
@@ -40,8 +39,6 @@ public class Headquarters extends Building {
 		this.gc = new GroupController(rc, strategy);
 		
 		switch(this.strategy) {
-			case GROUND_STRATEGY:		gameStrategy = new GroundStrategy(rc, gc, this);
-										break;
 			case AERIAL_STRATEGY:		gameStrategy = new AerialStrategy(rc, gc, this);
 										break;
 			case DUAL_STRATEGY:			gameStrategy = new SoldierLauncherComboStrategy(rc, gc, this);

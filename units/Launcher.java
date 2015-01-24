@@ -1,6 +1,7 @@
 package team158.units;
 
 import team158.com.Broadcast;
+import team158.utils.DirectionHelper;
 import team158.units.com.Navigation;
 import battlecode.common.Clock;
 import battlecode.common.Direction;
@@ -9,6 +10,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.Team;
 
 public class Launcher extends Unit {
 	
@@ -25,7 +27,7 @@ public class Launcher extends Unit {
 
 	@Override
 	protected void actions() throws GameActionException {
-		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(24, rc.getTeam().opponent());
+		RobotInfo[] enemiesAttackable = rc.senseNearbyRobots(26, rc.getTeam().opponent());
 		
 		MapLocation myLocation = rc.getLocation();
 
@@ -171,10 +173,10 @@ public class Launcher extends Unit {
 						else if (enemyNear) {
 							target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
 						}
-						chargeToLocation(target);
+						launcherMoveWithMicro(target);
 					}
 					else {
-						moveToLocationWithMicro(Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs), true);
+						launcherMoveWithMicro(Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs));
 					}
 				}
 				else if (groupTracker.groupID == Broadcast.launcherGroupAttackCh) {
@@ -197,7 +199,7 @@ public class Launcher extends Unit {
 						else {
 							target = enemyHQ;
 						}
-						chargeToLocation(target);
+						launcherMoveWithMicro(target);
 					}
 					else {
 						// enemyNearHQLocationChs defaults to rally location if no enemy around.
@@ -210,55 +212,97 @@ public class Launcher extends Unit {
 						else if (enemyNear) {
 							target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
 						}
-						chargeToLocation(target);
+						launcherMoveWithMicro(target);
 					}
 				}
 				else {
-					moveToLocationWithMicro(Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs), true);
+					launcherMoveWithMicro(Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs));
 				}
 				
 			}
 			else {
-				if (groupTracker.groupID == Broadcast.launcherGroupAttackCh) {
-					MapLocation target;
-					MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-					if (enemyTowers.length != 0) {
-						int minDistance = 9999;
-						target = null;
-						for (MapLocation tower : enemyTowers) {
-							int currentDistance = myLocation.distanceSquaredTo(tower);
-							if (currentDistance < minDistance) {
-								target = tower;
-								minDistance = currentDistance;
-							}
+				MapLocation target;
+				MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+				if (enemyTowers.length != 0) {
+					int minDistance = 9999;
+					target = null;
+					for (MapLocation tower : enemyTowers) {
+						int currentDistance = myLocation.distanceSquaredTo(tower);
+						if (currentDistance < minDistance) {
+							target = tower;
+							minDistance = currentDistance;
 						}
 					}
-					else {
-						target = enemyHQ;
-					}
-					chargeToLocation(target);
 				}
 				else {
-					MapLocation target;
-					MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-					if (enemyTowers.length != 0) {
-						int minDistance = 9999;
-						target = null;
-						for (MapLocation tower : enemyTowers) {
-							int currentDistance = myLocation.distanceSquaredTo(tower);
-							if (currentDistance < minDistance) {
-								target = tower;
-								minDistance = currentDistance;
-							}
-						}
-					}
-					else {
-						target = enemyHQ;
-					}
-					chargeToLocation(target);
+					target = enemyHQ;
 				}
+				launcherMoveWithMicro(target);
 			}
 		}
 	}
 
+	protected void launcherMoveWithMicro(MapLocation target) throws GameActionException {
+		Team opponentTeam = rc.getTeam().opponent();
+		RobotInfo[] enemies = rc.senseNearbyRobots(26, opponentTeam);
+		// no enemies in range
+		if (enemies.length == 0) { // then move towards destination safely
+			if (target != null) {
+				navigation.moveToDestination(target, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
+			}
+			return;
+		}
+
+		MapLocation myLocation = rc.getLocation();
+
+		computeStuff();
+
+		if (safeSpots[8]) {
+			// Try to move to edge of sight range
+			RobotInfo[] dangerousEnemies = rc.senseNearbyRobots(15, opponentTeam);
+			if (dangerousEnemies.length > 0) {
+				int minDistance = 9999;
+				MapLocation closestEnemy = null;
+				for (int i = 0; i < dangerousEnemies.length; i++) {
+					if (dangerousEnemies[i].type != RobotType.MISSILE && !dangerousEnemies[i].type.isBuilding) {
+						int distance = myLocation.distanceSquaredTo(dangerousEnemies[i].location);
+						if (distance < minDistance) {
+							closestEnemy = dangerousEnemies[i].location;
+							minDistance = distance;
+						}
+					}
+				}
+				if (closestEnemy != null) {
+					Direction moveDirection = closestEnemy.directionTo(myLocation);
+					for (int i = 0; i < 3; i++) {
+						if (myLocation.add(moveDirection).distanceSquaredTo(closestEnemy) <= 24 &&
+								damages[DirectionHelper.directionToInt(moveDirection)] <= damages[8]) {
+							rc.move(moveDirection);
+						}
+						else if (i == 0) {
+							moveDirection = moveDirection.rotateLeft();
+						}
+						else if (i == 1) {
+							moveDirection = moveDirection.rotateRight().rotateRight();
+						}
+					}
+				}
+			}
+		}
+		// Take less damage
+		else {
+			int bestDirection = 8;
+			int bestDamage = 999999;
+			for (int i = 0; i < 8; i++) {
+				if (rc.canMove(DirectionHelper.directions[i]) && damages[i] <= bestDamage) {
+					bestDirection = i;
+					bestDamage = damages[i];
+				}
+			}
+			if (bestDamage < damages[8]) {
+				navigation.stopObstacleTracking();
+				rc.move(DirectionHelper.directions[bestDirection]);
+			}
+		}
+	}
 }
