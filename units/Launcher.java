@@ -68,25 +68,13 @@ public class Launcher extends Unit {
 			RobotType targetType = rc.senseRobotAtLocation(target).type;
 			Direction dirToEnemy = myLocation.directionTo(target);
 			
-			int missileDensity;
-			if (targetType == RobotType.MISSILE || targetType == RobotType.LAUNCHER) {
-				missileDensity = 1;
-			} else {
-				missileDensity = 2;
-			}
+			int missileDensity = 1;
 			
 			Direction dirToFire = dirToEnemy;
 			MapLocation locationToFire = myLocation.add(dirToFire);
 			int nearbyAllyMissiles = 0;
-			RobotInfo[] nearbyPotentialAllyMissiles = rc.senseNearbyRobots(locationToFire, 2, rc.getTeam());
-			for (RobotInfo r: nearbyPotentialAllyMissiles) {
-				if (r.type == RobotType.MISSILE) {
-					nearbyAllyMissiles++;
-				}
-			}
-			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles < missileDensity) {
-				rc.launchMissile(dirToFire);
-			}
+			RobotInfo[] nearbyPotentialAllyMissiles;
+			
 			
 			dirToFire = dirToEnemy.rotateLeft();
 			locationToFire = myLocation.add(dirToFire);
