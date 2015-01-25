@@ -144,7 +144,7 @@ public class Launcher extends Unit {
 				if (rc.canLaunch(directionToTarget)) {
 					rc.launchMissile(directionToTarget);
 				} 
-				if (rc.getMissileCount() < 3) {
+				if (rc.getMissileCount() <= 5) {
 					isReloading = true;
 				}
 			}
@@ -154,8 +154,7 @@ public class Launcher extends Unit {
 		if (rc.isCoreReady()) {
 			// reloading - retreat to recover missiles
 			if (isReloading) {
-				Direction enemyToUs = this.enemyHQ.directionTo(this.ownHQ);
-				navigation.moveToDestination(rc.getLocation().add(enemyToUs, 4), Navigation.AVOID_ALL);
+				navigation.moveToDestination(ownHQ, Navigation.AVOID_ALL);
 				return;
 			}
 
