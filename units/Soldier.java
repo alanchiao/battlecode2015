@@ -91,7 +91,7 @@ public class Soldier extends Unit {
 		// Take less damage
 		else {
 			int bestDirection = 8;
-			int bestDamage = 999999;
+			double bestDamage = 999999;
 			for (int i = 0; i < 8; i++) {
 				if (rc.canMove(DirectionHelper.directions[i]) && inRange[i] && damages[i] <= bestDamage) {
 					bestDirection = i;
@@ -154,7 +154,7 @@ public class Soldier extends Unit {
 				Direction d = DirectionHelper.directions[i];
 				MapLocation potentialLocation = myLocation.add(d);		
 				// if cannot move in direction, do not consider
-				if (!rc.canMove(d) || !safeSpots[i]) { // also avoids getting too close to missiles
+				if (!rc.canMove(d) || !safeSpots[i] || rc.getCoreDelay() + (i%2 == 1 ? 2.8 : 2) > 3) { // also avoids getting too close to missiles
 					continue;
 				}
 				
@@ -209,11 +209,11 @@ public class Soldier extends Unit {
 		// Take less damage
 		else {
 			int bestDirection = 8;
-			int bestDamage = 999999;
+			double bestDamage = 999999;
 			for (int i = 0; i < 8; i++) {
-				if (rc.canMove(DirectionHelper.directions[i]) && damages[i] <= bestDamage) {
+				if (rc.canMove(DirectionHelper.directions[i]) && damages[i] <= bestDamage && damages[i] + i%2 <= bestDamage) {
 					bestDirection = i;
-					bestDamage = damages[i];
+					bestDamage = damages[i] + i%2;
 				}
 			}
 			if (bestDamage < damages[8]) {

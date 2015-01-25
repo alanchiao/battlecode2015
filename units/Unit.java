@@ -1,5 +1,4 @@
 package team158.units;
-import java.util.Arrays;
 import java.util.Random;
 
 import team158.Robot;
@@ -18,7 +17,7 @@ public abstract class Unit extends Robot {
 	protected GroupTracker groupTracker;
 	protected double prevHealth;
 	protected boolean autoSupplyTransfer;
-	protected int[] damages;
+	protected double[] damages;
 	protected boolean[] inRange;
 	protected boolean[] safeSpots;
 	
@@ -33,7 +32,7 @@ public abstract class Unit extends Robot {
 		prevHealth = 0;
 		autoSupplyTransfer = true;
 		
-		damages = new int[9];
+		damages = new double[9];
 		inRange = new boolean[9];
 		safeSpots = new boolean[9];
 	
@@ -76,7 +75,7 @@ public abstract class Unit extends Robot {
 					// Get rid of excess supply
 					else if (mySupply > rc.getType().supplyUpkeep * 250) {
 						for (RobotInfo r : friendlyRobots) {
-							if (rc.getType() == r.type && r.supplyLevel < r.type.supplyUpkeep * 150 && r.health > 8) {
+							if (rc.getType() == r.type && r.supplyLevel < r.type.supplyUpkeep * 150 && r.health > 20) {
 								rc.transferSupplies(mySupply - rc.getType().supplyUpkeep * 250, r.location);
 								break;
 							}
@@ -273,6 +272,5 @@ public abstract class Unit extends Robot {
 				inRange[8] = true;
 			}
 		}
-		rc.setIndicatorString(0, Arrays.toString(damages));
 	}
 }

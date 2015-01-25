@@ -1,5 +1,4 @@
 package team158.units;
-import java.util.Arrays;
 
 import battlecode.common.*;
 import team158.com.Broadcast;
@@ -32,9 +31,13 @@ public class Miner extends Unit {
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		MapLocation myLocation = rc.getLocation();
 		double myOre = rc.senseOre(myLocation);
-		
-		computeStuff();
-		if (rc.isCoreReady() && minerMoveIgnoreOre(myOre < 2.5)) {
+
+		if (rc.isCoreReady()) {
+			computeStuff();
+
+			if (!minerMoveIgnoreOre(myOre < 2.5)) {
+				return;
+			}
 
 			if (rc.readBroadcast(Broadcast.scoutEnemyHQCh) == rc.getID()) {
 				navigation.moveToDestination(enemyHQ, Navigation.AVOID_ALL);
@@ -103,16 +106,15 @@ public class Miner extends Unit {
 	}
 	
 	// enemies must have length 0
-	// returns whether or not it's ok to mine
+	// returns whether or not it's ok to move
 	protected boolean minerMoveIgnoreOre(boolean priorityMove) throws GameActionException {
 		Team opponentTeam = rc.getTeam().opponent();
 		RobotInfo[] enemies = rc.senseNearbyRobots(24, opponentTeam);
 		MapLocation myLocation = rc.getLocation();
 		
-		if (enemies.length > 0) {
+		if (enemies.length == 0) {
 			return true;
 		}
-		rc.setIndicatorString(0, Arrays.toString(damages));
 		if (safeSpots[8]) {
 			for (RobotInfo enemy : enemies) {
 				if (enemy.type == RobotType.COMMANDER) {
@@ -140,11 +142,11 @@ public class Miner extends Unit {
 		// Take less damage
 		else {
 			int bestDirection = 8;
-			int bestDamage = 999999;
+			double bestDamage = 999999;
 			for (int i = 0; i < 8; i++) {
-				if (rc.canMove(DirectionHelper.directions[i]) && damages[i] <= bestDamage) {
+				if (rc.canMove(DirectionHelper.directions[i]) && damages[i] + i%2 <= bestDamage) {
 					bestDirection = i;
-					bestDamage = damages[i];
+					bestDamage = damages[i] + i%2;
 				}
 			}
 			if (bestDamage < damages[8]) {

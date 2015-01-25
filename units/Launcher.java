@@ -292,11 +292,11 @@ public class Launcher extends Unit {
 		// Take less damage
 		else {
 			int bestDirection = 8;
-			int bestDamage = 999999;
+			double bestDamage = 999999;
 			for (int i = 0; i < 8; i++) {
-				if (rc.canMove(DirectionHelper.directions[i]) && damages[i] <= bestDamage) {
+				if (rc.canMove(DirectionHelper.directions[i]) && damages[i] + i%2 <= bestDamage) {
 					bestDirection = i;
-					bestDamage = damages[i];
+					bestDamage = damages[i] + i%2;
 				}
 			}
 			if (bestDamage < damages[8]) {
