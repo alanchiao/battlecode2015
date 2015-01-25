@@ -144,7 +144,8 @@ public class Launcher extends Unit {
 				if (rc.canLaunch(directionToTarget)) {
 					rc.launchMissile(directionToTarget);
 				} 
-				if (rc.getMissileCount() <= 5) {
+				// no reloading with respect to towers
+				if (rc.getMissileCount() <= 4) {
 					isReloading = true;
 				}
 			}
