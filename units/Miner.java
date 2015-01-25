@@ -1,4 +1,6 @@
 package team158.units;
+import java.util.Arrays;
+
 import battlecode.common.*;
 import team158.com.Broadcast;
 import team158.units.com.Navigation;
@@ -31,32 +33,10 @@ public class Miner extends Unit {
 		MapLocation myLocation = rc.getLocation();
 		double myOre = rc.senseOre(myLocation);
 		
-		if (rc.isCoreReady()) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(24, rc.getTeam().opponent());
-			boolean[] possibleMovesAvoidingEnemies = navigation.moveDirectionsAvoidingAttack(enemies, 5);
-			for (int i = 0; i < 8; i++) {
-				if (!rc.canMove(DirectionHelper.directions[i])) {
-					possibleMovesAvoidingEnemies[i] = false;
-				}
-			}
+		computeStuff();
+		if (rc.isCoreReady() && minerMoveIgnoreOre(myOre < 2.5)) {
 
-			if (!possibleMovesAvoidingEnemies[8]) {
-				int dirint;
-				if (enemies.length == 0) { // need to avoid hq which is not in enemies
-					dirint = DirectionHelper.directionToInt(enemyHQ.directionTo(myLocation));
-				}
-				else {
-					dirint = DirectionHelper.directionToInt(enemies[0].location.directionTo(myLocation));
-				}
-				int offsetIndex = 0;
-				while (offsetIndex < 8 && !rc.canMove(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8])) {
-					offsetIndex++;
-				}
-				if (offsetIndex < 8) {
-					rc.move(DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8]);
-				}
-			}
-			else if (rc.readBroadcast(Broadcast.scoutEnemyHQCh) == rc.getID()) {
+			if (rc.readBroadcast(Broadcast.scoutEnemyHQCh) == rc.getID()) {
 				navigation.moveToDestination(enemyHQ, Navigation.AVOID_ALL);
 				stepsUntilEnemyHQ++;
 				// uses symmetrical properties of map. doubles distance it had to travel
@@ -77,13 +57,14 @@ public class Miner extends Unit {
 				// looks around for an ore concentration that is bigger than its current location by a certain fraction
 				for (Direction dir: DirectionHelper.directions) {
 					double possibleOre = rc.senseOre(myLocation.add(dir));
-					if (possibleOre > maxOre && possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(dir)]) {
+					if (possibleOre > maxOre && rc.canMove(dir) && damages[DirectionHelper.directionToInt(dir)] == 0) {
 						maxOre = possibleOre;
 						bestDirection = dir;
 					}
 				}
 
 				if (maxOre >= 10 || (myOre == 0 && bestDirection != null) || (myOre <= 2.5 && maxOre >= 5)) {
+					navigation.stopObstacleTracking();
 					rc.move(bestDirection);
 					prevDirection = null;
 				}
@@ -98,7 +79,7 @@ public class Miner extends Unit {
 					int offsetIndex = 0;
 					while (offsetIndex < 8) {
 						int candidateDirection = (dirint+offsets[offsetIndex]+8)%8;
-						if (possibleMovesAvoidingEnemies[candidateDirection]) {
+						if (rc.canMove(DirectionHelper.directions[candidateDirection]) && damages[candidateDirection] == 0) {
 							rc.move(DirectionHelper.directions[candidateDirection]);
 							prevDirection = DirectionHelper.directions[candidateDirection];
 							break;
@@ -119,5 +100,59 @@ public class Miner extends Unit {
 				rc.attackLocation(selectTarget(enemies));
 			}
         }
+	}
+	
+	// enemies must have length 0
+	// returns whether or not it's ok to mine
+	protected boolean minerMoveIgnoreOre(boolean priorityMove) throws GameActionException {
+		Team opponentTeam = rc.getTeam().opponent();
+		RobotInfo[] enemies = rc.senseNearbyRobots(24, opponentTeam);
+		MapLocation myLocation = rc.getLocation();
+		
+		if (enemies.length > 0) {
+			return true;
+		}
+		rc.setIndicatorString(0, Arrays.toString(damages));
+		if (safeSpots[8]) {
+			for (RobotInfo enemy : enemies) {
+				if (enemy.type == RobotType.COMMANDER) {
+					if (enemy.location.distanceSquaredTo(myLocation) <= 20) {
+						Direction moveDirection = enemy.location.directionTo(myLocation);
+						if (damages[DirectionHelper.directionToInt(moveDirection)] <= damages[8] && rc.canMove(moveDirection)) {
+							navigation.stopObstacleTracking();
+							rc.move(moveDirection);
+							return false;
+						}
+					}
+				}
+				else if (enemy.type != RobotType.MINER) {
+					Direction moveDirection = enemy.location.directionTo(myLocation);
+					if (enemy.location.add(moveDirection).distanceSquaredTo(myLocation) <= enemy.type.attackRadiusSquared) {
+						if (priorityMove && rc.canMove(moveDirection)) {
+							navigation.stopObstacleTracking();
+							rc.move(moveDirection);
+							return false;
+						}
+					}
+				}
+			}
+		}
+		// Take less damage
+		else {
+			int bestDirection = 8;
+			int bestDamage = 999999;
+			for (int i = 0; i < 8; i++) {
+				if (rc.canMove(DirectionHelper.directions[i]) && damages[i] <= bestDamage) {
+					bestDirection = i;
+					bestDamage = damages[i];
+				}
+			}
+			if (bestDamage < damages[8]) {
+				navigation.stopObstacleTracking();
+				rc.move(DirectionHelper.directions[bestDirection]);
+				return false;
+			}
+		}
+		return true;
 	}
 }

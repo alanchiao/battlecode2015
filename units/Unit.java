@@ -93,7 +93,7 @@ public abstract class Unit extends Robot {
 					}
 				}
 			}
-			
+
 			// Grouping stage
 			if (groupTracker.groupID == GroupTracker.UNGROUPED) {
 				int broadcastCh = -1;
@@ -256,8 +256,8 @@ public abstract class Unit extends Robot {
 			int newLocationDistance;
 			for (int i = 0; i < 8; i++) {
 				newLocationDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(r.location);
-				if (newLocationDistance <= radiusSquared && canAttack) {
-					damages[i] += r.type.attackPower;
+				if (newLocationDistance <= radiusSquared) {
+					damages[i] += canAttack ? r.type.attackPower : r.type.attackPower / Math.max(1, r.type.attackDelay);
 					safeSpots[i] = false;
 				}
 				if (newLocationDistance <= myAttackRange) {
@@ -265,8 +265,8 @@ public abstract class Unit extends Robot {
 				}
 			}
 			newLocationDistance = myLocation.distanceSquaredTo(r.location);
-			if (newLocationDistance <= radiusSquared && canAttack) {
-				damages[8] += r.type.attackPower;
+			if (newLocationDistance <= radiusSquared) {
+				damages[8] += canAttack ? r.type.attackPower : r.type.attackPower / Math.max(1, r.type.attackDelay);
 				safeSpots[8] = false;
 			}
 			if (newLocationDistance <= myAttackRange) {
