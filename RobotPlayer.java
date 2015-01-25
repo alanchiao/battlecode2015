@@ -11,8 +11,8 @@ import team158.units.Drone;
 import team158.units.Launcher;
 import team158.units.Miner;
 import team158.units.Missile;
-import team158.units.Soldier;
 import team158.units.beaver.Beaver;
+import team158.units.soldier.Soldier;
 import battlecode.common.*;
 
 public class RobotPlayer {

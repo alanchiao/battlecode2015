@@ -1,7 +1,8 @@
-package team158.units;
+package team158.units.soldier;
 
 import java.util.Arrays;
 
+import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -9,26 +10,54 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import team158.units.Unit;
 import team158.units.com.Navigation;
 import team158.utils.DirectionHelper;
 
 public class Soldier extends Unit {
 	
+	private Harasser harasser;
+	
 	public Soldier(RobotController newRC) {
 		super(newRC);
+		harasser = new Harasser(newRC, this);
 	}
 
 	@Override
 	protected void actions() throws GameActionException {
-
-		// Note: Soldier attacks every turn (AD=1) if an enemy is in range. This is desired behavior.
-		if (rc.isWeaponReady()) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.SOLDIER.attackRadiusSquared, rc.getTeam().opponent());
-			if (enemies.length > 0) {
-				rc.attackLocation(selectTarget(enemies));
-				return;
+		if (Clock.getRoundNum() >= 1900) { // just for funsies
+			if (rc.isWeaponReady()) {
+				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
+				if (enemies.length > 0) { 
+					rc.attackLocation(selectTarget(enemies));
+				}
 			}
-        }
+			
+			if (rc.isCoreReady()) {
+				this.soldierMoveWithMicro(enemyHQ);
+			}
+			return;
+		} else {
+			// Note: Soldier attacks every turn (AD=1) if an enemy is in range. This is desired behavior.
+			/**
+			if (rc.isWeaponReady()) {
+				RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.SOLDIER.attackRadiusSquared, rc.getTeam().opponent());
+				if (enemies.length > 0) {
+					rc.attackLocation(selectTarget(enemies));
+					return;
+				}
+	        } **/
+			harasser.harass();
+		}
+
+		
+		
+		
+		
+		
+		
+		
+		/**
 
 		if (rc.isCoreReady()) {
 			MapLocation target = groupTracker.getRallyPoint();
@@ -48,6 +77,7 @@ public class Soldier extends Unit {
 			}
 			soldierMoveWithMicro(target);
 		}
+		**/
 	}
 	
 	protected void chargeToLocation(MapLocation target) throws GameActionException {

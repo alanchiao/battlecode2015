@@ -13,7 +13,7 @@ import battlecode.common.RobotType;
 
 public abstract class Unit extends Robot {
 		
-	protected Navigation navigation;
+	public Navigation navigation;
 	protected GroupTracker groupTracker;
 	protected double prevHealth;
 	protected boolean autoSupplyTransfer;

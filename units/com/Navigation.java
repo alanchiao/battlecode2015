@@ -181,6 +181,40 @@ public class Navigation {
 		}
 	}
 	
+	// more options
+	public void greedyMoveToDestination(MapLocation destination, int avoidLevel) {
+		try {
+			rc.setIndicatorString(1, "reached");
+			stopObstacleTracking();
+			this.destination = destination;
+			this.avoidLevel = avoidLevel;
+			if (avoidLevel == AVOID_ENEMY_ATTACK_BUILDINGS) {
+				MapLocation myLocation = rc.getLocation();
+				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(destination));
+				int offsetIndex = 0;
+				int[] offsets = {0,1,-1,2,-2};
+				Direction direction = DirectionHelper.directions[dirint];
+				while (offsetIndex < 5 && (!rc.canMove(direction) || isObstacle(rc.getLocation().add(direction), direction))) {
+					offsetIndex++;
+					if (offsetIndex < 5) {
+						direction = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
+					}	
+				}
+				Direction moveDirection = null;
+				if (offsetIndex < 5) {
+					moveDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
+				}
+				if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(destination) <= myLocation.distanceSquaredTo(destination)) {
+					if (rc.canMove(moveDirection)) {
+						rc.move(moveDirection);
+					}
+				} 
+			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	////////////////////////////////////////////////////////////////////////////////////////
 	// Helper methods
 	public void stopObstacleTracking() {
