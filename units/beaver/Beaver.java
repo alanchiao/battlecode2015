@@ -40,7 +40,7 @@ public class Beaver extends Unit {
 					builder.buildBuilding(RobotType.MINERFACTORY, numMinerFactories);
 				}
 			}
-			else if (numBarracks == 0) {
+			else if (numBarracks <= 1) {
 				if (ore >= 300) {
 					builder.buildBuilding(RobotType.BARRACKS, numBarracks);
 				}

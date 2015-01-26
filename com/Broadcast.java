@@ -25,13 +25,14 @@ public class Broadcast {
 	public static final int soldierRallyLocationChs = 402; // 402 - 403
 	public static final int droneRallyLocationChs = 404; // 404 - 405
 	public static final int launcherRallyLocationChs = 408; // 408- 409
-	public static final int launcherAttackLocationChs = 410;
+	public static final int launcherAttackLocationChs = 410; //410 - 411
+	public static final int soldierHarassLocationChs = 412; // 412 - 414
 	// target commanded by the HQ
-	public static final int enemyTowerTargetLocationChs = 412; // 410 - 411
-	public static final int enemyNearHQLocationChs = 414;
+	public static final int enemyTowerTargetLocationChs = 414; // 410 - 411
+	public static final int enemyNearHQLocationChs = 416;
 	// target commanded by the Towers
-	public static final int attackedTowerLocationChs = 416;
-	public static final int enemyNearTowerLocationChs = 418;
+	public static final int attackedTowerLocationChs = 418;
+	public static final int enemyNearTowerLocationChs = 420;
 	
 	public static final int groupingSoldiersCh = 501;
 	public static final int groupingDronesCh = 503;

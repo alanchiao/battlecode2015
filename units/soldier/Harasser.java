@@ -35,6 +35,8 @@ public class Harasser {
 	public MapLocation searchDestinationTwo;
 	public MapLocation currentSearchDestination;
 	public final static int SEARCH_RADIUS = 10;
+	public boolean switchedSearchDestination = false;
+	public int timeSinceLastSwitch = 0;
 	
 	// FOLLOW_STATE/ATTACK_STATE variables
 	public int targetID;
@@ -52,24 +54,42 @@ public class Harasser {
 		} else {
 			this.state = SEARCH_STATE;
 		}
+		
+		try {
+			MapLocation safeSearchDestination = Broadcast.readLocation(rc, Broadcast.soldierHarassLocationChs);
+			if (!safeSearchDestination.equals(new MapLocation(0, 0)) && !safeSearchDestination.equals(this.currentSearchDestination)) {
+				this.currentSearchDestination = safeSearchDestination;
+			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void harass() throws GameActionException {
+		
+		// keep track of destination switching
+	
+		
 		if (this.state == RETREAT_STATE) {
 			rc.setIndicatorString(0, Integer.toString(this.state));
 			
 			if (rc.isCoreReady()) {
 				if (shouldRetreat()) {
 					unit.navigation.moveToDestination(unit.ownHQ, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
-				} else {
 					// switch searching areas to avoid initial enemy
-					if (this.currentSearchDestination.equals(this.searchDestinationOne)) {
-						this.currentSearchDestination = this.searchDestinationTwo;
-					} else {
-						this.currentSearchDestination = this.searchDestinationOne;
+					if (!switchedSearchDestination) {
+						if (this.currentSearchDestination.equals(this.searchDestinationOne)) {
+							this.currentSearchDestination = this.searchDestinationTwo;
+						} else {
+							this.currentSearchDestination = this.searchDestinationOne;
+						}
+						switchedSearchDestination = true;
+						Broadcast.broadcastLocation(rc, Broadcast.soldierHarassLocationChs, this.currentSearchDestination);
 					}
-					
+				} else {			
 					this.state = SEARCH_STATE;
+					switchedSearchDestination = false;
+					timeSinceLastSwitch = 0;
 					harass();
 				}
 				return;
