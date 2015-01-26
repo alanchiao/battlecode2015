@@ -65,16 +65,13 @@ public class Headquarters extends Building {
 		
 		RobotInfo closestEnemy = super.findClosestEnemy(100);
 		MapLocation closestEnemyLocation;
-		int enemyFound = 0;
 		if (closestEnemy == null) {
 			// hack -- broadcast to Launcher Rally Location 
 			closestEnemyLocation = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
 		} else {
-			enemyFound = 1;
 			closestEnemyLocation = closestEnemy.location;
 		}
-		rc.broadcast(Broadcast.enemyNearHQCh, enemyFound);
-		Broadcast.broadcastLocation(rc,  Broadcast.enemyNearHQLocationChs, closestEnemyLocation);
+		Broadcast.broadcastLocation(rc, Broadcast.enemyNearHQLocationChs, closestEnemyLocation);
 		
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
 
@@ -189,8 +186,6 @@ public class Headquarters extends Building {
 		*/
 		this.gameStrategy.executeStrategy();
 	}
-	
-	
 	
 	// Broadcasts to groups about a vulnerable tower for us to attack
 	// 

@@ -42,7 +42,7 @@ public class AerospaceLab extends Building {
 		
 		int[] offsets = {0,1,-1,2,-2,3,-3,4};
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
-		if (Broadcast.isNotInitiated(rc, Broadcast.launcherRallyLocationChs)) {
+		if (Broadcast.isNotInitialized(rc, Broadcast.launcherRallyLocationChs)) {
 			MapLocation rally = myLocation;
 			// Move 5 squares away
 			int rallyDistance = 5;
