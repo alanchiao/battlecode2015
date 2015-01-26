@@ -184,10 +184,11 @@ public class Navigation {
 	// more options
 	public void greedyMoveToDestination(MapLocation destination, int avoidLevel) {
 		try {
-			rc.setIndicatorString(1, "reached");
+			this.possibleMovesAvoidingEnemies = null;
 			stopObstacleTracking();
 			this.destination = destination;
 			this.avoidLevel = avoidLevel;
+			
 			if (avoidLevel == AVOID_ENEMY_ATTACK_BUILDINGS) {
 				MapLocation myLocation = rc.getLocation();
 				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(destination));

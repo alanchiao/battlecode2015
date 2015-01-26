@@ -62,6 +62,13 @@ public class Harasser {
 				if (shouldRetreat()) {
 					unit.navigation.moveToDestination(unit.ownHQ, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
 				} else {
+					// switch searching areas to avoid initial enemy
+					if (this.currentSearchDestination.equals(this.searchDestinationOne)) {
+						this.currentSearchDestination = this.searchDestinationTwo;
+					} else {
+						this.currentSearchDestination = this.searchDestinationOne;
+					}
+					
 					this.state = SEARCH_STATE;
 					harass();
 				}
@@ -167,14 +174,14 @@ public class Harasser {
 	public boolean shouldRetreat() {
 		RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
 		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam());
-		int enemyPower = 0;
-		int allyPower = 0;
+		double enemyPower = 0;
+		double allyPower = 0;
 		for (int i = nearbyEnemies.length; --i >= 0;) {
-			if (nearbyEnemies[i].type == RobotType.LAUNCHER || nearbyEnemies[i].type == RobotType.MISSILE) {
+			if (nearbyEnemies[i].type == RobotType.LAUNCHER || nearbyEnemies[i].type == RobotType.MISSILE || nearbyEnemies[i].type == RobotType.COMMANDER) {
 				enemyPower += 2.5;
 			} else if (nearbyEnemies[i].type == RobotType.BEAVER || nearbyEnemies[i].type == RobotType.MINER) {
-				enemyPower += 0.5;
-			} else {
+				enemyPower += 0.32;
+			} else if (nearbyEnemies[i].type == RobotType.SOLDIER){
 				enemyPower += 1.25;
 			}
 		} 
@@ -184,7 +191,7 @@ public class Harasser {
 				allyPower += 1;
 			}
 		} 
-		allyPower -= 1; // account for self
+		allyPower += 1; // self
 		/**
 		for (int i = nearbyEnemies.length; --i >= 0;) {	
 			if (nearbyEnemies[i].type != RobotType.BEAVER && nearbyEnemies[i].type != RobotType.MINER) {
@@ -198,7 +205,8 @@ public class Harasser {
 		rc.setIndicatorString(2, "Should retreat: " + Boolean.toString(false));
 		return false;
 		**/
-		if (enemyPower - allyPower  > 0) {
+		rc.setIndicatorString(1, "Enemy power: " + Double.toString(enemyPower) + ", Ally power: " + Double.toString(allyPower));
+		if (enemyPower - allyPower  >= 0) {
 			rc.setIndicatorString(2, "Should retreat: " + Boolean.toString(true));
 			return true;
 		} else {
