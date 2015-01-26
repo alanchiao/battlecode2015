@@ -1,5 +1,6 @@
 package team158.units.soldier;
 
+import team158.com.Broadcast;
 import team158.units.Unit;
 import team158.units.com.Navigation;
 import battlecode.common.Direction;
@@ -170,7 +171,11 @@ public class Harasser {
 			
 			if (rc.isCoreReady()) {
 				RobotInfo targetEnemy = rc.senseRobot(this.targetID);
-				unit.navigation.greedyMoveToDestination(targetEnemy.location, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
+				boolean success = unit.navigation.greedyMoveToDestination(targetEnemy.location, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
+				if (!success) {
+					this.state = SEARCH_STATE;
+					harass();
+				}
 			} 
 		}
 	}
@@ -180,7 +185,7 @@ public class Harasser {
 	// line passing through the two points and the enemy HQ
 	public void initializeSearchDestinations() {
 		Direction dirToEnemyBase = unit.ownHQ.directionTo(unit.enemyHQ);
-		MapLocation nearEnemyHQLocation = new MapLocation((unit.ownHQ.x + 3*unit.enemyHQ.x)/4, (unit.ownHQ.y + 3*unit.enemyHQ.y)/4);
+		MapLocation nearEnemyHQLocation = new MapLocation(unit.enemyHQ.x, unit.enemyHQ.y).add(dirToEnemyBase, 10);
 		Direction perpDirectionOne = dirToEnemyBase.rotateRight().rotateRight();
 		Direction perpDirectionTwo = dirToEnemyBase.rotateLeft().rotateLeft();
 		
@@ -210,19 +215,7 @@ public class Harasser {
 			}
 		} 
 		allyPower += 1; // self
-		/**
-		for (int i = nearbyEnemies.length; --i >= 0;) {	
-			if (nearbyEnemies[i].type != RobotType.BEAVER && nearbyEnemies[i].type != RobotType.MINER) {
-				rc.setIndicatorString(2, "Should retreat: " + Boolean.toString(true));
-				return true;
-			} 
-		}
-		**/
-		
-		/**
-		rc.setIndicatorString(2, "Should retreat: " + Boolean.toString(false));
-		return false;
-		**/
+	
 		rc.setIndicatorString(1, "Enemy power: " + Double.toString(enemyPower) + ", Ally power: " + Double.toString(allyPower));
 		if (enemyPower - allyPower  >= 0) {
 			rc.setIndicatorString(2, "Should retreat: " + Boolean.toString(true));
