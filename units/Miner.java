@@ -115,7 +115,7 @@ public class Miner extends Unit {
 		if (enemies.length == 0) {
 			return true;
 		}
-		if (safeSpots[8]) {
+		if (safeSpots[8] == 2) {
 			for (RobotInfo enemy : enemies) {
 				if (enemy.type == RobotType.COMMANDER) {
 					if (enemy.location.distanceSquaredTo(myLocation) <= 20) {
@@ -152,6 +152,10 @@ public class Miner extends Unit {
 			if (bestDamage < damages[8]) {
 				navigation.stopObstacleTracking();
 				rc.move(DirectionHelper.directions[bestDirection]);
+				return false;
+			}
+			else if (bestDamage == damages[8]) {
+				navigation.moveToDestination(ownHQ, Navigation.AVOID_NOTHING);
 				return false;
 			}
 		}

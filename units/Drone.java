@@ -50,6 +50,7 @@ public class Drone extends Unit {
 					}
 				}
 				if (rc.isCoreReady()) {
+					computeStuff();
 					navigation.moveToDestination(followingLocation, Navigation.AVOID_ALL);
 				}
 			}
@@ -61,6 +62,7 @@ public class Drone extends Unit {
 					rc.broadcast(Broadcast.requestSupplyFromHQCh, rc.getID());
 				}
 				else if (rc.isCoreReady()) {
+					computeStuff();
 					navigation.moveToDestination(ownHQ, Navigation.AVOID_ALL);
 				}
 			}
@@ -77,6 +79,7 @@ public class Drone extends Unit {
 		}
 		// Move
 		else if (rc.isCoreReady()) {
+			computeStuff();
 			navigation.moveToDestination(ownHQ, Navigation.AVOID_ALL);
 		}
 	}

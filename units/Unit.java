@@ -19,7 +19,7 @@ public abstract class Unit extends Robot {
 	protected boolean autoSupplyTransfer;
 	protected double[] damages;
 	protected boolean[] inRange;
-	protected boolean[] safeSpots;
+	public int[] safeSpots;
 	
 	public Unit (RobotController newRC) {
 		rc = newRC;
@@ -34,9 +34,9 @@ public abstract class Unit extends Robot {
 		
 		damages = new double[9];
 		inRange = new boolean[9];
-		safeSpots = new boolean[9];
+		safeSpots = new int[9];
 	
-		navigation = new Navigation(rc, rand, enemyHQ);
+		navigation = new Navigation(this);
 		groupTracker = new GroupTracker(rc);
 	}
 
@@ -143,8 +143,7 @@ public abstract class Unit extends Robot {
 			return enemies[0].location;
 		}
 	}
-	
-	// Computes the amount of damage that could be taken before unit's next turn ONLY
+
 	public void computeStuff() {
 		MapLocation myLocation = rc.getLocation();
 		int myAttackRange = rc.getType() == RobotType.LAUNCHER ? 35 : rc.getType().attackRadiusSquared;
@@ -153,7 +152,7 @@ public abstract class Unit extends Robot {
 		for (int i = 0; i < 9; i++) {
 			damages[i] = 0;
 			inRange[i] = false;
-			safeSpots[i] = true;
+			safeSpots[i] = 2;
 		}
 		
 		// factor in towers
@@ -166,7 +165,7 @@ public abstract class Unit extends Robot {
 					newDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(tower);
 					if (newDistance <= 24) {
 						damages[i] += 8;
-						safeSpots[i] = false;
+						safeSpots[i] = 0;
 					}
 					if (newDistance <= myAttackRange) {
 						inRange[i] = true;
@@ -175,7 +174,7 @@ public abstract class Unit extends Robot {
 				newDistance = myLocation.distanceSquaredTo(tower);
 				if (newDistance <= 24) {
 					damages[8] += 8;
-					safeSpots[8] = false;
+					safeSpots[8] = 0;
 				}
 				if (newDistance <= myAttackRange) {
 					inRange[8] = true;
@@ -197,21 +196,21 @@ public abstract class Unit extends Robot {
 
 				if (initDistance <= 35) {
 					damages[8] += towerDamage;
-					safeSpots[8] = false;
+					safeSpots[8] = 0;
 				}
 				else if (myLocation.add(myLocation.directionTo(enemyHQ)).distanceSquaredTo(enemyHQ) <= 35) {
 					damages[8] += splashDamage;
-					safeSpots[8] = false;
+					safeSpots[8] = 0;
 				}
 				for (int i = 0; i < 8; i++) {
 					MapLocation newLocation = myLocation.add(DirectionHelper.directions[i]);
 					if (newLocation.distanceSquaredTo(enemyHQ) <= 35) {
 						damages[i] += towerDamage;
-						safeSpots[i] = false;
+						safeSpots[i] = 0;
 					}
 					else if (newLocation.add(newLocation.directionTo(enemyHQ)).distanceSquaredTo(enemyHQ) <= 35) {
 						damages[i] += splashDamage;
-						safeSpots[i] = false;
+						safeSpots[i] = 0;
 					}
 				}
 			}
@@ -225,12 +224,12 @@ public abstract class Unit extends Robot {
 				}
 				if (initDistance <= 35) {
 					damages[8] += towerDamage;
-					safeSpots[8] = false;
+					safeSpots[8] = 0;
 				}
 				for (int i = 0; i < 8; i++) {
 					if (myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(enemyHQ) <= 35) {
 						damages[i] += towerDamage;
-						safeSpots[i] = false;
+						safeSpots[i] = 0;
 					}
 				}
 			}
@@ -238,7 +237,7 @@ public abstract class Unit extends Robot {
 				for (int i = 0; i < 8; i++) {
 					if (myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(enemyHQ) <= 24) {
 						damages[i] += 12;
-						safeSpots[i] = false;
+						safeSpots[i] = 0;
 					}
 				}
 			}
@@ -257,7 +256,7 @@ public abstract class Unit extends Robot {
 				newLocationDistance = myLocation.add(DirectionHelper.directions[i]).distanceSquaredTo(r.location);
 				if (newLocationDistance <= radiusSquared) {
 					damages[i] += canAttack ? r.type.attackPower : r.type.attackPower / Math.max(1, r.type.attackDelay);
-					safeSpots[i] = false;
+					safeSpots[i] = 1;
 				}
 				if (newLocationDistance <= myAttackRange) {
 					inRange[i] = true;
@@ -266,7 +265,7 @@ public abstract class Unit extends Robot {
 			newLocationDistance = myLocation.distanceSquaredTo(r.location);
 			if (newLocationDistance <= radiusSquared) {
 				damages[8] += canAttack ? r.type.attackPower : r.type.attackPower / Math.max(1, r.type.attackDelay);
-				safeSpots[8] = false;
+				safeSpots[8] = 1;
 			}
 			if (newLocationDistance <= myAttackRange) {
 				inRange[8] = true;

@@ -2,6 +2,7 @@ package team158.units.com;
 
 import java.util.Random;
 
+import team158.units.Unit;
 import team158.utils.DirectionHelper;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -17,13 +18,13 @@ public class Navigation {
 	
 	// information needed from Unit
 	public RobotController rc;
+	public Unit unit;
 	public Random rand;
 	public MapLocation enemyHQ;
 	
 	// states
 	public boolean isAvoidingObstacle; // whether in state of avoiding obstacle
-	
-	
+
 	// what institutes as an obstacle
 	public int avoidLevel;
 	public int avoidEnemyMinRange;
@@ -40,10 +41,11 @@ public class Navigation {
 	// precomputation per turn
 	public boolean[] possibleMovesAvoidingEnemies;
 	
-	public Navigation(RobotController rc, Random rand, MapLocation enemyHQ) {
-		this.rc = rc;
-		this.rand = rand;
-		this.enemyHQ = enemyHQ;
+	public Navigation(Unit unit) {
+		this.unit = unit;
+		this.rc = unit.rc;
+		this.rand = unit.rand;
+		this.enemyHQ = unit.enemyHQ;
 		
 		isAvoidingObstacle = false;
 		avoidLevel = 0;
@@ -128,7 +130,7 @@ public class Navigation {
 							return;
 						}
 						// move in that direction. newLocation = attemptedLocation. Handle updating logic
-						else if (isPassable(attemptedLocation, attemptedDir)) {
+						else if (isPassable(attemptedDir)) {
 							if (rc.canMove(attemptedDir)) {
 								rc.move(attemptedDir);
 							}
@@ -138,7 +140,7 @@ public class Navigation {
 				}
 			}
 			// not in state of avoiding obstacle
-			else if (isPassable(directLocation, directDirection)) { // then free to move!
+			else if (isPassable(directDirection)) { // then free to move!
 				rc.move(directDirection);
 			// possibly found obstacle
 			} else {
@@ -181,44 +183,6 @@ public class Navigation {
 		}
 	}
 	
-	// more options
-	public boolean greedyMoveToDestination(MapLocation destination, int avoidLevel) {
-		try {
-			this.possibleMovesAvoidingEnemies = null;
-			stopObstacleTracking();
-			this.destination = destination;
-			this.avoidLevel = avoidLevel;
-			
-			if (avoidLevel == AVOID_ENEMY_ATTACK_BUILDINGS) {
-				MapLocation myLocation = rc.getLocation();
-				int dirint = DirectionHelper.directionToInt(myLocation.directionTo(destination));
-				int offsetIndex = 0;
-				int[] offsets = {0,1,-1,2,-2};
-				Direction direction = DirectionHelper.directions[dirint];
-				while (offsetIndex < 5 && (!rc.canMove(direction) || isObstacle(rc.getLocation().add(direction), direction))) {
-					offsetIndex++;
-					if (offsetIndex < 5) {
-						direction = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
-					}	
-				}
-				Direction moveDirection = null;
-				if (offsetIndex < 5) {
-					moveDirection = DirectionHelper.directions[(dirint+offsets[offsetIndex]+8)%8];
-				}
-				if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(destination) <= myLocation.distanceSquaredTo(destination)) {
-					if (rc.canMove(moveDirection)) {
-						rc.move(moveDirection);
-						return true;
-					}
-				}
-			}
-			return false;
-		} catch (GameActionException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-	
 	////////////////////////////////////////////////////////////////////////////////////////
 	// Helper methods
 	public void stopObstacleTracking() {
@@ -248,14 +212,13 @@ public class Navigation {
 	// Location analysis methods: to be potentially used outside this class
 	
 	// treat as passable or not
-	public boolean isPassable(MapLocation location, Direction movementDirection) {
+	public boolean isPassable(Direction movementDirection) {
 		if (this.avoidLevel == AVOID_ENEMY_ATTACK_BUILDINGS) {
-			if(!isOutsideEnemyAttackRange(null, 5, location)) {
+			if (unit.safeSpots[DirectionHelper.directionToInt(movementDirection)] == 0) {
 				return false;
 			}
 		} else if (this.avoidLevel == AVOID_ALL) {
-			RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
-			if(!isOutsideEnemyAttackRange(enemies, 5, location)) {
+			if (unit.safeSpots[DirectionHelper.directionToInt(movementDirection)] != 2) {
 				return false;
 			}
 		}	
@@ -264,123 +227,18 @@ public class Navigation {
 	
 	// treat as obstacle or not to wall hug along
 	public boolean isObstacle (MapLocation location, Direction movementDirection) throws GameActionException {
-		if (this.avoidLevel == AVOID_ENEMY_ATTACK_BUILDINGS || this.avoidLevel == AVOID_ALL) {
-			if (possibleMovesAvoidingEnemies == null) {
-				RobotInfo[] enemies = null;
-				if (this.avoidLevel == AVOID_ALL) {
-					enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
-				}
-				possibleMovesAvoidingEnemies = moveDirectionsAvoidingAttack(enemies, 5);
-			} 
-			if (!possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(movementDirection)]) {
+		if (this.avoidLevel == AVOID_ENEMY_ATTACK_BUILDINGS) {
+			if (unit.safeSpots[DirectionHelper.directionToInt(movementDirection)] == 0) {
+				return true;
+			}
+		}
+		else if (this.avoidLevel == AVOID_ALL) {
+			if (unit.safeSpots[DirectionHelper.directionToInt(movementDirection)] != 2) {
 				return true;
 			}
 		}
 		return isStationaryBlock(location);
 	}
-	
-	// check if unit is outside the attack range of any enemy units
-	// with greater than rangeSquared range and any enemy buildings
-	public boolean isOutsideEnemyAttackRange(RobotInfo[] enemies, int rangeSquared, MapLocation loc) {
-		// enemies
-		if (enemies != null) {
-			for (RobotInfo enemy : enemies) {
-				if (enemy.type.attackRadiusSquared > rangeSquared) {
-					if (loc.distanceSquaredTo(enemy.location) <= enemy.type.attackRadiusSquared) {
-						return false;
-					}
-				}
-			}
-		}
-		// towers
-		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-		for (MapLocation l : enemyTowers) {
-			if (loc.distanceSquaredTo(l) <= 24) {
-				return false;
-			}
-		}
-		// hq
-		int initDistance = loc.distanceSquaredTo(enemyHQ);
-		if (enemyTowers.length < 2) {
-			if (initDistance <= 24) {
-				return false;
-			}
-		}
-		else if (enemyTowers.length > 4) {
-			if (loc.add(loc.directionTo(enemyHQ)).distanceSquaredTo(enemyHQ) <= 35) {
-				return false;
-			}
-		}
-		else if (initDistance <= 35) {
-			return false;
-		}
-		return true;
-	}
-
-	public boolean[] moveDirectionsAvoidingAttack(RobotInfo[] enemies, int rangeSquared) {
-		boolean[] possibleMovesAvoidingEnemies = {true,true,true,true,true,true,true,true,true};
-		MapLocation myLocation = rc.getLocation();
-		if (enemies != null) {
-		possibleMovesAvoidingEnemies[8] = isOutsideEnemyAttackRange(enemies, rangeSquared, myLocation);
-		// enemies
-		for (RobotInfo enemy : enemies) {
-			if (enemy.type.attackRadiusSquared > rangeSquared) {
-				for (Direction d : DirectionHelper.directions) {
-					if (myLocation.add(d).distanceSquaredTo(enemy.location) <= enemy.type.attackRadiusSquared) {
-						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-					}
-				}
-			}
-		}
-		}
-		// towers
-		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-		for (MapLocation l : enemyTowers) {
-			int initDistance = myLocation.distanceSquaredTo(l);
-			if (initDistance <= 34) {
-				for (Direction d : DirectionHelper.directions) {
-					if (myLocation.add(d).distanceSquaredTo(l) <= 24) {
-						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-					}
-				}
-			}
-		}
-		// hq
-		int initDistance = myLocation.distanceSquaredTo(enemyHQ);
-		if (enemyTowers.length < 2) {
-			if (initDistance <= 34) {
-				for (Direction d : DirectionHelper.directions) {
-					if (myLocation.add(d).distanceSquaredTo(enemyHQ) <= 24) {
-						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-					}
-				}
-			}
-		}
-		else if (enemyTowers.length < 5) {
-			if (initDistance <= 52) {
-				for (Direction d : DirectionHelper.directions) {
-					if (myLocation.add(d).distanceSquaredTo(enemyHQ) <= 35) {
-						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-					}
-				}
-			}
-		}
-		else {
-			if (initDistance <= 74) {
-				for (Direction d : DirectionHelper.directions) {
-					MapLocation newLocation = myLocation.add(d);
-					if (newLocation.distanceSquaredTo(enemyHQ) <= 35) {
-						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-					}
-					else if (newLocation.add(newLocation.directionTo(enemyHQ)).distanceSquaredTo(enemyHQ) <= 35) {
-						possibleMovesAvoidingEnemies[DirectionHelper.directionToInt(d)] = false;
-					}
-				}
-			}
-		}
-		return possibleMovesAvoidingEnemies;
-	}
-	
 	
 	// check if the location is somewhere a bot cannot go more or less for the entire game
 	public boolean isStationaryBlock(MapLocation potentialObstacle) throws GameActionException{

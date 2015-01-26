@@ -153,6 +153,7 @@ public class Launcher extends Unit {
 		
 		// Move
 		if (rc.isCoreReady()) {
+			computeStuff();
 			// reloading - retreat to recover missiles
 			if (isReloading) {
 				navigation.moveToDestination(ownHQ, Navigation.AVOID_ALL);
@@ -255,9 +256,7 @@ public class Launcher extends Unit {
 
 		MapLocation myLocation = rc.getLocation();
 
-		computeStuff();
-
-		if (safeSpots[8]) {
+		if (safeSpots[8] == 2) {
 			// Try to move to edge of sight range
 			RobotInfo[] dangerousEnemies = rc.senseNearbyRobots(15, opponentTeam);
 			if (dangerousEnemies.length > 0) {

@@ -18,6 +18,7 @@ public class Beaver extends Unit {
 	@Override
 	protected void actions() throws GameActionException {
 		if (rc.isCoreReady()) {
+			computeStuff();
 			// continue building current building
 			if (builder.isNavigating) {
 				builder.continueNavigating();
@@ -78,13 +79,12 @@ public class Beaver extends Unit {
 					double currentOre = rc.senseOre(myLocation);
 					double maxOre = -2;
 					Direction bestDirection = null;
-					boolean[] avoidMoves = navigation.moveDirectionsAvoidingAttack(rc.senseNearbyRobots(24, rc.getTeam().opponent()), 5);
 					// looks around for an ore concentration that is bigger than its current location by a certain fraction
 					for (Direction dir: DirectionHelper.directions) {
 						MapLocation possibleLocation = myLocation.add(dir);
 						if (possibleLocation.distanceSquaredTo(ownHQ) < 15) {
 							double possibleOre = rc.senseOre(possibleLocation);
-							if (possibleOre > maxOre && rc.canMove(dir) && avoidMoves[DirectionHelper.directionToInt(dir)]) {
+							if (possibleOre > maxOre && rc.canMove(dir) && safeSpots[DirectionHelper.directionToInt(dir)] == 2) {
 								maxOre = possibleOre;
 								bestDirection = dir;
 							}

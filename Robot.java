@@ -4,8 +4,8 @@ import java.util.Random;
 import battlecode.common.*;
 
 public abstract class Robot {
-	protected Random rand;
-	protected RobotController rc;
+	public Random rand;
+	public RobotController rc;
 	public MapLocation ownHQ;
 	public MapLocation enemyHQ;
 	public int distanceBetweenHQ;

@@ -34,29 +34,20 @@ public class Soldier extends Unit {
 			}
 			
 			if (rc.isCoreReady()) {
+				computeStuff();
 				this.soldierMoveWithMicro(enemyHQ);
 			}
 			return;
-		} else {
-			// Note: Soldier attacks every turn (AD=1) if an enemy is in range. This is desired behavior.
-			/**
-			if (rc.isWeaponReady()) {
-				RobotInfo[] enemies = rc.senseNearbyRobots(RobotType.SOLDIER.attackRadiusSquared, rc.getTeam().opponent());
-				if (enemies.length > 0) {
-					rc.attackLocation(selectTarget(enemies));
-					return;
-				}
-	        } **/
-			harasser.harass();
 		}
-
-		
-		
-		
-		
-		
-		
-		
+		else if (rc.isCoreReady()) {
+			computeStuff();
+			if (rc.getSupplyLevel() == 0) {
+				soldierMoveWithMicro(ownHQ);
+			}
+			else {
+				harasser.harass();
+			}
+		}
 		/**
 
 		if (rc.isCoreReady()) {
@@ -97,8 +88,7 @@ public class Soldier extends Unit {
 			return;
 		}
 
-		computeStuff();
-		if (safeSpots[8]) {
+		if (safeSpots[8] == 2) {
 			navigation.moveToDestination(target, Navigation.AVOID_NOTHING);
 			return;
 		}
@@ -151,9 +141,8 @@ public class Soldier extends Unit {
 		MapLocation myLocation = rc.getLocation();
 		int myAttackRange = rc.getType().attackRadiusSquared;
 
-		computeStuff();
 		rc.setIndicatorString(0, Arrays.toString(damages));
-		if (safeSpots[8]) {
+		if (safeSpots[8] == 2) {
 			// Check if almost in range of an enemy
 			boolean almostInRange = false;
 			for (RobotInfo r : enemies) {
@@ -184,7 +173,7 @@ public class Soldier extends Unit {
 				Direction d = DirectionHelper.directions[i];
 				MapLocation potentialLocation = myLocation.add(d);		
 				// if cannot move in direction, do not consider
-				if (!rc.canMove(d) || !safeSpots[i] || rc.getCoreDelay() + (i%2 == 1 ? 2.8 : 2) > 3) { // also avoids getting too close to missiles
+				if (!rc.canMove(d) || safeSpots[i] != 2 || rc.getCoreDelay() + (i%2 == 1 ? 2.8 : 2) > 3) { // also avoids getting too close to missiles
 					continue;
 				}
 				
@@ -249,6 +238,9 @@ public class Soldier extends Unit {
 			if (bestDamage < damages[8]) {
 				navigation.stopObstacleTracking();
 				rc.move(DirectionHelper.directions[bestDirection]);
+			}
+			else if (bestDamage == damages[8] && !inRange[8]) {
+				navigation.moveToDestination(ownHQ, Navigation.AVOID_NOTHING);
 			}
 		}
 	}

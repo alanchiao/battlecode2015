@@ -15,7 +15,7 @@ public class Harasser {
 	// Operational variables
 	private RobotController rc;
 	private Soldier unit;
-	
+
 	///////////////////////////////////////////////
 	// Harassing Variables
 	
