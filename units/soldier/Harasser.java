@@ -1,7 +1,6 @@
 package team158.units.soldier;
 
 import team158.units.Unit;
-import team158.units.com.Navigation;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -14,7 +13,7 @@ public class Harasser {
 	//////////////////////////////////////////////
 	// Operational variables
 	private RobotController rc;
-	private Unit unit;
+	private Soldier unit;
 	
 	///////////////////////////////////////////////
 	// Harassing Variables
@@ -23,7 +22,6 @@ public class Harasser {
 	
 	// harassing drone states
 	public int state;
-	public final static int RETREAT_STATE = 0;
 	public final static int SEARCH_STATE = 1;
 	public final static int FOLLOW_STATE = 2;
 	public final static int ATTACK_STATE = 3;
@@ -38,7 +36,7 @@ public class Harasser {
 	public int targetID;
 	public final static int NO_TARGET = -1;
 
-	public Harasser(RobotController rc, Unit unit) {
+	public Harasser(RobotController rc, Soldier unit) {
 		this.rc = rc;
 		this.unit = unit;
 		
@@ -53,33 +51,8 @@ public class Harasser {
 	}
 
 	public void harass() throws GameActionException {
-		if (this.state == RETREAT_STATE) {
+		if (this.state == SEARCH_STATE) { // then randomly move around searching for miner/beaver while avoiding attack
 			rc.setIndicatorString(0, Integer.toString(this.state));
-			
-			if (rc.isCoreReady()) {
-				if (shouldRetreat()) {
-					unit.navigation.moveToDestination(unit.ownHQ, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
-				} else {
-					// switch searching areas to avoid initial enemy
-					if (this.currentSearchDestination.equals(this.searchDestinationOne)) {
-						this.currentSearchDestination = this.searchDestinationTwo;
-					} else {
-						this.currentSearchDestination = this.searchDestinationOne;
-					}
-					
-					this.state = SEARCH_STATE;
-					harass();
-				}
-				return;
-			}
-		}  else if (this.state == SEARCH_STATE) { // then randomly move around searching for miner/beaver while avoiding attack
-			rc.setIndicatorString(0, Integer.toString(this.state));
-			
-			if (shouldRetreat()) {
-				this.state = RETREAT_STATE;
-				harass();
-				return;
-			} 
 			
 			if (rc.isWeaponReady()) {
 				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
@@ -98,7 +71,7 @@ public class Harasser {
 					}
 				}
 			
-				unit.navigation.moveToDestination(this.currentSearchDestination, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
+				unit.soldierMoveWithMicro(this.currentSearchDestination);
 				
 				// pick a unit to follow
 				RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
@@ -111,12 +84,7 @@ public class Harasser {
 				}
 			}
 		} else if (this.state == FOLLOW_STATE) { // then continue following target
-			if (shouldRetreat()) {
-				this.state = RETREAT_STATE;
-				harass();
-				return;
-			}
-			
+
 			if (rc.isCoreReady()) {
 				if (rc.canSenseRobot(targetID)) { // attack
 					this.state = ATTACK_STATE;
@@ -127,13 +95,7 @@ public class Harasser {
 				}
 			}
 		} else if (this.state == ATTACK_STATE) { // try to attack target
-			rc.setIndicatorString(0, Integer.toString(this.state));
-			if (shouldRetreat()) {
-				this.state = RETREAT_STATE;
-				harass();
-				return;
-			}
-			
+
 			// make sure can still attack target
 			if (!rc.canSenseRobot(this.targetID)) { // then need to go back to searching
 				this.state = SEARCH_STATE;
@@ -150,7 +112,7 @@ public class Harasser {
 			
 			if (rc.isCoreReady()) {
 				RobotInfo targetEnemy = rc.senseRobot(this.targetID);
-				unit.navigation.greedyMoveToDestination(targetEnemy.location, Navigation.AVOID_ENEMY_ATTACK_BUILDINGS);
+				unit.soldierMoveWithMicro(targetEnemy.location);
 			} 
 		}
 	}
@@ -167,49 +129,5 @@ public class Harasser {
 		this.searchDestinationOne = nearEnemyHQLocation.add(perpDirectionOne, SEARCH_RADIUS);
 		this.searchDestinationTwo = nearEnemyHQLocation.add(perpDirectionTwo, SEARCH_RADIUS);
 		this.currentSearchDestination = searchDestinationOne;
-	}
-	
-	public boolean shouldRetreat() {
-		RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam().opponent());
-		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, rc.getTeam());
-		double enemyPower = 0;
-		double allyPower = 0;
-		for (int i = nearbyEnemies.length; --i >= 0;) {
-			if (nearbyEnemies[i].type == RobotType.LAUNCHER || nearbyEnemies[i].type == RobotType.MISSILE || nearbyEnemies[i].type == RobotType.COMMANDER) {
-				enemyPower += 2.5;
-			} else if (nearbyEnemies[i].type == RobotType.BEAVER || nearbyEnemies[i].type == RobotType.MINER) {
-				enemyPower += 0.32;
-			} else if (nearbyEnemies[i].type == RobotType.SOLDIER){
-				enemyPower += 1.25;
-			}
-		} 
-		
-		for (int i = nearbyAllies.length; --i >= 0;) {
-			if (nearbyAllies[i].type == RobotType.SOLDIER) {
-				allyPower += 1;
-			}
-		} 
-		allyPower += 1; // self
-		/**
-		for (int i = nearbyEnemies.length; --i >= 0;) {	
-			if (nearbyEnemies[i].type != RobotType.BEAVER && nearbyEnemies[i].type != RobotType.MINER) {
-				rc.setIndicatorString(2, "Should retreat: " + Boolean.toString(true));
-				return true;
-			} 
-		}
-		**/
-		
-		/**
-		rc.setIndicatorString(2, "Should retreat: " + Boolean.toString(false));
-		return false;
-		**/
-		rc.setIndicatorString(1, "Enemy power: " + Double.toString(enemyPower) + ", Ally power: " + Double.toString(allyPower));
-		if (enemyPower - allyPower  >= 0) {
-			rc.setIndicatorString(2, "Should retreat: " + Boolean.toString(true));
-			return true;
-		} else {
-			rc.setIndicatorString(2, "Should retreat: " + Boolean.toString(false));
-			return false;
-		} 
 	}
 }

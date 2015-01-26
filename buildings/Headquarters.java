@@ -145,11 +145,16 @@ public class Headquarters extends Building {
 					RobotInfo[] directlyAttackable = rc.senseNearbyRobots(35, rc.getTeam().opponent());
 					// Greedy attack. Could potentially use selectTarget but it doesn't factor in splash.
 					if (directlyAttackable.length > 0) {
+						boolean attacked = false;
 						for (RobotInfo enemy : directlyAttackable) {
 							if (enemy.type != RobotType.MISSILE) {
 								rc.attackLocation(enemy.location);
+								attacked = true;
 								break;
 							}
+						}
+						if (!attacked) {
+							rc.attackLocation(directlyAttackable[0].location);
 						}
 					}
 					else {
@@ -213,7 +218,8 @@ public class Headquarters extends Building {
 			Broadcast.broadcastLocation(rc, Broadcast.enemyTowerTargetLocationChs, targetTower);
 			rc.setIndicatorString(0, String.valueOf(targetTower));
 		}
-	}	
+	}
+
 	//calculates whether the towers are defeatable down to 3 using ground units. If not, we must build launchers
 //	protected void towerDefeatable() throws GameActionException {
 //		MapLocation targetTower = null;
@@ -283,9 +289,9 @@ public class Headquarters extends Building {
 		MapLocation targetTower = null;
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 		int numEnemyTowers = enemyTowers.length;
-		//keeps track of the order of the towers defeated so we don't have to recompute
+		// keeps track of the order of the towers defeated so we don't have to recompute
 		while (numTowersDefeated < numEnemyTowers) {
-			//every iteration one tower decreases so we must acount for this
+			// every iteration one tower decreases so we must account for this
 			int numTowersLeft = numEnemyTowers - numTowersDefeated;
 			// runs the iteration on the number of towers remaining
 			MapLocation[] enemyTowersLeft = new MapLocation[numTowersLeft];
