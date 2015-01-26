@@ -52,26 +52,11 @@ public class Launcher extends Unit {
 				broadcasted = false;
 			}
 		}
-		if (this.currentTargetType == RobotType.TANK) {
-			if (rc.getMissileCount() >= 1 && isReloading) {
-				isReloading = false;
-				navigation.stopObstacleTracking();
-			}
-		} else {
-			if (rc.getMissileCount() >= 4 && isReloading) {
-				isReloading = false;
-				navigation.stopObstacleTracking();
-			}
+	
+		if (rc.getMissileCount() >= 4 && isReloading) {
+			isReloading = false;
+			navigation.stopObstacleTracking();
 		}
-		// launch 3 missiles at a time, then retreat. Do not launch
-		// 3 missiles if already surrounded by more than 1 missile
-		/*RobotInfo[] nearbyAlliedUnits = rc.senseNearbyRobots(2, rc.getTeam());
-		int nearbyMissileCount = 0;
-		for (RobotInfo ally: nearbyAlliedUnits) {
-			if (ally.type == RobotType.MISSILE) {
-				nearbyMissileCount++;
-			}
-		}*/
 		
 		if (enemiesAttackable.length > 0 && !isReloading) {
 			MapLocation target =  selectTarget(enemiesAttackable);
@@ -127,17 +112,10 @@ public class Launcher extends Unit {
 				rc.launchMissile(dirToFire);
 			}
 			
-			if (targetType == RobotType.TANK ) {
-				if (rc.getMissileCount() <= 2) {
-					isReloading = true;
-				}
-			} else {
-				if (rc.getMissileCount() <= 5) {
-					isReloading = true;
-				}
+			if (rc.getMissileCount() <= 5) {
+				isReloading = true;
 			}
-			this.currentTargetType = targetType;
-        } else {
+	    } else {
 			MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 			boolean isNextToTowerOrHQ = false;
 			MapLocation target = null;
