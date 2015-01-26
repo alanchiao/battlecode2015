@@ -10,7 +10,6 @@ public class GroupController {
 	
 	// high-level game information
 	private RobotController rc;
-	
 	// two group management code
 	int ptDroneA;
 	int ptDroneB;

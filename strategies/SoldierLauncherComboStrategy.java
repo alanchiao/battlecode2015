@@ -19,6 +19,9 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 	private int pathDifficulty;
 	private int attackGroup;
 	private int defendGroup;
+	private boolean isMidGame;
+	public final static int ATTACK_GROUP = 0;
+	public final static int DEFENSE_GROUP = 1;
 	
 	private int scoutMiner;
 	
@@ -143,27 +146,33 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		if (Clock.getRoundNum() < (rc.getRoundLimit() - 100 - Math.sqrt(distance)*4)) {
 			// launcher grouping logic
 			if (enemyRush && numLaunchersDefense < 3) {
-				gc.groupUnits(RobotType.LAUNCHER, 1);
+				gc.groupUnits(RobotType.LAUNCHER, DEFENSE_GROUP);
 				rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
 			} else	if (numLaunchersAttack >= 3) {
-				gc.groupUnits(RobotType.LAUNCHER, 0);
+				gc.groupUnits(RobotType.LAUNCHER, ATTACK_GROUP);
 				rc.broadcast(Broadcast.launcherGroupAttackCh, 1);
 			} else {
-				gc.groupUnits(RobotType.LAUNCHER, 0);
+				gc.groupUnits(RobotType.LAUNCHER, ATTACK_GROUP);
 				rc.broadcast(Broadcast.launcherGroupAttackCh, 0);				
 			}
+			boolean isMidGame = rc.readBroadcast(Broadcast.isMidGameCh) == 1;
 			
+			if (!isMidGame) {
 			// soldier grouping logic
-			if (numSoldiersAttack < 6) {
-				gc.groupUnits(RobotType.SOLDIER, 0);
-				rc.broadcast(Broadcast.soldierGroupAttackCh, 0);
-			} else {
-				gc.groupUnits(RobotType.SOLDIER, 0);
-				rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
+				if (numSoldiersAttack < 6) {
+					gc.groupUnits(RobotType.SOLDIER, ATTACK_GROUP);
+					rc.broadcast(Broadcast.soldierGroupAttackCh, 0);
+				} else {
+					gc.groupUnits(RobotType.SOLDIER, DEFENSE_GROUP);
+					rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
+				}
 			}
+//			else if (isMidGame) {
+//				if (numSoldiersAttack)
+//			}
 		}
 		else {
-			gc.groupUnits(RobotType.LAUNCHER, 1);
+			gc.groupUnits(RobotType.LAUNCHER, DEFENSE_GROUP);
 			rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
 		}
 	}

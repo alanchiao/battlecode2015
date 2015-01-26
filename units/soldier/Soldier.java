@@ -13,6 +13,7 @@ import battlecode.common.Team;
 import team158.units.Unit;
 import team158.units.com.Navigation;
 import team158.utils.DirectionHelper;
+import team158.com.Broadcast;
 
 public class Soldier extends Unit {
 	
@@ -25,6 +26,21 @@ public class Soldier extends Unit {
 
 	@Override
 	protected void actions() throws GameActionException {
+		//if soldier sees 2 or more launchers or tanks, it is midgame
+		boolean isMidGame = rc.readBroadcast(Broadcast.isMidGameCh) == 1;
+		if (!isMidGame) {
+			RobotInfo[] enemyAround = rc.senseNearbyRobots(RobotType.SOLDIER.sensorRadiusSquared, rc.getTeam().opponent());
+			int countLauncherTank = 0;
+			for (RobotInfo e : enemyAround) { 
+				if (e.type == RobotType.TANK || e.type == RobotType.LAUNCHER) {
+					countLauncherTank++;
+				}
+				if (countLauncherTank >=2) {
+					rc.broadcast(Broadcast.isMidGameCh, 1);
+					break;
+				}
+			}
+		}
 		if (Clock.getRoundNum() >= 1900) { // just for funsies
 			if (rc.isWeaponReady()) {
 				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
@@ -39,7 +55,7 @@ public class Soldier extends Unit {
 			}
 			return;
 		}
-		else if (rc.isCoreReady()) {
+		else if (!isMidGame && rc.isCoreReady()) {
 			computeStuff();
 			if (rc.getSupplyLevel() == 0) {
 				soldierMoveWithMicro(ownHQ);
@@ -47,6 +63,9 @@ public class Soldier extends Unit {
 			else {
 				harasser.harass();
 			}
+		}
+		else if (isMidGame && rc.isCoreReady()) {
+			
 		}
 		/**
 

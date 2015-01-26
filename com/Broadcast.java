@@ -24,6 +24,7 @@ public class Broadcast {
 	public static final int requestSupplyDroneCh = 12;
 	public static final int towerAttacked = 13;
 	public static final int enemyNearTower = 14;
+	public static final int isMidGameCh = 15;
 
 	// Misc
 	public static final int minerOreX1000Ch = 17;
