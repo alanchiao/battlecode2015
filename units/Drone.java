@@ -69,9 +69,11 @@ public class Drone extends Unit {
 		followingID = rc.readBroadcast(Broadcast.requestSupplyDroneCh);
 		if (followingID != 0) {
 			rc.broadcast(Broadcast.requestSupplyDroneCh, 0);
-			followingLocation = rc.senseRobot(followingID).location;
-			autoSupplyTransfer = false;
-			gotSupply = false;
+			if (rc.canSenseRobot(followingID)) {
+				followingLocation = rc.senseRobot(followingID).location;
+				autoSupplyTransfer = false;
+				gotSupply = false;
+			}
 		}
 		// Move
 		else if (rc.isCoreReady()) {
