@@ -38,21 +38,29 @@ public class Beaver extends Unit {
 			if (numMinerFactories == 0) {
 				if (ore >= 500) {
 					builder.buildBuilding(RobotType.MINERFACTORY, numMinerFactories);
+				} else {
+					rc.mine();
 				}
 			}
 			else if (numBarracks == 0) {
 				if (ore >= 300) {
 					builder.buildBuilding(RobotType.BARRACKS, numBarracks);
+				} else {
+					rc.mine();
 				}
 			}
 			else if (numSupplyDepots == 0) {
 				if (ore >= 100) {
 					builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
+				} else {
+					rc.mine();
 				}
 			}
 			else if (numHelipads == 0) {
 				if (ore >= 300) {
 					builder.buildBuilding(RobotType.HELIPAD, numHelipads);
+				} else {
+					rc.mine();
 				}
 			}
 			else {
@@ -74,28 +82,7 @@ public class Beaver extends Unit {
 					builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
 				}
 				else {
-					MapLocation myLocation = rc.getLocation();
-					double currentOre = rc.senseOre(myLocation);
-					double maxOre = -2;
-					Direction bestDirection = null;
-					boolean[] avoidMoves = navigation.moveDirectionsAvoidingAttack(rc.senseNearbyRobots(24, rc.getTeam().opponent()), 5);
-					// looks around for an ore concentration that is bigger than its current location by a certain fraction
-					for (Direction dir: DirectionHelper.directions) {
-						MapLocation possibleLocation = myLocation.add(dir);
-						if (possibleLocation.distanceSquaredTo(ownHQ) < 15) {
-							double possibleOre = rc.senseOre(possibleLocation);
-							if (possibleOre > maxOre && rc.canMove(dir) && avoidMoves[DirectionHelper.directionToInt(dir)]) {
-								maxOre = possibleOre;
-								bestDirection = dir;
-							}
-						}
-					}
-					if (maxOre > 1.5 * currentOre && bestDirection != null) {
-						rc.move(bestDirection);
-					}
-					else {
-						rc.mine();
-					}
+					rc.mine();
 				}
 			}
 		}
