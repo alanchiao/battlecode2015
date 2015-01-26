@@ -1,5 +1,7 @@
 package team158.buildings;
 
+import java.util.Arrays;
+
 import battlecode.common.*;
 import team158.com.Broadcast;
 import team158.com.GroupController;
@@ -24,7 +26,7 @@ public class Headquarters extends Building {
 
 	private MapLocation[] towerOrder; // order of which enemy towers can be defeated
 
-	private int numTowersDefeated;
+	private int numTowersInitial;
 	private int enemyTowersRemaining;
 
 	/*
@@ -45,9 +47,14 @@ public class Headquarters extends Building {
 		}
 		
 		towerOrder = new MapLocation[6];
-		numTowersDefeated = 0;
 		enemyTowersRemaining = 7;
-		
+
+		calculateTowerOrder();
+		try {
+			Broadcast.broadcastLocation(rc, Broadcast.enemyHQLocation, enemyHQ);
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
 		/*
 		oreMined = new double[ORE_WINDOW];
 		oreRate = 5;
@@ -56,11 +63,7 @@ public class Headquarters extends Building {
 	}
 	
 	@Override
-	protected void actions() throws GameActionException {	
-		if (Clock.getRoundNum()==0) {
-			calculateTowerOrder();
-			Broadcast.broadcastLocation(rc, Broadcast.enemyHQLocation, enemyHQ);
-		}
+	protected void actions() throws GameActionException {
 		broadcastVulnerableEnemyTowerAttack();
 		RobotInfo closestEnemy = super.findClosestEnemy((int)(hqDistance*hqDistance)/8);
 		MapLocation closestEnemyLocation;
@@ -187,10 +190,7 @@ public class Headquarters extends Building {
 		this.gameStrategy.executeStrategy();
 	}
 	
-	// Broadcasts to groups about a vulnerable tower for us to attack
-	// 
-	// A vulnerable tower is one where that 
-	//
+	// Broadcasts to groups about a vulnerable tower for us to attack.
 	protected void broadcastVulnerableEnemyTowerAttack() throws GameActionException {
 		MapLocation targetTower = null;
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
@@ -199,7 +199,7 @@ public class Headquarters extends Building {
 			this.enemyTowersRemaining = enemyTowersRemaining;
 			if (enemyTowersRemaining > 0) {
 				// index of the tower targeted
-				int index = numTowersDefeated - enemyTowersRemaining;
+				int index = numTowersInitial - enemyTowersRemaining;
 				if (towerOrder[index] != null) {
 					targetTower = towerOrder[index];
 				}
@@ -211,94 +211,28 @@ public class Headquarters extends Building {
 				targetTower = enemyHQ;
 			}
 			Broadcast.broadcastLocation(rc, Broadcast.enemyTowerTargetLocationChs, targetTower);
-			rc.setIndicatorString(0, String.valueOf(targetTower));
 		}
 	}
 
-	//calculates whether the towers are defeatable down to 3 using ground units. If not, we must build launchers
-//	protected void towerDefeatable() throws GameActionException {
-//		MapLocation targetTower = null;
-//		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-//		int numEnemyTowers = enemyTowers.length;
-//		//keeps track of the order of the towers defeated so we don't have to recompute
-//		while (numTowersDefeatable < numEnemyTowers) {
-//			//every iteration one tower decreases so we must acount for this
-//			int numTowersLeft = numEnemyTowers - numTowersDefeatable;
-//			// runs the iteration on the number of towers remaining
-//			MapLocation[] enemyTowersLeft = new MapLocation[numTowersLeft];
-//			int index = 0;
-//			for (int i = 0; i < numEnemyTowers; i++) {
-//				if (!inTowerOrder(enemyTowers[i])) {
-//					enemyTowersLeft[index] = enemyTowers[i];
-//					index++;
-//				} 
-//			}
-//			int[] distToEnemyTowers = new int[numTowersLeft];
-//			// keeps track of distance of enemy towers to ourhq
-//			for (int i = 0; i < numTowersLeft; i++) {
-//				distToEnemyTowers[i] = this.myLocation.distanceSquaredTo(enemyTowersLeft[i]);
-//			}
-//			boolean towerExists = false;
-//			int count = 0;
-//			while (count < numEnemyTowers) {
-//				int minDistance = 999999;
-//				int targetTowerIndex = 0; // to keep track of which tower was chosen
-//				for (int i = 0; i < numTowersLeft; i++) {
-//					if (distToEnemyTowers[i] < minDistance) {
-//						minDistance = distToEnemyTowers[i];
-//						targetTower = enemyTowersLeft[i];
-//						targetTowerIndex = i;
-//					}
-//				}
-//				int numNearbyTowers = 0;
-//				for (int j = 0; j < numTowersLeft; j++) {
-//					if (targetTowerIndex != j && targetTower.distanceSquaredTo(enemyTowersLeft[j]) <= 24) {
-//						numNearbyTowers++;
-//					}
-//				}
-//				//valid tower target, add to towerOrder and increment the num towers defeatable
-//				if (numNearbyTowers <= 3) {
-//					towerExists = true;
-//					towerOrder[numTowersDefeatable] = targetTower;
-//					numTowersDefeatable++;
-//					break;
-//				}
-//				//otherwise test next target
-//				else {
-//					distToEnemyTowers[targetTowerIndex] = 999999;
-//					count++;
-//				}
-//			}
-//			// if no isolated tower exists, check if number of towers remaining is <= 3
-//			// if so, attack enemyHQ. otherwise, need to build launchers
-//			boolean buildLaunchers;
-//			if (!towerExists) {
-//				if (numTowersDefeatable >= 3) {
-//					buildLaunchers = true;
-//				}
-//				break;
-//			}
-//		}
-//	}
 	protected void calculateTowerOrder() {
 		MapLocation targetTower = null;
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-		int numEnemyTowers = enemyTowers.length;
+		numTowersInitial = enemyTowers.length;
 		// keeps track of the order of the towers defeated so we don't have to recompute
-		while (numTowersDefeated < numEnemyTowers) {
+		for (int j = 0; j < numTowersInitial; j++) {
 			// every iteration one tower decreases so we must account for this
-			int numTowersLeft = numEnemyTowers - numTowersDefeated;
+			int numTowersLeft = numTowersInitial - j;
 			// runs the iteration on the number of towers remaining
 			MapLocation[] enemyTowersLeft = new MapLocation[numTowersLeft];
 			int index = 0;
-			for (int i = 0; i < numEnemyTowers; i++) {
-				if (!inTowerOrder(enemyTowers[i])) {
+			for (int i = 0; i < numTowersInitial; i++) {
+				if (!inTowerOrder(enemyTowers[i], j)) {
 					enemyTowersLeft[index] = enemyTowers[i];
 					index++;
 				} 
 			}
 			int[] distToEnemyTowers = new int[numTowersLeft];
-			// keeps track of distance of enemy towers to ourhq
+			// keeps track of distance of enemy towers to own hq
 			for (int i = 0; i < numTowersLeft; i++) {
 				distToEnemyTowers[i] = this.myLocation.distanceSquaredTo(enemyTowersLeft[i]);
 			}
@@ -309,16 +243,23 @@ public class Headquarters extends Building {
 					targetTower = enemyTowersLeft[i];
 				}
 			}
-			towerOrder[numTowersDefeated] = targetTower;
-			numTowersDefeated++;
+			towerOrder[j] = targetTower;
 		}
+		rc.setIndicatorString(0, Arrays.toString(towerOrder));
 	}
-	
-	protected boolean inTowerOrder(MapLocation m) {
+
+	protected boolean inTowerOrder(MapLocation m, int numTowersDefeated) {
 		for (int i = 0; i < numTowersDefeated; i++) {
 			if (towerOrder[i] == m) return true;
 		}
 		return false;
 	}
-
+	
+	public double computePerpendicularDistance(MapLocation candidate) {
+		double x1 = ownHQ.x;
+		double x2 = enemyHQ.x;
+		double y1 = ownHQ.y;
+		double y2 = enemyHQ.y;
+		return Math.abs((y2 - y1) * candidate.x - (x2 - x1) * candidate.y + x2 * y1 - y2 * x1) / Math.sqrt(ownHQ.distanceSquaredTo(enemyHQ));
+	}
 }
