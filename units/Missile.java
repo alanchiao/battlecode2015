@@ -62,7 +62,7 @@ public class Missile extends Robot {
 					  rc.explode();
 				  }
 			   } else {
-				   Direction moveDirection = rc.getLocation().directionTo(Broadcast.readLocation(rc, Broadcast.enemyHQLocation));
+				  Direction moveDirection = rc.getLocation().directionTo(Broadcast.readLocation(rc, Broadcast.enemyHQLocation));
 				  if (rc.canMove(moveDirection)) {
 				          rc.move(moveDirection);
 				          return;

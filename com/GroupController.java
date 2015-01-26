@@ -114,31 +114,6 @@ public class GroupController {
 			return;
 		}
 	}
-	
-	public void unGroup(int ID_Broadcast) {
-		try {
-			rc.broadcast(ID_Broadcast, -1);
-			if (ID_Broadcast == Broadcast.droneGroupAttackCh) {
-				int i = 0;
-				while (droneGroupA[i] != 0) {
-					Hashing.put(droneGroupA[i], 0);
-					droneGroupA[i] = 0;
-					i++;
-				}
-			}
-			else if (ID_Broadcast == Broadcast.droneGroupDefenseCh) {
-				int i = 0;
-				while (droneGroupB[i] != 0) {
-					Hashing.put(droneGroupB[i], 0);
-					droneGroupB[i] = 0;
-					i++;
-				}
-			}
-		}
-		catch (GameActionException e) {
-			return;
-		}
-	}
 		
 	public void stopGroup(RobotType rt) {
 		int broadcastCh;

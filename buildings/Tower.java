@@ -29,19 +29,18 @@ public class Tower extends Building {
 				rc.attackLocation(Unit.selectTarget(enemies));
 			}
 		}
-		if (rc.isCoreReady()) {
-			RobotInfo closestEnemy = findClosestEnemy(100);
-			MapLocation closestEnemyLocation;
-			int enemyNear = 0;
-			if (closestEnemy == null) {
-				closestEnemyLocation = myLocation;
-			} else {
-				enemyNear = 1;
-				closestEnemyLocation = closestEnemy.location;
-			}
-			rc.setIndicatorString(0, String.valueOf(closestEnemyLocation));
-			rc.broadcast(Broadcast.enemyNearTower, enemyNear);
-			Broadcast.broadcastLocation(rc, Broadcast.enemyNearTowerLocationChs, closestEnemyLocation);
+
+		RobotInfo closestEnemy = findClosestEnemy(100);
+		MapLocation closestEnemyLocation;
+		int enemyNear = 0;
+		if (closestEnemy == null) {
+			closestEnemyLocation = myLocation;
+		} else {
+			enemyNear = 1;
+			closestEnemyLocation = closestEnemy.location;
 		}
+		rc.setIndicatorString(0, String.valueOf(closestEnemyLocation));
+		rc.broadcast(Broadcast.enemyNearTower, enemyNear);
+		Broadcast.broadcastLocation(rc, Broadcast.enemyNearTowerLocationChs, closestEnemyLocation);
 	}
 }

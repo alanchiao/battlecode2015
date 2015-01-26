@@ -11,7 +11,5 @@ public class Hashing {
 		int hashedKey = (key*(key+5))%groupID.length;
 		return groupID[hashedKey];
 	}
-	
-	
 }
 

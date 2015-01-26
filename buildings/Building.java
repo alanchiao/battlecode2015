@@ -34,6 +34,7 @@ public abstract class Building extends Robot {
             e.printStackTrace();
 		}
 	}
+
 	public RobotInfo findClosestEnemy(int rangeSquared) {
 		//find closest enemy target
 		RobotInfo[] closeRobots = rc.senseNearbyRobots(rangeSquared, rc.getTeam().opponent());
