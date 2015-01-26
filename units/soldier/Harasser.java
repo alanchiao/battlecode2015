@@ -1,5 +1,6 @@
 package team158.units.soldier;
 
+import team158.com.Broadcast;
 import team158.units.Unit;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -31,6 +32,8 @@ public class Harasser {
 	public MapLocation searchDestinationTwo;
 	public MapLocation currentSearchDestination;
 	public final static int SEARCH_RADIUS = 10;
+	public boolean switchedSearchDestination = false;
+	public int timeSinceLastSwitch = 0;
 	
 	// FOLLOW_STATE/ATTACK_STATE variables
 	public int targetID;
@@ -48,12 +51,21 @@ public class Harasser {
 		} else {
 			this.state = SEARCH_STATE;
 		}
+		
+		try {
+			MapLocation safeSearchDestination = Broadcast.readLocation(rc, Broadcast.soldierHarassLocationChs);
+			if (!safeSearchDestination.equals(new MapLocation(0, 0)) && !safeSearchDestination.equals(this.currentSearchDestination)) {
+				this.currentSearchDestination = safeSearchDestination;
+			}
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void harass() throws GameActionException {
+
 		if (this.state == SEARCH_STATE) { // then randomly move around searching for miner/beaver while avoiding attack
 			rc.setIndicatorString(0, Integer.toString(this.state));
-			
 			if (rc.isWeaponReady()) {
 				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
 				if (enemies.length > 0) { 
@@ -122,7 +134,7 @@ public class Harasser {
 	// line passing through the two points and the enemy HQ
 	public void initializeSearchDestinations() {
 		Direction dirToEnemyBase = unit.ownHQ.directionTo(unit.enemyHQ);
-		MapLocation nearEnemyHQLocation = new MapLocation((unit.ownHQ.x + 3*unit.enemyHQ.x)/4, (unit.ownHQ.y + 3*unit.enemyHQ.y)/4);
+		MapLocation nearEnemyHQLocation = new MapLocation(unit.enemyHQ.x, unit.enemyHQ.y).add(dirToEnemyBase, 10);
 		Direction perpDirectionOne = dirToEnemyBase.rotateRight().rotateRight();
 		Direction perpDirectionTwo = dirToEnemyBase.rotateLeft().rotateLeft();
 		

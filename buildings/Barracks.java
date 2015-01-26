@@ -2,6 +2,7 @@ package team158.buildings;
 
 import team158.com.Broadcast;
 import team158.utils.DirectionHelper;
+import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -37,7 +38,7 @@ public class Barracks extends Building {
 		}
 		
 		int numSoldiers = rc.readBroadcast(Broadcast.numSoldiersCh);
-		if (rc.isCoreReady() && numSoldiers <= 5 && rc.getTeamOre() >= 60) {
+		if (rc.isCoreReady() && numSoldiers <= 20 && rc.getTeamOre() >= 60 && Clock.getRoundNum() <= 1000) {
 			this.greedySpawn(RobotType.SOLDIER);
 		}
 	}

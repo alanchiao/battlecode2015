@@ -182,7 +182,7 @@ public class Navigation {
 	}
 	
 	// more options
-	public void greedyMoveToDestination(MapLocation destination, int avoidLevel) {
+	public boolean greedyMoveToDestination(MapLocation destination, int avoidLevel) {
 		try {
 			this.possibleMovesAvoidingEnemies = null;
 			stopObstacleTracking();
@@ -208,11 +208,14 @@ public class Navigation {
 				if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(destination) <= myLocation.distanceSquaredTo(destination)) {
 					if (rc.canMove(moveDirection)) {
 						rc.move(moveDirection);
+						return true;
 					}
-				} 
+				}
 			}
+			return false;
 		} catch (GameActionException e) {
 			e.printStackTrace();
+			return false;
 		}
 	}
 	
