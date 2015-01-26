@@ -1,9 +1,7 @@
 package team158.units.soldier;
 
-import team158.com.Broadcast;
 import team158.units.Unit;
 import team158.units.com.Navigation;
-import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
