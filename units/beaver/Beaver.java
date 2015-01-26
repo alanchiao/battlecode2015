@@ -39,64 +39,69 @@ public class Beaver extends Unit {
 			if (numMinerFactories == 0) {
 				if (ore >= 500) {
 					builder.buildBuilding(RobotType.MINERFACTORY, numMinerFactories);
+					return;
 				}
 			}
 			else if (numBarracks == 0) {
 				if (ore >= 300) {
 					builder.buildBuilding(RobotType.BARRACKS, numBarracks);
+					return;
 				}
 			}
 			else if (numSupplyDepots == 0) {
 				if (ore >= 100) {
 					builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
+					return;
 				}
 			}
 			else if (numHelipads == 0) {
 				if (ore >= 300) {
 					builder.buildBuilding(RobotType.HELIPAD, numHelipads);
+					return;
 				}
 			}
-			else {
-				if (numAerospaceLabs == 0) {
-					if (ore >= 500) {
-						builder.buildBuilding(RobotType.AEROSPACELAB, numAerospaceLabs);
-					}
-				}
-				else if (numSupplyDepots < 3 && ore >= 100) {
-					builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
-				}
-				else if (numAerospaceLabs == 2 && numSupplyDepots < 6 && ore >= 100) {
-					builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
-				}
-				else if (ore >= 700) {
+			else if (numAerospaceLabs == 0) {
+				if (ore >= 500) {
 					builder.buildBuilding(RobotType.AEROSPACELAB, numAerospaceLabs);
+					return;
 				}
-				else if (estimatedSupplyNeeded > 200 + 100 * Math.pow(numSupplyDepots, 0.6)) {
-					builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
+			}
+			else if (numSupplyDepots < 3 && ore >= 100) {
+				builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
+				return;
+			}
+			else if (numAerospaceLabs == 2 && numSupplyDepots < 6 && ore >= 100) {
+				builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
+				return;
+			}
+			else if (ore >= 700) {
+				builder.buildBuilding(RobotType.AEROSPACELAB, numAerospaceLabs);
+				return;
+			}
+			else if (estimatedSupplyNeeded > 200 + 100 * Math.pow(numSupplyDepots, 0.6)) {
+				builder.buildBuilding(RobotType.SUPPLYDEPOT, numSupplyDepots);
+				return;
+			}
+			MapLocation myLocation = rc.getLocation();
+			double currentOre = rc.senseOre(myLocation);
+			double maxOre = -2;
+			Direction bestDirection = null;
+			// looks around for an ore concentration that is bigger than its current location by a certain fraction
+			for (Direction dir: DirectionHelper.directions) {
+				MapLocation possibleLocation = myLocation.add(dir);
+				if (possibleLocation.distanceSquaredTo(ownHQ) < 15) {
+					double possibleOre = rc.senseOre(possibleLocation);
+					if (possibleOre > maxOre && rc.canMove(dir) && safeSpots[DirectionHelper.directionToInt(dir)] == 2) {
+						maxOre = possibleOre;
+						bestDirection = dir;
+					}
 				}
-				else {
-					MapLocation myLocation = rc.getLocation();
-					double currentOre = rc.senseOre(myLocation);
-					double maxOre = -2;
-					Direction bestDirection = null;
-					// looks around for an ore concentration that is bigger than its current location by a certain fraction
-					for (Direction dir: DirectionHelper.directions) {
-						MapLocation possibleLocation = myLocation.add(dir);
-						if (possibleLocation.distanceSquaredTo(ownHQ) < 15) {
-							double possibleOre = rc.senseOre(possibleLocation);
-							if (possibleOre > maxOre && rc.canMove(dir) && safeSpots[DirectionHelper.directionToInt(dir)] == 2) {
-								maxOre = possibleOre;
-								bestDirection = dir;
-							}
-						}
-					}
-					if (maxOre > 1.5 * currentOre && bestDirection != null) {
-						rc.move(bestDirection);
-					}
-					else {
-						rc.mine();
-					}
-				}
+			}
+			if (maxOre > 1.5 * currentOre && bestDirection != null) {
+				rc.move(bestDirection);
+			}
+			else {
+				rc.mine();
 			}
 		}
 	}

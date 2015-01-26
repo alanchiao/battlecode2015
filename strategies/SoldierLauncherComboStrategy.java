@@ -142,10 +142,10 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		
 		if (Clock.getRoundNum() < (rc.getRoundLimit() - 100 - Math.sqrt(distance)*4)) {
 			// launcher grouping logic
-			if (enemyRush && numLaunchersDefense < 5) {
+			if (enemyRush && numLaunchersDefense < 3) {
 				gc.groupUnits(RobotType.LAUNCHER, 1);
 				rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
-			} else	if (numLaunchersAttack >= 6) {
+			} else	if (numLaunchersAttack >= 3) {
 				gc.groupUnits(RobotType.LAUNCHER, 0);
 				rc.broadcast(Broadcast.launcherGroupAttackCh, 1);
 			} else {
