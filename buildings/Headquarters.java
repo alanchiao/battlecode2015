@@ -62,8 +62,7 @@ public class Headquarters extends Building {
 			Broadcast.broadcastLocation(rc, Broadcast.enemyHQLocation, enemyHQ);
 		}
 		broadcastVulnerableEnemyTowerAttack();
-		
-		RobotInfo closestEnemy = super.findClosestEnemy(100);
+		RobotInfo closestEnemy = super.findClosestEnemy((int)(hqDistance*hqDistance)/8);
 		MapLocation closestEnemyLocation;
 		if (closestEnemy == null) {
 			// hack -- broadcast to Launcher Rally Location 
@@ -71,6 +70,7 @@ public class Headquarters extends Building {
 		} else {
 			closestEnemyLocation = closestEnemy.location;
 		}
+		rc.setIndicatorString(2, String.valueOf(closestEnemyLocation));
 		Broadcast.broadcastLocation(rc, Broadcast.enemyNearHQLocationChs, closestEnemyLocation);
 		
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());

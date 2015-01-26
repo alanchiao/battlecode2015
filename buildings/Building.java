@@ -42,7 +42,6 @@ public abstract class Building extends Robot {
 		if (closeRobots.length == 0) {
 			return null;
 		}
-		
 		RobotInfo closestRobot;
 		closestRobot = closeRobots[0];
 		int closestDistance = closestRobot.location.distanceSquaredTo(myLocation);

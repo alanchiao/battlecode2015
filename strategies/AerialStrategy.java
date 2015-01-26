@@ -116,8 +116,8 @@ public class AerialStrategy extends GameStrategy {
 			gc.stopGroup(RobotType.LAUNCHER);
 		}
 		
-		rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
-		rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
+//		rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
+//		rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
 
 		MapLocation closestTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 		MapLocation myLocation = rc.getLocation();
