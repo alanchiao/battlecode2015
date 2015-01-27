@@ -65,7 +65,7 @@ public class Harasser {
 
 		if (this.state == SEARCH_STATE) { // then randomly move around searching for miner/beaver while avoiding attack
 			rc.setIndicatorString(0, Integer.toString(this.state));
-			
+
 			if (rc.isCoreReady()) {
 				// move back and forward between two search destinations
 				if (rc.getLocation().distanceSquaredTo(currentSearchDestination) <= SEARCH_RADIUS * SEARCH_RADIUS / 8) { // close enough. switch search area.

@@ -26,62 +26,60 @@ public class Soldier extends Unit {
 
 	@Override
 	protected void actions() throws GameActionException {
-		if (Clock.getRoundNum() >= 1900) { // just for funsies
-			if (rc.isWeaponReady()) {
-				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
-				if (enemies.length > 0) { 
-					rc.attackLocation(selectTarget(enemies));
+		int gameStage = rc.readBroadcast(Broadcast.gameStageCh);
+		
+		if (gameStage == Broadcast.EARLY_GAME) { // then check if progression to mid game tower attacking is necessary
+			// switch to mid condition 1 : powerful enemies
+			RobotInfo[] enemyAround = rc.senseNearbyRobots(RobotType.SOLDIER.sensorRadiusSquared, rc.getTeam().opponent());
+			int countLauncherTank = 0;
+			for (RobotInfo e : enemyAround) { 
+				if (e.type == RobotType.TANK || e.type == RobotType.LAUNCHER) {
+					countLauncherTank++;
 				}
-			}
-			if (rc.isCoreReady()) {
-				computeStuff();
-				this.soldierMoveWithMicro(enemyHQ);
-			}
-			return;
-		}
-		else {
-			if (rc.isWeaponReady()) {
-				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
-				if (enemies.length > 0) { 
-					rc.attackLocation(Unit.selectTarget(enemies));
-				}
-			}
-			if (rc.isCoreReady()) {
-				computeStuff();
-				if (rc.getSupplyLevel() == 0) {
-					soldierMoveWithMicro(ownHQ);
+				if (countLauncherTank >= 2) {
+					rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
+					actions();
 					return;
 				}
-				if (groupTracker.isGrouped()) {
-					if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocationChs)) {
-						harasser.harass();
-					}
-					else {
-						soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocationChs));
-					}
-				}
-				else if (rc.readBroadcast(Broadcast.isMidGameCh) == 1) {
-					if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocation2Chs)) {
-						harasser.harass();
-					}
-					else {
-						soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation2Chs));
-					}
-				}
-				else {
-					RobotInfo[] enemyAround = rc.senseNearbyRobots(RobotType.SOLDIER.sensorRadiusSquared, rc.getTeam().opponent());
-					int countLauncherTank = 0;
-					for (RobotInfo e : enemyAround) { 
-						if (e.type == RobotType.TANK || e.type == RobotType.LAUNCHER) {
-							countLauncherTank++;
-						}
-						if (countLauncherTank >= 2) {
-							rc.broadcast(Broadcast.isMidGameCh, 1);
-							break;
-						}
-					}
+			}
+			
+			// switch to mid condition 2 : soldiers haven't done much from harassing for a long time
+		} else if (gameStage == Broadcast.MID_GAME) { // then check if progression to late game harass is necessary
+			if (false) {
+				rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
+				actions();
+				return;
+			}
+		}
+		
+		if (rc.isCoreReady()) {
+			if (rc.getSupplyLevel() == 0) { // then go to retrieve supply
+				computeStuff();
+				soldierMoveWithMicro(ownHQ);
+				return;
+			}
+
+			if (groupTracker.isGrouped()) {
+				if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocationChs)) {
 					harasser.harass();
 				}
+				else {
+					soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocationChs));
+				}
+			}
+			else if (gameStage == Broadcast.EARLY_GAME) { // early-stage harass
+				harasser.harass();
+			}
+			else if (gameStage == Broadcast.MID_GAME) {
+				if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocation2Chs)) {
+					harasser.harass();
+				}
+				else {
+					soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation2Chs));
+				}
+			}
+			else if (gameStage == Broadcast.LATE_GAME){
+				harasser.harass();
 			}
 		}
 	}

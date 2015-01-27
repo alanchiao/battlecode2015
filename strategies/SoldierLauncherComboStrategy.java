@@ -17,9 +17,10 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 	
 	private boolean enemyRush;
 	private int pathDifficulty;
-	private boolean isMidGame;
+
 	public final static int ATTACK_GROUP = 0;
 	public final static int DEFENSE_GROUP = 1;
+	MapLocation enemyHQ;
 	
 	private int scoutMiner;
 	
@@ -29,6 +30,7 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		this.enemyRush = false;
 		this.pathDifficulty = 0;
 		this.scoutMiner = 0;
+		this.enemyHQ = rc.senseEnemyHQLocation();
 	}
 	
 	public void executeStrategy() throws GameActionException {
@@ -100,6 +102,9 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 			int possibleDifficulty = rc.readBroadcast(Broadcast.scoutEnemyHQCh);
 			if (possibleDifficulty != scoutMiner) {
 				pathDifficulty = possibleDifficulty;
+				// switch to early_mid condition 3 : map too large
+				// TODO: more consistent when our scout dies / doesn't reach destination
+				selectInitialStage(pathDifficulty);
 			}
 		}
 
@@ -129,7 +134,6 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		MapLocation closestTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 		MapLocation myLocation = rc.getLocation();
 		int distance = myLocation.distanceSquaredTo(closestTower);
-		MapLocation enemyHQ = rc.senseEnemyHQLocation();
 		int hqDistance = myLocation.distanceSquaredTo(enemyHQ);
 		if (hqDistance < distance) {
 			distance = hqDistance; 
@@ -148,8 +152,9 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 				rc.broadcast(Broadcast.launcherGroupAttackCh, 0);				
 			}
 
-			isMidGame = rc.readBroadcast(Broadcast.isMidGameCh) == 1;
-			if (!isMidGame) {
+
+			int gameStage = rc.readBroadcast(Broadcast.gameStageCh);
+			if (gameStage == Broadcast.EARLY_GAME || gameStage == Broadcast.LATE_GAME) {
 			// soldier grouping logic
 				if (numSoldiersAttack < 6) {
 					gc.groupUnits(RobotType.SOLDIER, ATTACK_GROUP);
@@ -159,7 +164,7 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 					rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
 				}
 			}
-			else if (isMidGame) {
+			else if (gameStage == Broadcast.MID_GAME) {
 				if (numSoldiers - numSoldiersAttack < 12) {
 					gc.groupUnits(RobotType.SOLDIER, ATTACK_GROUP);
 					rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
@@ -172,6 +177,26 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		else {
 			gc.groupUnits(RobotType.LAUNCHER, DEFENSE_GROUP);
 			rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
+		}
+	}
+	
+	public void selectInitialStage(int pathDifficulty) throws GameActionException {
+		int initialStage = Broadcast.EARLY_GAME;
+		
+		// start as early_mid condition 1 : stage too large
+		if (pathDifficulty >= 100) {
+			rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
+			return;
+		}
+		// start as early_mid condition 2 : too many resources in safe zones
+		MapLocation[] nearbySquares = MapLocation.getAllMapLocationsWithinRadiusSq(rc.getLocation(), 100);
+		int totalOre = 0;
+		for (MapLocation square: nearbySquares) {
+			totalOre += rc.senseOre(square);
+		}
+		if (totalOre >= 1000) {
+			rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
+			return;
 		}
 	}
 }

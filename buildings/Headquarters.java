@@ -42,12 +42,6 @@ public class Headquarters extends Building {
 		this.strategy = DUAL_STRATEGY;
 		this.gc = new GroupController(rc, strategy);
 		
-		switch(this.strategy) {
-			case AERIAL_STRATEGY:		gameStrategy = new AerialStrategy(rc, gc, this);
-										break;
-			case DUAL_STRATEGY:			gameStrategy = new SoldierLauncherComboStrategy(rc, gc, this);
-		}
-		
 		towerOrder = new MapLocation[6];
 		enemyTowersRemaining = 7;
 
@@ -67,6 +61,11 @@ public class Headquarters extends Building {
 		oreRate = 5;
 		orePointer = 0;
 		*/
+		switch(this.strategy) {
+		case AERIAL_STRATEGY:		gameStrategy = new AerialStrategy(rc, gc, this);
+									break;
+		case DUAL_STRATEGY:			gameStrategy = new SoldierLauncherComboStrategy(rc, gc, this);
+	}
 	}
 	
 	@Override
