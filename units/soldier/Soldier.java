@@ -26,21 +26,6 @@ public class Soldier extends Unit {
 
 	@Override
 	protected void actions() throws GameActionException {
-		// if soldier sees 2 or more launchers or tanks, it is midgame
-		boolean isMidGame = rc.readBroadcast(Broadcast.isMidGameCh) == 1;
-		if (!isMidGame) {
-			RobotInfo[] enemyAround = rc.senseNearbyRobots(RobotType.SOLDIER.sensorRadiusSquared, rc.getTeam().opponent());
-			int countLauncherTank = 0;
-			for (RobotInfo e : enemyAround) { 
-				if (e.type == RobotType.TANK || e.type == RobotType.LAUNCHER) {
-					countLauncherTank++;
-				}
-				if (countLauncherTank >= 2) {
-					rc.broadcast(Broadcast.isMidGameCh, 1);
-					break;
-				}
-			}
-		}
 		if (Clock.getRoundNum() >= 1900) { // just for funsies
 			if (rc.isWeaponReady()) {
 				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
@@ -67,10 +52,34 @@ public class Soldier extends Unit {
 					soldierMoveWithMicro(ownHQ);
 					return;
 				}
-				if (!isMidGame) {
-					harasser.harass();
+				if (groupTracker.isGrouped()) {
+					if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocationChs)) {
+						harasser.harass();
+					}
+					else {
+						soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocationChs));
+					}
 				}
-				else if (isMidGame) {
+				else if (rc.readBroadcast(Broadcast.isMidGameCh) == 1) {
+					if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocation2Chs)) {
+						harasser.harass();
+					}
+					else {
+						soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation2Chs));
+					}
+				}
+				else {
+					RobotInfo[] enemyAround = rc.senseNearbyRobots(RobotType.SOLDIER.sensorRadiusSquared, rc.getTeam().opponent());
+					int countLauncherTank = 0;
+					for (RobotInfo e : enemyAround) { 
+						if (e.type == RobotType.TANK || e.type == RobotType.LAUNCHER) {
+							countLauncherTank++;
+						}
+						if (countLauncherTank >= 2) {
+							rc.broadcast(Broadcast.isMidGameCh, 1);
+							break;
+						}
+					}
 					harasser.harass();
 				}
 			}
