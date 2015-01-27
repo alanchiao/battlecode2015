@@ -21,7 +21,10 @@ public class RobotPlayer {
 	
 	public static void run(RobotController r) {
 		rc = r;
-		if (rc.getType() == RobotType.HQ) {
+		if (rc.getType() == RobotType.MISSILE) {
+			robot = new Missile(rc);
+		}
+		else if (rc.getType() == RobotType.HQ) {
 			robot = new Headquarters(rc);
 		}
 		else if (rc.getType() == RobotType.TOWER) {
@@ -56,9 +59,6 @@ public class RobotPlayer {
 		}
 		else if (rc.getType() == RobotType.LAUNCHER) {
 			robot = new Launcher(rc);
-		}
-		else if (rc.getType() == RobotType.MISSILE) {
-			robot = new Missile(rc);
 		}
 		while (true) {
 			robot.move();

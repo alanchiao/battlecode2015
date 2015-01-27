@@ -47,25 +47,15 @@ public class Soldier extends Unit {
 					return;
 				}
 			}
-			/**
-			// switch to mid condition 2 : soldiers haven't done much from harassing for a long time
-			int harassStrength = rc.readBroadcast(Broadcast.harassStrengthCh);		
-			if (harassStrength <= -50) {
-				rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
-			}
-			**/
 		} else if (gameStage == Broadcast.MID_GAME) { // then check if progression to late game harass is necessary
-			boolean attackTower = rc.readBroadcast(Broadcast.soldierAttackCh) == 1;
-			if (attackTower) {
-				MapLocation towerLocation = Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocationChs);
-				if (rc.canSenseLocation(towerLocation)) {
-					RobotInfo potentialTower = rc.senseRobotAtLocation(towerLocation);
-					if (potentialTower == null) {
-						rc.broadcast(Broadcast.gameStageCh, Broadcast.LATE_GAME);
-						actions();
-						return;
-					}
-				}	
+			MapLocation towerLocation = Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocationChs);
+			if (rc.canSenseLocation(towerLocation)) {
+				RobotInfo potentialTower = rc.senseRobotAtLocation(towerLocation);
+				if (potentialTower == null) { // tower defeated
+					rc.broadcast(Broadcast.gameStageCh, Broadcast.LATE_GAME);
+					actions();
+					return;
+				}
 			}
 		}
 		
