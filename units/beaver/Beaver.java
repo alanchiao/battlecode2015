@@ -42,7 +42,7 @@ public class Beaver extends Unit {
 					return;
 				}
 			}
-			else if (numBarracks == 0) {
+			else if (numBarracks == 0 && rc.readBroadcast(Broadcast.gameStageCh) != Broadcast.NO_SOLDIER_GAME) {
 				if (ore >= 300) {
 					builder.buildBuilding(RobotType.BARRACKS, numBarracks);
 					return;

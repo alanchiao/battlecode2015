@@ -18,11 +18,12 @@ public class Launcher extends Unit {
 	public boolean noSupply;
 	public boolean broadcasted;
 	public boolean notTooLate;
-	public RobotType currentTargetType;
+	
+	public Direction runAwayDirection;
+	public boolean shouldStay;
 
 	public Launcher(RobotController newRC) {
 		super(newRC);
-		this.isReloading = false;
 		noSupply = false;
 		broadcasted = false;
 		MapLocation closestTower;
@@ -36,6 +37,8 @@ public class Launcher extends Unit {
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
+		
+		this.runAwayDirection = null;
 	}
 
 	@Override
@@ -65,19 +68,7 @@ public class Launcher extends Unit {
 			}
 		}
 		
-		if (this.currentTargetType == RobotType.TANK || this.currentTargetType == RobotType.TOWER) {
-			if (rc.getMissileCount() >= 1 && isReloading) {
-				isReloading = false;
-				navigation.stopObstacleTracking();
-			}
-		} else {
-			if (rc.getMissileCount() >= 4 && isReloading) {
-				isReloading = false;
-				navigation.stopObstacleTracking();
-			}
-		}
-		
-		if (enemiesAttackable.length > 0 && !isReloading) {
+		if (enemiesAttackable.length > 0) {
 			MapLocation target =  selectTarget(enemiesAttackable);
 			RobotType targetType = rc.senseRobotAtLocation(target).type;
 			Direction dirToEnemy = myLocation.directionTo(target);
@@ -85,9 +76,9 @@ public class Launcher extends Unit {
 			int missileDensity;
 			int missilesFired = 0;
 			if (targetType == RobotType.MISSILE || targetType == RobotType.LAUNCHER) {
-				missileDensity = 1;
+				missileDensity = 0;
 			} else {
-				missileDensity = 2;
+				missileDensity = 1;
 			}
 			
 			Direction dirToFire = dirToEnemy;
@@ -130,18 +121,8 @@ public class Launcher extends Unit {
 			if (rc.canLaunch(dirToFire) && nearbyAllyMissiles + missilesFired <= missileDensity) {
 				rc.launchMissile(dirToFire);
 			}
-			
-			if (targetType == RobotType.TANK ) {
-				if (rc.getMissileCount() <= 2) {
-					isReloading = true;
-				}
-			} else {
-				if (rc.getMissileCount() <= 5) {
-					isReloading = true;
-				}
-			}
-			this.currentTargetType = targetType;
-	    } else if (!isReloading) { 
+
+		} else { 
 			MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 			boolean isNextToTowerOrHQ = false;
 			MapLocation target = null;
@@ -162,23 +143,55 @@ public class Launcher extends Unit {
 				if (rc.canLaunch(directionToTarget)) {
 					rc.launchMissile(directionToTarget);
 				} 
-				// no reloading with respect to towers
-				if (rc.getMissileCount() <= 2) {
-					isReloading = true;
-					this.currentTargetType = RobotType.TOWER;
-				}
-			}
+			} 
         }
+		
+		// sense nearby missile - run away
+		RobotInfo[] potentialEnemyMissiles = rc.senseNearbyRobots(49, rc.getTeam().opponent());
+		for (RobotInfo potentialMissile: potentialEnemyMissiles) {
+			if (potentialMissile.type == RobotType.MISSILE || potentialMissile.type == RobotType.LAUNCHER) {
+				shouldStay = true;
+				break;
+			}
+		}
+		
+		RobotInfo[] potentialEnemyMissiles2 = rc.senseNearbyRobots(8, rc.getTeam().opponent());
+		for (RobotInfo potentialMissile: potentialEnemyMissiles2) {
+			if (potentialMissile.type == RobotType.MISSILE || potentialMissile.type == RobotType.LAUNCHER) {
+				runAwayDirection = potentialMissile.location.directionTo(myLocation);
+				break;
+			}
+		}
 		
 		// Move
 		if (rc.isCoreReady()) {
 			computeStuff();
-			// reloading - retreat to recover missiles
-			if (isReloading) {
-				navigation.moveToDestination(ownHQ, Navigation.AVOID_ALL);
+
+			if (runAwayDirection != null) {
+				if (rc.canMove(runAwayDirection)) {
+					rc.move(runAwayDirection);
+					runAwayDirection = null;
+					return;
+				}
+				
+				if (rc.canMove(runAwayDirection.rotateLeft())) {
+					rc.move(runAwayDirection.rotateLeft());
+					runAwayDirection = null;
+					return;
+				}
+				
+				if (rc.canMove(runAwayDirection.rotateRight())) {
+					rc.move(runAwayDirection.rotateRight());
+					runAwayDirection = null;
+					return;
+				}	
+				return;
+			} else if (shouldStay) {
+				shouldStay = false;
 				return;
 			}
-
+			
+		
 			MapLocation target = null;
 			if (rc.readBroadcast(Broadcast.enemyNearHQ) == 1) {
 				target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
@@ -186,6 +199,7 @@ public class Launcher extends Unit {
 					target = null;
 				}
 			}
+
 			if (rc.readBroadcast(Broadcast.enemyNearTower) == 1) {
 				target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
 				if (myLocation.distanceSquaredTo(target) > 65) {

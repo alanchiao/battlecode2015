@@ -82,7 +82,7 @@ public class Missile extends Robot {
 					}	  
 				}
 
-				if (timeUntilDeath == 1) {
+				if (timeUntilDeath == 2) {
 					rc.disintegrate();
 				}
 			}
