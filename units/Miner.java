@@ -8,7 +8,7 @@ import team158.utils.*;
 public class Miner extends Unit {
 	
 	// ore information propagation
-	public double ORE_THRESHOLD_TO_MOVE = 2;
+	public double oreThreshold;
 	boolean isLeaderMiner;
 	double lastBroadcastedOreCount;
 	
@@ -18,6 +18,7 @@ public class Miner extends Unit {
 	public Miner(RobotController newRC) {
 		super(newRC);
 		
+		this.oreThreshold = 2.5;
 		this.isLeaderMiner = false;
 		this.lastBroadcastedOreCount = 0;
 		
@@ -68,7 +69,7 @@ public class Miner extends Unit {
 					}
 				}
 
-				if (maxOre >= 10 || (myOre == 0 && bestDirection != null) || (myOre <= 2.5 && maxOre >= 5)) {
+				if ((myOre <= (Clock.getRoundNum() < 1000 ? oreThreshold : 0) && bestDirection != null) || (myOre >= 2.5 && maxOre >= myOre * 1.5)) {
 					navigation.stopObstacleTracking();
 					rc.move(bestDirection);
 					prevDirection = null;
