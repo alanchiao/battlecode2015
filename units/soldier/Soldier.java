@@ -100,9 +100,27 @@ public class Soldier extends Unit {
 					harasser.harass();
 				}
 				else {
+					RobotInfo[] nearbyEnemies = rc.senseNearbyRobots(50, rc.getTeam().opponent());
+					boolean enemyNearby = rc.readBroadcast(Broadcast.soldierAttackDefendingEnemyCh) == 1;
+					if (nearbyEnemies.length > 0) {
+						for (RobotInfo e : nearbyEnemies) {
+							if (e.type == RobotType.LAUNCHER || e.type == RobotType.TANK) {
+								RobotInfo targetRobot = rc.senseRobotAtLocation(e.location);
+								rc.broadcast(Broadcast.soldierAttackDefendingEnemyCh, 1);
+								Broadcast.broadcastLocation(rc, Broadcast.soldierEnemyTargetCh, targetRobot.location);
+							}
+						}
+					}
+					else if (enemyNearby && nearbyEnemies.length == 0) {
+						rc.broadcast(Broadcast.soldierAttackDefendingEnemyCh, 0);
+					}
 					boolean attackTower = rc.readBroadcast(Broadcast.soldierAttackCh) == 1;
 					MapLocation towerLocation = Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocationChs);
-					if (attackTower) {
+					if (enemyNearby) {
+						MapLocation enemyLocation = Broadcast.readLocation(rc, Broadcast.soldierEnemyTargetCh);
+						chargeToLocation(enemyLocation);
+					}
+					else if (attackTower) {
 						chargeToLocation(towerLocation);
 					}
 					else {
