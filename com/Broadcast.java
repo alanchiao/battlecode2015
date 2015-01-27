@@ -5,6 +5,10 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
 public class Broadcast {
+	
+	public static final int EARLY_GAME = -10;
+	public static final int MID_GAME = -9;
+	public static final int LATE_GAME = -8;
 
 	// Channels for number of robots
 	public static final int numBeaversCh = 0;
@@ -24,7 +28,7 @@ public class Broadcast {
 	public static final int requestSupplyDroneCh = 12;
 	public static final int towerAttacked = 13;
 	public static final int enemyNearTower = 14;
-	public static final int isMidGameCh = 15;
+	public static final int gameStageCh = 15; // EARLY_GAME, EARLY_MID_GAME, or MID_GAME.
 	public static final int soldierTowerTarget1Exists = 16;
 	public static final int soldierTowerTarget2Exists = 17;
 
@@ -59,6 +63,9 @@ public class Broadcast {
 	public static final int enemyNearTowerLocationChs = 50;
 
 	public static final int enemyHQLocation = 52;
+	
+	
+	
 	
 	// Channels 8000 -  65121 on for internal map representation (remember 9999 is used somewhere)
 	public static final int internalMapHQCh = 36880;
