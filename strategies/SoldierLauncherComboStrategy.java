@@ -152,7 +152,6 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 				rc.broadcast(Broadcast.launcherGroupAttackCh, 0);				
 			}
 
-
 			int gameStage = rc.readBroadcast(Broadcast.gameStageCh);
 			if (gameStage == Broadcast.EARLY_GAME || gameStage == Broadcast.LATE_GAME) {
 			// soldier grouping logic
@@ -168,9 +167,6 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 				if (numSoldiers - numSoldiersAttack < 12) {
 					gc.groupUnits(RobotType.SOLDIER, ATTACK_GROUP);
 					rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
-				} else {
-					gc.groupUnits(RobotType.SOLDIER, DEFENSE_GROUP);
-					rc.broadcast(Broadcast.soldierGroupDefenseCh, 1);
 				}
 			}
 		}
@@ -181,8 +177,6 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 	}
 	
 	public void selectInitialStage(int pathDifficulty) throws GameActionException {
-		int initialStage = Broadcast.EARLY_GAME;
-		
 		// start as early_mid condition 1 : stage too large
 		if (pathDifficulty >= 100) {
 			rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);

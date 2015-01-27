@@ -60,11 +60,11 @@ public class Soldier extends Unit {
 			}
 
 			if (groupTracker.isGrouped()) {
-				if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocationChs)) {
+				if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocation1Chs)) {
 					harasser.harass();
 				}
 				else {
-					soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocationChs));
+					soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation1Chs));
 				}
 			}
 			else if (gameStage == Broadcast.EARLY_GAME) { // early-stage harass
