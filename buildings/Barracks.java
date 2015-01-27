@@ -2,7 +2,6 @@ package team158.buildings;
 
 import team158.com.Broadcast;
 import team158.utils.DirectionHelper;
-import battlecode.common.Clock;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
@@ -10,8 +9,11 @@ import battlecode.common.RobotType;
 
 public class Barracks extends Building {
 
+	int soldiersProducedLateGame;
+
 	public Barracks(RobotController newRC) {
 		super(newRC);
+		soldiersProducedLateGame = 0;
 	}
 
 	@Override
@@ -35,9 +37,12 @@ public class Barracks extends Building {
 			}
 			Broadcast.broadcastLocation(rc, Broadcast.soldierRallyLocationChs, rally);
 		}
-		
+
 		int numSoldiers = rc.readBroadcast(Broadcast.numSoldiersCh);
-		if (rc.isCoreReady() && numSoldiers <= 20 && rc.getTeamOre() >= 60 && Clock.getRoundNum() <= 1000) {
+		if (rc.isCoreReady() && numSoldiers <= 20 && soldiersProducedLateGame < 10 && rc.getTeamOre() >= 60) {
+			if (rc.readBroadcast(Broadcast.gameStageCh) == Broadcast.LATE_GAME) {
+				soldiersProducedLateGame++;
+			}
 			this.greedySpawn(RobotType.SOLDIER);
 		}
 	}
