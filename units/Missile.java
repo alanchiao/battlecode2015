@@ -11,25 +11,21 @@ import team158.utils.*;
 
 
 public class Missile extends Robot {
-		
-	public int timeUntilDeath;
 	
 	public Missile (RobotController newRC) {
 		rc = newRC;
-		timeUntilDeath = 5;
 	}
 
 	@Override
 	public void move() {
 		try {
-			timeUntilDeath --;
 			if (rc.isCoreReady()) {
 				RobotInfo unitsInAttack[] = rc.senseNearbyRobots(2);
 				int valuableAlliesInAttack = 0;
 				int effectiveEnemiesInAttack = 0;
-				for (RobotInfo unit: unitsInAttack) {
-					if (unit.type != RobotType.MISSILE) {
-						if (unit.team.equals(rc.getTeam())) {
+				for (int i = unitsInAttack.length; --i >= 0; ) {
+					if (unitsInAttack[i].type != RobotType.MISSILE) {
+						if (unitsInAttack[i].team.equals(rc.getTeam())) {
 							valuableAlliesInAttack++;
 						} else {
 							effectiveEnemiesInAttack++;
@@ -80,10 +76,6 @@ public class Missile extends Robot {
 					if (effectiveEnemiesInAttack - valuableAlliesInAttack >= 1) {
 						rc.explode();
 					}	  
-				}
-
-				if (timeUntilDeath == 2) {
-					rc.disintegrate();
 				}
 			}
 		} catch (GameActionException e) {
