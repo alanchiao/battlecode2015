@@ -96,24 +96,17 @@ public class Soldier extends Unit {
 						broadcasted = false;
 					}
 				}
-				if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTarget1ExistsCh)) {
+				if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetExistsCh)) {
 					harasser.harass();
 				}
 				else {
 					boolean attackTower = rc.readBroadcast(Broadcast.soldierAttackCh) == 1;
-					MapLocation towerLocation = Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation1Chs);
+					MapLocation towerLocation = Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocationChs);
 					if (attackTower) {
 						chargeToLocation(towerLocation);
 					}
 					else {
-						rc.setIndicatorString(1, "" + rc.senseNearbyRobots(towerLocation, 34, rc.getTeam()).length);
-						if (rc.senseNearbyRobots(towerLocation, 34, rc.getTeam()).length >= 11) {
-							rc.broadcast(Broadcast.soldierAttackCh, 1);
-							chargeToLocation(towerLocation);
-						}
-						else {
-							soldierMoveWithMicro(towerLocation);
-						}
+						soldierMoveWithMicro(towerLocation);
 					}
 				}
 			}

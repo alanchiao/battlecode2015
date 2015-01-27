@@ -27,8 +27,7 @@ public class Broadcast {
 	public static final int requestSupplyDroneCh = 12;
 	public static final int enemyNearTower = 14;
 	public static final int enemyNearHQ = 15;
-	public static final int soldierTowerTarget1ExistsCh = 16;
-	public static final int soldierTowerTarget2ExistsCh = 17;
+	public static final int soldierTowerTargetExistsCh = 16;
 	public static final int soldierAttackCh = 18;
 
 	// Misc
@@ -43,13 +42,12 @@ public class Broadcast {
 	public static final int launcherAttackLocationChs = 36;
 	public static final int soldierHarassLocationChs = 38;
 	// target commanded by the HQ
-	public static final int soldierTowerTargetLocation1Chs = 40;
-	public static final int soldierTowerTargetLocation2Chs = 42;
+	public static final int soldierTowerTargetLocationChs = 40;
 	public static final int enemyTowerTargetLocationChs = 44;
 	public static final int enemyNearHQLocationChs = 46;
 	// target commanded by the towers
 	public static final int enemyNearTowerLocationChs = 50;
-	public static final int enemyHQLocation = 52;
+	public static final int enemyHQLocation = 42;
 
 	public static final int harassStrengthCh = 54;
 

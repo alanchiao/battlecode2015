@@ -220,11 +220,9 @@ public class Headquarters extends Building {
 	}
 
 	protected void findSoldierTowerTargets() throws GameActionException {
-		MapLocation targetTower1 = null;
-		MapLocation targetTower2 = null;
+		MapLocation targetTower = null;
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 		double heuristicMax1 = 0;
-		double heuristicMax2 = 0;
 		for (MapLocation e : enemyTowers) {
 			double perpendDist = computePerpendicularDistance(e);
 			double heuristic = perpendDist + 2*Math.sqrt(e.distanceSquaredTo(enemyHQ));
@@ -236,44 +234,18 @@ public class Headquarters extends Building {
 					}
 				}
 				if (numNearbyTowers < 2) {
-					if (heuristicMax2 == 0) {
-						heuristicMax2 = heuristicMax1;
-						targetTower2 = targetTower1;
-					}
 					heuristicMax1 = heuristic;
-					targetTower1 = e;
-				}
-			}
-			// check for 2nd farthest tower
-			else if (heuristic > heuristicMax2 && perpendDist > 15){
-				int numNearbyTowers = 0;
-				for (MapLocation e2: enemyTowers) {
-					if(e2 != e && e.distanceSquaredTo(e2) <= 24) {
-						numNearbyTowers++;
-					}
-				}
-				if (numNearbyTowers < 2) {
-					heuristicMax2 = heuristic;
-					targetTower2 = e;
+					targetTower = e;
 				}
 			}
 		}
-		if (targetTower1 == null) {
-			rc.broadcast(Broadcast.soldierTowerTarget1ExistsCh, 0);
+		if (targetTower == null) {
+			rc.broadcast(Broadcast.soldierTowerTargetExistsCh, 0);
 		}
 		else {			
-			rc.broadcast(Broadcast.soldierTowerTarget1ExistsCh, 1);
-			Broadcast.broadcastLocation(rc, Broadcast.soldierTowerTargetLocation1Chs, targetTower1);
-			rc.setIndicatorString(1, String.valueOf(targetTower1));
-		}
-		
-		if (targetTower2 == null) {
-			rc.broadcast(Broadcast.soldierTowerTarget2ExistsCh, 0);
-		}
-		else {			
-			rc.broadcast(Broadcast.soldierTowerTarget2ExistsCh, 1);
-			Broadcast.broadcastLocation(rc, Broadcast.soldierTowerTargetLocation2Chs, targetTower2);
-			rc.setIndicatorString(2, String.valueOf(targetTower2));
+			rc.broadcast(Broadcast.soldierTowerTargetExistsCh, 1);
+			Broadcast.broadcastLocation(rc, Broadcast.soldierTowerTargetLocationChs, targetTower);
+			rc.setIndicatorString(1, String.valueOf(targetTower));
 		}
 	}
 
