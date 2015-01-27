@@ -124,7 +124,12 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		}
 
 		int gameStage = rc.readBroadcast(Broadcast.gameStageCh);
-		if (gameStage == Broadcast.MID_GAME && rc.readBroadcast(Broadcast.soldierTowerTargetExistsCh) == 1) {
+		if (gameStage == Broadcast.EARLY_GAME) {
+			if (numSoldiers >= 12) {
+				rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
+			}
+		}
+		else if (gameStage == Broadcast.MID_GAME && rc.readBroadcast(Broadcast.soldierTowerTargetExistsCh) == 1) {
 			RobotInfo[] allies = rc.senseNearbyRobots(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocationChs), 52, rc.getTeam());
 			if (allies.length >= 14) {
 				int effectiveSoldiers = 0;
@@ -159,7 +164,6 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 			rc.broadcast(Broadcast.gameStageCh, Broadcast.NO_SOLDIER_GAME);
 			return;
 		}
-		
 		rc.broadcast(Broadcast.gameStageCh, Broadcast.EARLY_GAME);
 	}
 }

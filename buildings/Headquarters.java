@@ -17,7 +17,6 @@ public class Headquarters extends Building {
 
 	public final static int TIME_COLLECT_SUPPLY = 350;
 	public final static int TIME_FULL_ATTACK = 200;
-	//private final static int ORE_WINDOW = 100;
 	
 	private GameStrategy gameStrategy;
 	private int strategy;
@@ -26,12 +25,6 @@ public class Headquarters extends Building {
 
 	private int numTowersInitial;
 	private int enemyTowersRemaining;
-
-	/*
-	private double[] oreMined;
-	private double oreRate;
-	private int orePointer;
-	*/
 	
 	public Headquarters(RobotController newRC) {
 		super(newRC);
@@ -52,12 +45,7 @@ public class Headquarters extends Building {
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}
-	
-		/*
-		oreMined = new double[ORE_WINDOW];
-		oreRate = 5;
-		orePointer = 0;
-		*/
+
 		switch(this.strategy) {
 		case AERIAL_STRATEGY:		gameStrategy = new AerialStrategy(rc, this);
 									break;
@@ -76,7 +64,6 @@ public class Headquarters extends Building {
 		else {
 			rc.broadcast(Broadcast.enemyNearHQ, 0);
 		}
-		//rc.setIndicatorString(2, String.valueOf(closestEnemyLocation));
 		
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
 
@@ -122,7 +109,7 @@ public class Headquarters extends Building {
 					}
 				}
 			}
-			else if (r.type == RobotType.SOLDIER || r.type == RobotType.TANK) {
+			else if (r.type == RobotType.SOLDIER) {
 				if (r.supplyLevel < r.type.supplyUpkeep * 8 * distanceFactor) {
 					if (priority == 0 || (r.supplyLevel == 0 && priority < 4)) {
 						loc = r.location;
@@ -191,11 +178,6 @@ public class Headquarters extends Building {
 			}
 		}
 
-		/* Compute rate of ore generation
-		oreMined[orePointer] = rc.readBroadcast(Broadcast.minerOreX1000Ch) / 1000.0;
-		oreRate = oreRate + (oreMined[orePointer] - oreMined[(orePointer + ORE_WINDOW - 1) % ORE_WINDOW]) / ORE_WINDOW;
-		orePointer = (orePointer + 1) % ORE_WINDOW;
-		*/
 		this.gameStrategy.executeStrategy();
 	}
 	
