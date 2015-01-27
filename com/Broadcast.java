@@ -33,9 +33,8 @@ public class Broadcast {
 	public static final int soldierTowerTarget2Exists = 17;
 
 	// Misc
-	public static final int minerOreX1000Ch = 17;
-	public static final int minersProducedCh = 18;
-	public static final int enemyHQLocation = 19;
+	public static final int minerOreX1000Ch = 18;
+	public static final int minersProducedCh = 19;
 	
 	// Channels for grouping
 	public static final int groupingSoldiersCh = 20;
@@ -62,6 +61,8 @@ public class Broadcast {
 	// target commanded by the towers
 	public static final int attackedTowerLocationChs = 48;
 	public static final int enemyNearTowerLocationChs = 50;
+
+	public static final int enemyHQLocation = 52;
 	
 	
 	
