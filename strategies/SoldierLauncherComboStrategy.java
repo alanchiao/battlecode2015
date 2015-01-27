@@ -17,8 +17,6 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 	
 	private boolean enemyRush;
 	private int pathDifficulty;
-	private int attackGroup;
-	private int defendGroup;
 	private boolean isMidGame;
 	public final static int ATTACK_GROUP = 0;
 	public final static int DEFENSE_GROUP = 1;
@@ -27,9 +25,7 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 	
 	public SoldierLauncherComboStrategy(RobotController rc, GroupController gc, Headquarters hq) {
 		super(rc, gc, hq);
-		
-		this.attackGroup = 1;
-		this.defendGroup = 0;
+
 		this.enemyRush = false;
 		this.pathDifficulty = 0;
 		this.scoutMiner = 0;
@@ -109,7 +105,7 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 
 		if (rc.isCoreReady()) {
 			double ore = rc.getTeamOre();
-			if (numBeavers == 0 || (numBeavers == 1 && numMinerFactories >= 1)) {
+			if (numBeavers == 0 || (numBeavers < 2 && numMinerFactories >= 1)) {
 				int offsetIndex = 0;
 				int[] offsets = {0,1,-1,2,-2,3,-3,4};
 				int dirint = DirectionHelper.directionToInt(Direction.EAST);
@@ -125,14 +121,10 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 				}
 			}
 		}
-		
-		int[] groupSize = {numLaunchersDefense, numLaunchersAttack};
+
 		if (numLaunchersAttack > 0 || numLaunchersDefense > 0) {
 			gc.stopGroup(RobotType.LAUNCHER);
 		}
-		
-//		rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
-//		rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
 
 		MapLocation closestTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 		MapLocation myLocation = rc.getLocation();
@@ -145,18 +137,18 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		
 		if (Clock.getRoundNum() < (rc.getRoundLimit() - 100 - Math.sqrt(distance)*4)) {
 			// launcher grouping logic
-			if (enemyRush && numLaunchersDefense < 5) {
+			if (enemyRush && numLaunchersDefense < 3) {
 				gc.groupUnits(RobotType.LAUNCHER, DEFENSE_GROUP);
 				rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
-			} else	if (numLaunchersAttack >= 5) {
+			} else if (numLaunchersAttack >= 3) {
 				gc.groupUnits(RobotType.LAUNCHER, ATTACK_GROUP);
 				rc.broadcast(Broadcast.launcherGroupAttackCh, 1);
 			} else {
 				gc.groupUnits(RobotType.LAUNCHER, ATTACK_GROUP);
 				rc.broadcast(Broadcast.launcherGroupAttackCh, 0);				
 			}
-			boolean isMidGame = rc.readBroadcast(Broadcast.isMidGameCh) == 1;
-			
+
+			isMidGame = rc.readBroadcast(Broadcast.isMidGameCh) == 1;
 			if (!isMidGame) {
 			// soldier grouping logic
 				if (numSoldiersAttack < 6) {

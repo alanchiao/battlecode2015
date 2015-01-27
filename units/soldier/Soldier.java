@@ -26,7 +26,7 @@ public class Soldier extends Unit {
 
 	@Override
 	protected void actions() throws GameActionException {
-		//if soldier sees 2 or more launchers or tanks, it is midgame
+		// if soldier sees 2 or more launchers or tanks, it is midgame
 		boolean isMidGame = rc.readBroadcast(Broadcast.isMidGameCh) == 1;
 		if (!isMidGame) {
 			RobotInfo[] enemyAround = rc.senseNearbyRobots(RobotType.SOLDIER.sensorRadiusSquared, rc.getTeam().opponent());
@@ -35,7 +35,7 @@ public class Soldier extends Unit {
 				if (e.type == RobotType.TANK || e.type == RobotType.LAUNCHER) {
 					countLauncherTank++;
 				}
-				if (countLauncherTank >=2) {
+				if (countLauncherTank >= 2) {
 					rc.broadcast(Broadcast.isMidGameCh, 1);
 					break;
 				}
@@ -48,46 +48,27 @@ public class Soldier extends Unit {
 					rc.attackLocation(selectTarget(enemies));
 				}
 			}
-			
 			if (rc.isCoreReady()) {
 				computeStuff();
 				this.soldierMoveWithMicro(enemyHQ);
 			}
 			return;
 		}
-		else if (!isMidGame && rc.isCoreReady()) {
-			computeStuff();
-			if (rc.getSupplyLevel() == 0) {
-				soldierMoveWithMicro(ownHQ);
-			}
-			else {
-				harasser.harass();
-			}
-		}
-		else if (isMidGame && rc.isCoreReady()) {
-			
-		}
-		/**
-
-		if (rc.isCoreReady()) {
-			MapLocation target = groupTracker.getRallyPoint();
-			// just always moveToDestination target?
-			if (groupTracker.isGrouped()) {
-				boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-				rc.setIndicatorString(1, String.valueOf(hasHQCommand));
-				if (hasHQCommand) {
-					target = enemyHQ;
+		else {
+			if (rc.isCoreReady()) {
+				if (rc.getSupplyLevel() == 0) {
+					computeStuff();
+					soldierMoveWithMicro(ownHQ);
+					return;
 				}
-				else {
-					target = groupTracker.getRallyPoint();
+				if (!isMidGame) {
+					harasser.harass();
+				}
+				else if (isMidGame) {
+					harasser.harass();
 				}
 			}
-			else {
-				target = groupTracker.getRallyPoint();
-			}
-			soldierMoveWithMicro(target);
 		}
-		**/
 	}
 	
 	protected void chargeToLocation(MapLocation target) throws GameActionException {

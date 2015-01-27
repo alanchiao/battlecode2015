@@ -17,16 +17,12 @@ public class AerialStrategy extends GameStrategy {
 	
 	private boolean enemyRush;
 	private int pathDifficulty;
-	private int attackGroup;
-	private int defendGroup;
 	
 	private int scoutMiner;
 	
 	public AerialStrategy(RobotController rc, GroupController gc, Headquarters hq) {
 		super(rc, gc, hq);
 		
-		this.attackGroup = 1;
-		this.defendGroup = 0;
 		this.enemyRush = false;
 		this.pathDifficulty = 0;
 		this.scoutMiner = 0;
@@ -110,14 +106,10 @@ public class AerialStrategy extends GameStrategy {
 				}
 			}
 		}
-		
-		int[] groupSize = {numLaunchersDefense, numLaunchersAttack};
+
 		if (numLaunchersAttack > 0 || numLaunchersDefense > 0) {
 			gc.stopGroup(RobotType.LAUNCHER);
 		}
-		
-//		rc.setIndicatorString(1, Integer.toString(groupSize[attackGroup]));
-//		rc.setIndicatorString(2, Integer.toString(groupSize[defendGroup]));
 
 		MapLocation closestTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 		MapLocation myLocation = rc.getLocation();
@@ -132,7 +124,7 @@ public class AerialStrategy extends GameStrategy {
 			if (enemyRush && numLaunchersDefense < 5) {
 				gc.groupUnits(RobotType.LAUNCHER, 1);
 				rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
-			} else	if (numLaunchersAttack >= 6) {
+			} else if (numLaunchersAttack >= 6) {
 				gc.groupUnits(RobotType.LAUNCHER, 0);
 				rc.broadcast(Broadcast.launcherGroupAttackCh, 1);
 			} else {
