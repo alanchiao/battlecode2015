@@ -53,11 +53,11 @@ public class Soldier extends Unit {
 					return;
 				}
 				if (groupTracker.isGrouped()) {
-					if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocationChs)) {
+					if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocation1Chs)) {
 						harasser.harass();
 					}
 					else {
-						soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocationChs));
+						soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation1Chs));
 					}
 				}
 				else if (rc.readBroadcast(Broadcast.isMidGameCh) == 1) {
@@ -71,7 +71,7 @@ public class Soldier extends Unit {
 				else {
 					RobotInfo[] enemyAround = rc.senseNearbyRobots(RobotType.SOLDIER.sensorRadiusSquared, rc.getTeam().opponent());
 					int countLauncherTank = 0;
-					for (RobotInfo e : enemyAround) { 
+					for (RobotInfo e : enemyAround) {
 						if (e.type == RobotType.TANK || e.type == RobotType.LAUNCHER) {
 							countLauncherTank++;
 						}

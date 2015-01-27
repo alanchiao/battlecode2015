@@ -149,23 +149,10 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 			}
 
 			isMidGame = rc.readBroadcast(Broadcast.isMidGameCh) == 1;
-			if (!isMidGame) {
-			// soldier grouping logic
-				if (numSoldiersAttack < 6) {
-					gc.groupUnits(RobotType.SOLDIER, ATTACK_GROUP);
-					rc.broadcast(Broadcast.soldierGroupAttackCh, 0);
-				} else {
-					gc.groupUnits(RobotType.SOLDIER, DEFENSE_GROUP);
-					rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
-				}
-			}
-			else if (isMidGame) {
+			if (isMidGame) {
 				if (numSoldiers - numSoldiersAttack < 12) {
 					gc.groupUnits(RobotType.SOLDIER, ATTACK_GROUP);
 					rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
-				} else {
-					gc.groupUnits(RobotType.SOLDIER, DEFENSE_GROUP);
-					rc.broadcast(Broadcast.soldierGroupDefenseCh, 1);
 				}
 			}
 		}
