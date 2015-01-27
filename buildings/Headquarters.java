@@ -9,7 +9,6 @@ import team158.strategies.AerialStrategy;
 import team158.strategies.GameStrategy;
 import team158.strategies.SoldierLauncherComboStrategy;
 import team158.units.Unit;
-import team158.utils.DirectionHelper;
 
 public class Headquarters extends Building {
 
@@ -31,7 +30,6 @@ public class Headquarters extends Building {
 
 	private int numTowersInitial;
 	private int enemyTowersRemaining;
-	private int numTowersDefeatableWOL;
 
 	/*
 	private double[] oreMined;
@@ -338,7 +336,7 @@ public class Headquarters extends Building {
 		}
 		return false;
 	}
-	
+
 	public double computePerpendicularDistance(MapLocation candidate) {
 		double x1 = ownHQ.x;
 		double x2 = enemyHQ.x;

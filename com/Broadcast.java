@@ -49,11 +49,13 @@ public class Broadcast {
 	public static final int launcherAttackLocationChs = 36;
 	public static final int soldierHarassLocationChs = 38;
 	// target commanded by the HQ
-	public static final int enemyTowerTargetLocationChs = 40;
-	public static final int enemyNearHQLocationChs = 42;
+	public static final int soldierTowerTargetLocationChs = 40;
+	public static final int soldierTowerTargetLocation2Chs = 42;
+	public static final int enemyTowerTargetLocationChs = 44;
+	public static final int enemyNearHQLocationChs = 46;
 	// target commanded by the towers
-	public static final int attackedTowerLocationChs = 44;
-	public static final int enemyNearTowerLocationChs = 46;
+	public static final int attackedTowerLocationChs = 48;
+	public static final int enemyNearTowerLocationChs = 50;
 	
 	// Channels 8000 -  65121 on for internal map representation (remember 9999 is used somewhere)
 	public static final int internalMapHQCh = 36880;
