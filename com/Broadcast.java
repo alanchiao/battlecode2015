@@ -29,8 +29,8 @@ public class Broadcast {
 	public static final int towerAttacked = 13;
 	public static final int enemyNearTower = 14;
 	public static final int gameStageCh = 15; // EARLY_GAME, EARLY_MID_GAME, or MID_GAME.
-	public static final int soldierTowerTarget1Exists = 16;
-	public static final int soldierTowerTarget2Exists = 17;
+	public static final int soldierTowerTarget1ExistsCh = 16;
+	public static final int soldierTowerTarget2ExistsCh = 17;
 
 	// Misc
 	public static final int minerOreX1000Ch = 18;
@@ -38,12 +38,9 @@ public class Broadcast {
 	
 	// Channels for grouping
 	public static final int groupingSoldiersCh = 20;
-	public static final int groupingDronesCh = 21;
 	public static final int groupingLaunchersCh = 22;
-	public static final int soldierGroupAttackCh = 23;
-	public static final int soldierGroupDefenseCh = 24;
-	public static final int droneGroupAttackCh = 25;
-	public static final int droneGroupDefenseCh = 26;
+	public static final int soldierGroup1Ch = 23;
+	public static final int soldierGroup2Ch = 24;
 	public static final int launcherGroupAttackCh = 27;
 	public static final int launcherGroupDefenseCh = 28;
 

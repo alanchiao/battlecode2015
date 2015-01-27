@@ -259,19 +259,19 @@ public class Headquarters extends Building {
 			}
 		}
 		if (targetTower1 == null) {
-			rc.broadcast(Broadcast.soldierTowerTarget1Exists, 0);
+			rc.broadcast(Broadcast.soldierTowerTarget1ExistsCh, 0);
 		}
 		else {			
-			rc.broadcast(Broadcast.soldierTowerTarget1Exists, 1);
+			rc.broadcast(Broadcast.soldierTowerTarget1ExistsCh, 1);
 			Broadcast.broadcastLocation(rc, Broadcast.soldierTowerTargetLocation1Chs, targetTower1);
 			rc.setIndicatorString(1, String.valueOf(targetTower1));
 		}
 		
 		if (targetTower2 == null) {
-			rc.broadcast(Broadcast.soldierTowerTarget2Exists, 0);
+			rc.broadcast(Broadcast.soldierTowerTarget2ExistsCh, 0);
 		}
 		else {			
-			rc.broadcast(Broadcast.soldierTowerTarget2Exists, 1);
+			rc.broadcast(Broadcast.soldierTowerTarget2ExistsCh, 1);
 			Broadcast.broadcastLocation(rc, Broadcast.soldierTowerTargetLocation2Chs, targetTower2);
 			rc.setIndicatorString(2, String.valueOf(targetTower2));
 		}

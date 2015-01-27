@@ -11,10 +11,6 @@ public class GroupController {
 	// high-level game information
 	private RobotController rc;
 	// two group management code
-	int ptDroneA;
-	int ptDroneB;
-	int[] droneGroupA;
-	int[] droneGroupB;
 	int ptSoldierA;
 	int ptSoldierB;
 	int[] soldierGroupA;
@@ -36,33 +32,26 @@ public class GroupController {
 		this.ptSoldierB = 0;
 		this.soldierGroupA = new int[256];
 		this.soldierGroupB = new int[256];
-		this.ptDroneA = 0;
-		this.ptDroneB = 0;
-		this.droneGroupA = new int[256];
-		this.droneGroupB = new int[512];
 		this.ptLauncherA = 0;
 		this.ptLauncherB = 0;
 		this.launcherGroupA = new int[256];
 		this.launcherGroupB = new int[256];
 
 		// roboTypes contains the robotType in a list
-		this.roboTypes = new RobotType[] {RobotType.SOLDIER, RobotType.DRONE, RobotType.LAUNCHER};
+		this.roboTypes = new RobotType[] {RobotType.SOLDIER, RobotType.LAUNCHER};
 		// attackGroups and defenseGroups contains the different groups
-		this.attackGroups = new int[][] {this.soldierGroupA, this.droneGroupA, this.launcherGroupA};
-		this.defenseGroups = new int[][] {this.soldierGroupB, this.droneGroupB, this.launcherGroupB};
-		this.broadcastChannels = new int[][] {{Broadcast.soldierGroupAttackCh, Broadcast.soldierGroupDefenseCh},
-												{Broadcast.droneGroupAttackCh, Broadcast.droneGroupDefenseCh},
+		this.attackGroups = new int[][] {this.soldierGroupA, this.launcherGroupA};
+		this.defenseGroups = new int[][] {this.soldierGroupB, this.launcherGroupB};
+		this.broadcastChannels = new int[][] {{Broadcast.soldierGroup1Ch, Broadcast.soldierGroup2Ch},
 												{Broadcast.launcherGroupAttackCh, Broadcast.launcherGroupDefenseCh}};
 		this.pointers = new int[][] {{ptSoldierA, ptSoldierB},
-										{ptDroneA, ptDroneB},
 										{ptLauncherA, ptLauncherB}};
 		
 	}
 	
 	public int rcToIntConvert(RobotType rt) {
 		if (rt == RobotType.SOLDIER) return 0;
-		else if (rt == RobotType.DRONE) return 1;
-		else if (rt == RobotType.LAUNCHER) return 2;
+		else if (rt == RobotType.LAUNCHER) return 1;
 		else return -1;
 	}
 	
@@ -94,10 +83,7 @@ public class GroupController {
 		}
 		
 		int broadcastCh;
-		if (rt == RobotType.DRONE) {
-			broadcastCh = Broadcast.groupingDronesCh;
-		}
-		else if (rt == RobotType.LAUNCHER) {
+		if (rt == RobotType.LAUNCHER) {
 			broadcastCh = Broadcast.groupingLaunchersCh;
 		}
 		else if (rt == RobotType.SOLDIER) {
@@ -108,22 +94,6 @@ public class GroupController {
 		}
 		try {
 			rc.broadcast(broadcastCh, ID_Broadcast);
-		}
-		catch (GameActionException e) {
-			return;
-		}
-	}
-		
-	public void stopGroup(RobotType rt) {
-		int broadcastCh;
-		if (rt == RobotType.DRONE) {
-			broadcastCh = Broadcast.groupingDronesCh;
-		}
-		else {
-			broadcastCh = 9999;
-		}
-		try {
-			rc.broadcast(broadcastCh, 0);
 		}
 		catch (GameActionException e) {
 			return;

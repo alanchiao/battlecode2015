@@ -107,10 +107,6 @@ public class AerialStrategy extends GameStrategy {
 			}
 		}
 
-		if (numLaunchersAttack > 0 || numLaunchersDefense > 0) {
-			gc.stopGroup(RobotType.LAUNCHER);
-		}
-
 		MapLocation closestTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 		MapLocation myLocation = rc.getLocation();
 		int distance = myLocation.distanceSquaredTo(closestTower);
