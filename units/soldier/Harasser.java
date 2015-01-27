@@ -1,7 +1,6 @@
 package team158.units.soldier;
 
 import team158.com.Broadcast;
-import team158.units.Unit;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -66,12 +65,6 @@ public class Harasser {
 
 		if (this.state == SEARCH_STATE) { // then randomly move around searching for miner/beaver while avoiding attack
 			rc.setIndicatorString(0, Integer.toString(this.state));
-			if (rc.isWeaponReady()) {
-				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
-				if (enemies.length > 0) { 
-					rc.attackLocation(Unit.selectTarget(enemies));
-				}
-			}
 			
 			if (rc.isCoreReady()) {
 				// move back and forward between two search destinations
@@ -113,13 +106,6 @@ public class Harasser {
 				this.state = SEARCH_STATE;
 				harass();
 				return;
-			}
-			
-			if (rc.isWeaponReady()) {
-				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
-				if (enemies.length > 0) { 
-					rc.attackLocation(Unit.selectTarget(enemies));
-				}
 			}
 			
 			if (rc.isCoreReady()) {

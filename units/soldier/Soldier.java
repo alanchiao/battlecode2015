@@ -55,9 +55,15 @@ public class Soldier extends Unit {
 			return;
 		}
 		else {
+			if (rc.isWeaponReady()) {
+				RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, rc.getTeam().opponent());
+				if (enemies.length > 0) { 
+					rc.attackLocation(Unit.selectTarget(enemies));
+				}
+			}
 			if (rc.isCoreReady()) {
+				computeStuff();
 				if (rc.getSupplyLevel() == 0) {
-					computeStuff();
 					soldierMoveWithMicro(ownHQ);
 					return;
 				}
