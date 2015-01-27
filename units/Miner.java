@@ -58,9 +58,11 @@ public class Miner extends Unit {
 				double maxOre = 0;
 				Direction bestDirection = null;
 				// looks around for an ore concentration that is bigger than its current location by a certain fraction
-				for (Direction dir: DirectionHelper.directions) {
+				int dirI = rand.nextInt(8);
+				for (int i = 0; i <= 7; i++) {
+					Direction dir = DirectionHelper.directions[(dirI + i) % 8];
 					double possibleOre = rc.senseOre(myLocation.add(dir));
-					if (possibleOre > maxOre && rc.canMove(dir) && damages[DirectionHelper.directionToInt(dir)] == 0) {
+					if (possibleOre > maxOre && rc.canMove(dir) && damages[(dirI + i) % 8] == 0) {
 						maxOre = possibleOre;
 						bestDirection = dir;
 					}
