@@ -13,6 +13,7 @@ import battlecode.common.MapLocation;
 public class SoldierLauncherComboStrategy extends GameStrategy {
 
 	private int pathDifficulty;
+	private int turnsSinceScoutLeft;
 
 	public final static int ATTACK_GROUP = 0;
 	public final static int DEFENSE_GROUP = 1;
@@ -25,6 +26,7 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 
 		this.pathDifficulty = 0;
 		this.scoutMiner = 0;
+		
 		this.enemyHQ = rc.senseEnemyHQLocation();
 		
 		try {
@@ -54,6 +56,8 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 				if (scoutMiner == 0) {
 					scoutMiner = r.ID;
 					rc.broadcast(Broadcast.scoutEnemyHQCh, scoutMiner);
+				} else {
+					turnsSinceScoutLeft++;
 				}
 			} else if (type == RobotType.DRONE) {
 				numDrones++;
@@ -91,11 +95,12 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 			int possibleDifficulty = rc.readBroadcast(Broadcast.scoutEnemyHQCh);
 			if (possibleDifficulty != scoutMiner) {
 				pathDifficulty = possibleDifficulty;
-				// switch to mid game harass condition 3 : map too large
-				// TODO: more consistent when our scout dies / doesn't reach destination
-				if (pathDifficulty >= 140 ) {
+				// switch to mid game harass condition 3 : map too hard to navigate
+				if (pathDifficulty >= 280 ) {
 					rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
 				}
+			} else if (turnsSinceScoutLeft >= 280) {
+				rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
 			}
 		}
 
@@ -136,14 +141,12 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 	}
 	
 	public void selectInitialStage() throws GameActionException {
-		
-		// start as early_mid condition 1 : stage too small
-		if (hq.distanceBetweenHQ >= 4900) {
+		if (hq.distanceBetweenHQ <= 70) {
 			System.out.println("distance between HQ + " + Double.toString(hq.distanceBetweenHQ));
 			rc.broadcast(Broadcast.gameStageCh, Broadcast.NO_SOLDIER_GAME);
 			return;
 		}
-		// start as early_mid condition 2 : too many resources in safe zones
+		
 		MapLocation[] nearbySquares = MapLocation.getAllMapLocationsWithinRadiusSq(rc.getLocation(), 35);
 		int totalOre = 0;
 		for (MapLocation square: nearbySquares) {
