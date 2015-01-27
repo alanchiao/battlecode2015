@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import battlecode.common.*;
 import team158.com.Broadcast;
-import team158.com.GroupController;
 import team158.strategies.AerialStrategy;
 import team158.strategies.GameStrategy;
 import team158.strategies.SoldierLauncherComboStrategy;
@@ -20,7 +19,6 @@ public class Headquarters extends Building {
 	public final static int TIME_FULL_ATTACK = 200;
 	//private final static int ORE_WINDOW = 100;
 	
-	private GroupController gc;
 	private GameStrategy gameStrategy;
 	private int strategy;
 
@@ -38,7 +36,6 @@ public class Headquarters extends Building {
 	public Headquarters(RobotController newRC) {
 		super(newRC);
 		this.strategy = DUAL_STRATEGY;
-		this.gc = new GroupController(rc, strategy);
 		
 		towerOrder = new MapLocation[6];
 		enemyTowersRemaining = 7;
@@ -61,29 +58,25 @@ public class Headquarters extends Building {
 		orePointer = 0;
 		*/
 		switch(this.strategy) {
-		case AERIAL_STRATEGY:		gameStrategy = new AerialStrategy(rc, gc, this);
+		case AERIAL_STRATEGY:		gameStrategy = new AerialStrategy(rc, this);
 									break;
-		case DUAL_STRATEGY:			gameStrategy = new SoldierLauncherComboStrategy(rc, gc, this);
+		case DUAL_STRATEGY:			gameStrategy = new SoldierLauncherComboStrategy(rc, this);
 	}
 	}
 	
 	@Override
 	protected void actions() throws GameActionException {
 		broadcastVulnerableEnemyTowerAttack();
-		RobotInfo closestEnemy = super.findClosestEnemy((int)(hqDistance*hqDistance)/8);
-		MapLocation closestEnemyLocation;
-		if (closestEnemy == null) {
-			// hack -- broadcast to Launcher Rally Location 
-			closestEnemyLocation = Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs);
-		} else {
-			closestEnemyLocation = closestEnemy.location;
+		RobotInfo closestEnemy = super.findClosestEnemy((int)(distanceBetweenHQ*distanceBetweenHQ)/8);
+		if (closestEnemy != null) {
+			rc.broadcast(Broadcast.enemyNearHQ, 1);
+			Broadcast.broadcastLocation(rc, Broadcast.enemyNearHQLocationChs, closestEnemy.location);
 		}
 		//rc.setIndicatorString(2, String.valueOf(closestEnemyLocation));
-		Broadcast.broadcastLocation(rc, Broadcast.enemyNearHQLocationChs, closestEnemyLocation);
 		
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
 
-		int distanceFactor = (int) hqDistance;
+		int distanceFactor = (int) distanceBetweenHQ;
 
 		MapLocation loc = null;
 		int supplyAmount = 0;

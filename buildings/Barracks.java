@@ -21,7 +21,7 @@ public class Barracks extends Building {
 		int dirint = DirectionHelper.directionToInt(myLocation.directionTo(enemyHQ));
 		if (Broadcast.isNotInitialized(rc, Broadcast.soldierRallyLocationChs)) {
 			MapLocation rally = myLocation;
-			int rallyDistance = (int)hqDistance / 6;
+			int rallyDistance = (int)distanceBetweenHQ / 6;
 			for (int i = 0; i < rallyDistance; i++) {
 				int offsetIndex = 0;
 				while (offsetIndex < 8) {

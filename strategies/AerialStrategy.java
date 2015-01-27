@@ -2,28 +2,22 @@ package team158.strategies;
 
 import team158.buildings.Headquarters;
 import team158.com.Broadcast;
-import team158.com.GroupController;
 import team158.utils.DirectionHelper;
-import team158.utils.Hashing;
-import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import battlecode.common.MapLocation;
 
 public class AerialStrategy extends GameStrategy {
 	
-	private boolean enemyRush;
 	private int pathDifficulty;
 	
 	private int scoutMiner;
 	
-	public AerialStrategy(RobotController rc, GroupController gc, Headquarters hq) {
-		super(rc, gc, hq);
+	public AerialStrategy(RobotController rc, Headquarters hq) {
+		super(rc, hq);
 		
-		this.enemyRush = false;
 		this.pathDifficulty = 0;
 		this.scoutMiner = 0;
 	}
@@ -36,8 +30,6 @@ public class AerialStrategy extends GameStrategy {
 		int numSupplyDepots = 0;
 		int numDrones = 0;
 		int numLaunchers = 0;
-		int numLaunchersAttack = 0;
-		int numLaunchersDefense = 0;
 		int numHelipads = 0;
 		int numAerospaceLabs = 0;
 		for (RobotInfo r : myRobots) {
@@ -62,13 +54,7 @@ public class AerialStrategy extends GameStrategy {
 			} else if (type == RobotType.AEROSPACELAB) {
 				numAerospaceLabs++;
 			} else if (type == RobotType.LAUNCHER) {
-				numLaunchers++;
-				if (Hashing.find(r.ID) == Broadcast.launcherGroupAttackCh) {
-					numLaunchersAttack++;
-				}							
-				else if (Hashing.find(r.ID)  == Broadcast.launcherGroupDefenseCh) {
-					numLaunchersDefense++;
-				}	
+				numLaunchers++;	
 			}
 		}
 		
@@ -105,32 +91,6 @@ public class AerialStrategy extends GameStrategy {
 					rc.spawn(buildDirection, RobotType.BEAVER);
 				}
 			}
-		}
-
-		MapLocation closestTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-		MapLocation myLocation = rc.getLocation();
-		int distance = myLocation.distanceSquaredTo(closestTower);
-		MapLocation enemyHQ = rc.senseEnemyHQLocation();
-		int hqDistance = myLocation.distanceSquaredTo(enemyHQ);
-		if (hqDistance < distance) {
-			distance = hqDistance; 
-		}
-		
-		if (Clock.getRoundNum() < (rc.getRoundLimit() - 100 - Math.sqrt(distance)*4)) {
-			if (enemyRush && numLaunchersDefense < 5) {
-				gc.groupUnits(RobotType.LAUNCHER, 1);
-				rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
-			} else if (numLaunchersAttack >= 6) {
-				gc.groupUnits(RobotType.LAUNCHER, 0);
-				rc.broadcast(Broadcast.launcherGroupAttackCh, 1);
-			} else {
-				gc.groupUnits(RobotType.LAUNCHER, 0);
-				rc.broadcast(Broadcast.launcherGroupAttackCh, 0);				
-			}
-		}
-		else {
-			gc.groupUnits(RobotType.LAUNCHER, 1);
-			rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
 		}
 	}
 }
