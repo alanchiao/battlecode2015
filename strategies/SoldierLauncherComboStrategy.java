@@ -26,6 +26,12 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		this.pathDifficulty = 0;
 		this.scoutMiner = 0;
 		this.enemyHQ = rc.senseEnemyHQLocation();
+		
+		try {
+			selectInitialStage();
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void executeStrategy() throws GameActionException {
@@ -85,9 +91,11 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 			int possibleDifficulty = rc.readBroadcast(Broadcast.scoutEnemyHQCh);
 			if (possibleDifficulty != scoutMiner) {
 				pathDifficulty = possibleDifficulty;
-				// switch to early_mid condition 3 : map too large
+				// switch to mid game harass condition 3 : map too large
 				// TODO: more consistent when our scout dies / doesn't reach destination
-				selectInitialStage(pathDifficulty);
+				if (pathDifficulty >= 140 ) {
+					rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
+				}
 			}
 		}
 
@@ -127,21 +135,25 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		}
 	}
 	
-	public void selectInitialStage(int pathDifficulty) throws GameActionException {
-		// start as early_mid condition 1 : stage too large
-		if (hq.distanceBetweenHQ >= 4000 ||pathDifficulty >= 200) {
-			rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
+	public void selectInitialStage() throws GameActionException {
+		
+		// start as early_mid condition 1 : stage too small
+		if (hq.distanceBetweenHQ >= 4900) {
+			System.out.println("distance between HQ + " + Double.toString(hq.distanceBetweenHQ));
+			rc.broadcast(Broadcast.gameStageCh, Broadcast.NO_SOLDIER_GAME);
 			return;
 		}
 		// start as early_mid condition 2 : too many resources in safe zones
-		MapLocation[] nearbySquares = MapLocation.getAllMapLocationsWithinRadiusSq(rc.getLocation(), 100);
+		MapLocation[] nearbySquares = MapLocation.getAllMapLocationsWithinRadiusSq(rc.getLocation(), 35);
 		int totalOre = 0;
 		for (MapLocation square: nearbySquares) {
 			totalOre += rc.senseOre(square);
 		}
-		if (totalOre >= 1500) {
-			rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
+		if (totalOre <= 840) { // 84 squares * 10 on average
+			rc.broadcast(Broadcast.gameStageCh, Broadcast.NO_SOLDIER_GAME);
 			return;
 		}
+		
+		rc.broadcast(Broadcast.gameStageCh, Broadcast.EARLY_GAME);
 	}
 }

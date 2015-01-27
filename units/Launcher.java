@@ -143,20 +143,7 @@ public class Launcher extends Unit {
 				if (rc.canLaunch(directionToTarget)) {
 					rc.launchMissile(directionToTarget);
 				} 
-			} else {
-				/**
-				if (rc.getMissileCount() == 5) {
-					Direction dirToEnemyHQ = myLocation.directionTo(enemyHQ);
-					if (rc.canLaunch(dirToEnemyHQ)) {
-						rc.launchMissile(dirToEnemyHQ);
-					} else if (rc.canLaunch(dirToEnemyHQ.rotateLeft())) {
-						rc.launchMissile(dirToEnemyHQ.rotateLeft());
-					} else if (rc.canLaunch(dirToEnemyHQ.rotateRight())) {
-						rc.launchMissile(dirToEnemyHQ.rotateRight());
-					}
-				}
-				**/
-			}
+			} 
         }
 		
 		// sense nearby missile - run away

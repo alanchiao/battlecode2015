@@ -6,6 +6,7 @@ import battlecode.common.RobotController;
 
 public class Broadcast {
 	
+	public static final int NO_SOLDIER_GAME = -11;
 	public static final int EARLY_GAME = -10;
 	public static final int MID_GAME = -9;
 	public static final int LATE_GAME = -8;
