@@ -188,7 +188,7 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		for (MapLocation square: nearbySquares) {
 			totalOre += rc.senseOre(square);
 		}
-		if (totalOre >= 1000) {
+		if (totalOre >= 1500) {
 			rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
 			return;
 		}
