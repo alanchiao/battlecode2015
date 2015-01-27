@@ -149,8 +149,8 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 	}
 	
 	public void selectInitialStage() throws GameActionException {
+		System.out.println("distance between HQ: " + Double.toString(hq.distanceBetweenHQ));
 		if (hq.distanceBetweenHQ <= 70) {
-			System.out.println("distance between HQ: " + Double.toString(hq.distanceBetweenHQ));
 			rc.broadcast(Broadcast.gameStageCh, Broadcast.NO_SOLDIER_GAME);
 			return;
 		}
@@ -164,6 +164,11 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 			rc.broadcast(Broadcast.gameStageCh, Broadcast.NO_SOLDIER_GAME);
 			return;
 		}
+		if (rc.readBroadcast(Broadcast.soldierTowerTargetExistsCh) == 0) { // no tower to attack
+			rc.broadcast(Broadcast.gameStageCh, Broadcast.NO_SOLDIER_GAME);
+			return;
+		}
+
 		rc.broadcast(Broadcast.gameStageCh, Broadcast.EARLY_GAME);
 	}
 }
