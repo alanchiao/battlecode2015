@@ -44,7 +44,8 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		int numLaunchersAttack = 0;
 		int numLaunchersDefense = 0;
 		int numSoldiers = 0;
-		int numSoldiersAttack = 0;
+		int numSoldiersAttack1 = 0;
+		int numSoldiersAttack2 = 0;
 		int numHelipads = 0;
 		int numAerospaceLabs = 0;
 		int numBarracks = 0;
@@ -63,9 +64,12 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 				numBeavers++;
 			} else if (type == RobotType.SOLDIER) {
 				numSoldiers++;
-				if (Hashing.find(r.ID) == Broadcast.soldierGroupAttackCh) {
-					numSoldiersAttack++;
-				}	
+				if (Hashing.find(r.ID) == Broadcast.soldierGroup1Ch) {
+					numSoldiersAttack1++;
+				}
+				if (Hashing.find(r.ID) == Broadcast.soldierGroup2Ch) {
+					numSoldiersAttack2++;
+				}
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
 			} else if (type == RobotType.SUPPLYDEPOT) {
@@ -127,10 +131,6 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 			}
 		}
 
-		if (numLaunchersAttack > 0 || numLaunchersDefense > 0) {
-			gc.stopGroup(RobotType.LAUNCHER);
-		}
-
 		MapLocation closestTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
 		MapLocation myLocation = rc.getLocation();
 		int distance = myLocation.distanceSquaredTo(closestTower);
@@ -153,20 +153,12 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 			}
 
 			int gameStage = rc.readBroadcast(Broadcast.gameStageCh);
-			if (gameStage == Broadcast.EARLY_GAME || gameStage == Broadcast.LATE_GAME) {
-				// soldier grouping logic
-				if (numSoldiersAttack < 6) {
-					gc.groupUnits(RobotType.SOLDIER, ATTACK_GROUP);
-					rc.broadcast(Broadcast.soldierGroupAttackCh, 0);
-				} else {
-					gc.groupUnits(RobotType.SOLDIER, DEFENSE_GROUP);
-					rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
+			if (gameStage == Broadcast.MID_GAME) {
+				if (numSoldiersAttack1 < 13) {
+					gc.groupUnits(RobotType.SOLDIER, 0);
 				}
-			}
-			else if (gameStage == Broadcast.MID_GAME) {
-				if (numSoldiers - numSoldiersAttack < 12) {
-					gc.groupUnits(RobotType.SOLDIER, ATTACK_GROUP);
-					rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
+				else if (numSoldiersAttack2 < 13) {
+					gc.groupUnits(RobotType.SOLDIER, 1);
 				}
 			}
 		}

@@ -2,7 +2,6 @@ package team158.units.soldier;
 
 import java.util.Arrays;
 
-import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -18,16 +17,17 @@ import team158.com.Broadcast;
 public class Soldier extends Unit {
 	
 	private Harasser harasser;
+	boolean attackTower;
 	
 	public Soldier(RobotController newRC) {
 		super(newRC);
 		harasser = new Harasser(newRC, this);
+		attackTower = false;
 	}
 
 	@Override
 	protected void actions() throws GameActionException {
 		int gameStage = rc.readBroadcast(Broadcast.gameStageCh);
-		rc.setIndicatorString(1, Integer.toString(gameStage));
 		
 		if (gameStage == Broadcast.EARLY_GAME) { // then check if progression to mid game tower attacking is necessary
 			// switch to mid condition 1 : powerful enemies
@@ -43,45 +43,71 @@ public class Soldier extends Unit {
 					return;
 				}
 			}
-			
-			// switch to mid condition 2 : soldiers haven't done much from harassing for a long time
-		} else if (gameStage == Broadcast.MID_GAME) { // then check if progression to late game harass is necessary
-			if (false) {
-				rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
-				actions();
-				return;
-			}
 		}
 		
+		if (rc.isWeaponReady()) {
+			RobotInfo[] enemies = rc.senseNearbyRobots(5, rc.getTeam().opponent());
+			if (enemies.length > 0) {
+				rc.attackLocation(selectTarget(enemies));
+			}
+        }
+
 		if (rc.isCoreReady()) {
 			computeStuff();
 			if (rc.getSupplyLevel() == 0) { // then go to retrieve supply
-				soldierMoveWithMicro(ownHQ);
-				return;
+				//soldierMoveWithMicro(ownHQ);
+				//return;
 			}
-			rc.setIndicatorString(0, "not cool");
 		
 			if (gameStage == Broadcast.EARLY_GAME) { // early-stage harass
 				harasser.harass();
 			}
 			else if (gameStage == Broadcast.MID_GAME) {
-				if (groupTracker.isGrouped()) {
-					if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocation1Chs)) {
+				if (groupTracker.groupID == Broadcast.soldierGroup1Ch) {
+					if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTarget1ExistsCh)) {
 						harasser.harass();
 					}
 					else {
-						rc.setIndicatorString(0, "cool");
-						soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation1Chs));
+						boolean attackTower = rc.readBroadcast(groupTracker.groupID) == 1;
+						MapLocation towerLocation = Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation1Chs);
+						if (attackTower) {
+							chargeToLocation(towerLocation);
+						}
+						else {
+							rc.setIndicatorString(1, "" + rc.senseNearbyRobots(towerLocation, 34, rc.getTeam()).length);
+							if (rc.senseNearbyRobots(towerLocation, 34, rc.getTeam()).length >= 11) {
+								rc.broadcast(groupTracker.groupID, 1);
+								chargeToLocation(towerLocation);
+							}
+							else {
+								soldierMoveWithMicro(towerLocation);
+							}
+						}
 					}
 				}
-				else if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocation2Chs)) {
-					harasser.harass();
-				}
-				else {
-					soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation2Chs));
+				else if (groupTracker.groupID == Broadcast.soldierGroup2Ch) {
+					if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTarget2ExistsCh)) {
+						harasser.harass();
+					}
+					else {
+						boolean attackTower = rc.readBroadcast(groupTracker.groupID) == 1;
+						MapLocation towerLocation = Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation2Chs);
+						if (attackTower) {
+							chargeToLocation(towerLocation);
+						}
+						else {
+							if (rc.senseNearbyRobots(towerLocation, 34, rc.getTeam()).length >= 11) {
+								rc.broadcast(groupTracker.groupID, 1);
+								chargeToLocation(towerLocation);
+							}
+							else {
+								soldierMoveWithMicro(towerLocation);
+							}
+						}
+					}
 				}
 			}
-			else if (gameStage == Broadcast.LATE_GAME){
+			else if (gameStage == Broadcast.LATE_GAME) {
 				harasser.harass();
 			}
 		}
