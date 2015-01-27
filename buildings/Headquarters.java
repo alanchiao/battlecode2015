@@ -9,6 +9,7 @@ import team158.strategies.AerialStrategy;
 import team158.strategies.GameStrategy;
 import team158.strategies.SoldierLauncherComboStrategy;
 import team158.units.Unit;
+import team158.utils.DirectionHelper;
 
 public class Headquarters extends Building {
 
@@ -25,9 +26,12 @@ public class Headquarters extends Building {
 	private int strategy;
 
 	private MapLocation[] towerOrder; // order of which enemy towers can be defeated
+	private MapLocation[] soldierTowerOrder;
+	private MapLocation[] launcherTowerOrder;
 
 	private int numTowersInitial;
 	private int enemyTowersRemaining;
+	private int numTowersDefeatableWOL;
 
 	/*
 	private double[] oreMined;
@@ -214,6 +218,86 @@ public class Headquarters extends Building {
 		}
 	}
 
+	//calculates whether the towers are defeatable down to 3 using ground units. If not, we must build launchers
+//	protected void soldierTowerOrder() throws GameActionException {
+//		MapLocation targetTower = null;
+//		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+//		int numEnemyTowers = enemyTowers.length;
+//		//keeps track of the order of the towers defeated so we don't have to recompute
+//		while (numTowersDefeatableWOL < numEnemyTowers) {
+//			//every iteration one tower decreases so we must acount for this
+//			int numTowersLeft = numEnemyTowers - numTowersDefeatableWOL;
+//			// runs the iteration on the number of towers remaining
+//			MapLocation[] enemyTowersLeft = new MapLocation[numTowersLeft];
+//			int index = 0;
+//			for (int i = 0; i < numEnemyTowers; i++) {
+//				if (!inTowerOrder(enemyTowers[i])) {
+//					enemyTowersLeft[index] = enemyTowers[i];
+//					index++;
+//				} 
+//			}
+//			int[] distToEnemyTowers = new int[numTowersLeft];
+//			// keeps track of distance of enemy towers to ourhq
+//			for (int i = 0; i < numTowersLeft; i++) {
+//				distToEnemyTowers[i] = this.myLocation.distanceSquaredTo(enemyTowersLeft[i]);
+//			}
+//			boolean towerExists = false;
+//			int count = 0;
+//			while (count < numEnemyTowers) {
+//				int minDistance = 999999;
+//				int targetTowerIndex = 0; // to keep track of which tower was chosen
+//				for (int i = 0; i < numTowersLeft; i++) {
+//					if (distToEnemyTowers[i] < minDistance) {
+//						minDistance = distToEnemyTowers[i];
+//						targetTower = enemyTowersLeft[i];
+//						targetTowerIndex = i;
+//					}
+//				}
+//				int numNearbyTowers = 0;
+//				for (int j = 0; j < numTowersLeft; j++) {
+//					if (targetTowerIndex != j && targetTower.distanceSquaredTo(enemyTowersLeft[j]) <= 24) {
+//						numNearbyTowers++;
+//					}
+//				}
+//				//valid tower target, add to towerOrder and increment the num towers defeatable
+//				if (numNearbyTowers <= 3) {
+//					towerExists = true;
+//					towerOrder[numTowersDefeatableWOL] = targetTower;
+//					numTowersDefeatableWOL++;
+//					break;
+//				}
+//				//otherwise test next target
+//				else {
+//					distToEnemyTowers[targetTowerIndex] = 999999;
+//					count++;
+//				}
+//			}
+//			// if no isolated tower exists, check if number of towers remaining is <= 3
+//			// if so, attack enemyHQ. otherwise, need to build launchers
+//			boolean buildLaunchers;
+//			if (!towerExists) {
+//				if (numTowersDefeatableWOL >= 3) {
+//					buildLaunchers = true;
+//				}
+//				break;
+//			}
+//		}
+//	}
+//	protected void separateTowers() {
+//		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+//		int numEnemyTowers = enemyTowers.length;
+//		int soldierPtr = 0; 
+//		int launcherPtr = 0;
+//		Direction dirToEnemyHQ = myLocation.directionTo(enemyHQ);
+//		for (int j = 0; j < numEnemyTowers; j++) {
+//			Direction dirToEnemyTower = myLocation.directionTo(enemyTowers[j]);
+//			if (dirToEnemyHQ == dirToEnemyTower || 
+//					DirectionHelper.directionToInt(dirToEnemyTower) == DirectionHelper.directionToInt(dirToEnemyHQ) + 1 ||
+//					DirectionHelper.directionToInt(dirToEnemyTower) == DirectionHelper.directionToInt(dirToEnemyHQ) - 1) {
+//				launcherTower
+//			}
+//		}
+//	}
 	protected void calculateTowerOrder() {
 		MapLocation targetTower = null;
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();

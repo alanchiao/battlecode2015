@@ -167,9 +167,15 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 					rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
 				}
 			}
-//			else if (isMidGame) {
-//				if (numSoldiersAttack)
-//			}
+			else if (isMidGame) {
+				if (numSoldiers - numSoldiersAttack < 12) {
+					gc.groupUnits(RobotType.SOLDIER, ATTACK_GROUP);
+					rc.broadcast(Broadcast.soldierGroupAttackCh, 1);
+				} else {
+					gc.groupUnits(RobotType.SOLDIER, DEFENSE_GROUP);
+					rc.broadcast(Broadcast.soldierGroupDefenseCh, 1);
+				}
+			}
 		}
 		else {
 			gc.groupUnits(RobotType.LAUNCHER, DEFENSE_GROUP);
