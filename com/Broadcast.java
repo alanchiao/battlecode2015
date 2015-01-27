@@ -25,6 +25,8 @@ public class Broadcast {
 	public static final int towerAttacked = 13;
 	public static final int enemyNearTower = 14;
 	public static final int isMidGameCh = 15;
+	public static final int soldierTowerTarget1Exists = 16;
+	public static final int soldierTowerTarget2Exists = 17;
 
 	// Misc
 	public static final int minerOreX1000Ch = 17;
@@ -49,7 +51,7 @@ public class Broadcast {
 	public static final int launcherAttackLocationChs = 36;
 	public static final int soldierHarassLocationChs = 38;
 	// target commanded by the HQ
-	public static final int soldierTowerTargetLocationChs = 40;
+	public static final int soldierTowerTargetLocation1Chs = 40;
 	public static final int soldierTowerTargetLocation2Chs = 42;
 	public static final int enemyTowerTargetLocationChs = 44;
 	public static final int enemyNearHQLocationChs = 46;

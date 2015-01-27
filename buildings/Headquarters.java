@@ -53,6 +53,11 @@ public class Headquarters extends Building {
 
 		calculateTowerOrder();
 		try {
+			findSoldierTowerTargets();
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
+		try {
 			Broadcast.broadcastLocation(rc, Broadcast.enemyHQLocation, enemyHQ);
 		} catch (GameActionException e) {
 			e.printStackTrace();
@@ -75,7 +80,7 @@ public class Headquarters extends Building {
 		} else {
 			closestEnemyLocation = closestEnemy.location;
 		}
-		rc.setIndicatorString(2, String.valueOf(closestEnemyLocation));
+		//rc.setIndicatorString(2, String.valueOf(closestEnemyLocation));
 		Broadcast.broadcastLocation(rc, Broadcast.enemyNearHQLocationChs, closestEnemyLocation);
 		
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
@@ -216,6 +221,64 @@ public class Headquarters extends Building {
 		}
 	}
 
+	protected void findSoldierTowerTargets() throws GameActionException {
+		MapLocation targetTower1 = null;
+		MapLocation targetTower2 = null;
+		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
+		int numEnemyTowers = enemyTowers.length;
+		double heuristicMax1 = 0;
+		double heuristicMax2 = 0;
+		for (MapLocation e : enemyTowers) {
+			double perpendDist = computePerpendicularDistance(e);
+			double heuristic = perpendDist + 2*Math.sqrt(e.distanceSquaredTo(enemyHQ));
+			if (heuristic > heuristicMax1 && perpendDist > 15) {
+				int numNearbyTowers = 0;
+				for (MapLocation e2: enemyTowers) {
+					if(e2 != e && e.distanceSquaredTo(e2) <= 24) {
+						numNearbyTowers++;
+					}
+				}
+				if (numNearbyTowers < 2) {
+					if (heuristicMax2 == 0) {
+						heuristicMax2 = heuristicMax1;
+						targetTower2 = targetTower1;
+					}
+					heuristicMax1 = heuristic;
+					targetTower1 = e;
+				}
+			}
+			// check for 2nd farthest tower
+			else if (heuristic > heuristicMax2 && perpendDist > 15){
+				int numNearbyTowers = 0;
+				for (MapLocation e2: enemyTowers) {
+					if(e2 != e && e.distanceSquaredTo(e2) <= 24) {
+						numNearbyTowers++;
+					}
+				}
+				if (numNearbyTowers < 2) {
+					heuristicMax2 = heuristic;
+					targetTower2 = e;
+				}
+			}
+		}
+		if (targetTower1 == null) {
+			rc.broadcast(Broadcast.soldierTowerTarget1Exists, 0);
+		}
+		else {			
+			rc.broadcast(Broadcast.soldierTowerTarget1Exists, 1);
+			Broadcast.broadcastLocation(rc, Broadcast.soldierTowerTargetLocation1Chs, targetTower1);
+			rc.setIndicatorString(1, String.valueOf(targetTower1));
+		}
+		
+		if (targetTower2 == null) {
+			rc.broadcast(Broadcast.soldierTowerTarget2Exists, 0);
+		}
+		else {			
+			rc.broadcast(Broadcast.soldierTowerTarget2Exists, 1);
+			Broadcast.broadcastLocation(rc, Broadcast.soldierTowerTargetLocation2Chs, targetTower2);
+			rc.setIndicatorString(2, String.valueOf(targetTower2));
+		}
+	}
 	//calculates whether the towers are defeatable down to 3 using ground units. If not, we must build launchers
 //	protected void soldierTowerOrder() throws GameActionException {
 //		MapLocation targetTower = null;
@@ -281,21 +344,6 @@ public class Headquarters extends Building {
 //			}
 //		}
 //	}
-//	protected void separateTowers() {
-//		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-//		int numEnemyTowers = enemyTowers.length;
-//		int soldierPtr = 0; 
-//		int launcherPtr = 0;
-//		Direction dirToEnemyHQ = myLocation.directionTo(enemyHQ);
-//		for (int j = 0; j < numEnemyTowers; j++) {
-//			Direction dirToEnemyTower = myLocation.directionTo(enemyTowers[j]);
-//			if (dirToEnemyHQ == dirToEnemyTower || 
-//					DirectionHelper.directionToInt(dirToEnemyTower) == DirectionHelper.directionToInt(dirToEnemyHQ) + 1 ||
-//					DirectionHelper.directionToInt(dirToEnemyTower) == DirectionHelper.directionToInt(dirToEnemyHQ) - 1) {
-//				launcherTower
-//			}
-//		}
-//	}
 	protected void calculateTowerOrder() {
 		MapLocation targetTower = null;
 		MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
@@ -338,6 +386,7 @@ public class Headquarters extends Building {
 	}
 
 	public double computePerpendicularDistance(MapLocation candidate) {
+		ownHQ = myLocation;
 		double x1 = ownHQ.x;
 		double x2 = enemyHQ.x;
 		double y1 = ownHQ.y;
