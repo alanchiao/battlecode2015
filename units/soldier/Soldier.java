@@ -43,12 +43,13 @@ public class Soldier extends Unit {
 					return;
 				}
 			}
-			
+			/**
 			// switch to mid condition 2 : soldiers haven't done much from harassing for a long time
 			int harassStrength = rc.readBroadcast(Broadcast.harassStrengthCh);		
 			if (harassStrength <= -50) {
 				rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
 			}
+			**/
 		} else if (gameStage == Broadcast.MID_GAME) { // then check if progression to late game harass is necessary
 			if (false) {
 				rc.broadcast(Broadcast.gameStageCh, Broadcast.LATE_GAME);
