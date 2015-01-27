@@ -52,10 +52,17 @@ public class Launcher extends Unit {
 				broadcasted = false;
 			}
 		}
-	
-		if (rc.getMissileCount() >= 4 && isReloading) {
-			isReloading = false;
-			navigation.stopObstacleTracking();
+		
+		if (this.currentTargetType == RobotType.TANK || this.currentTargetType == RobotType.TOWER) {
+			if (rc.getMissileCount() >= 1 && isReloading) {
+				isReloading = false;
+				navigation.stopObstacleTracking();
+			}
+		} else {
+			if (rc.getMissileCount() >= 4 && isReloading) {
+				isReloading = false;
+				navigation.stopObstacleTracking();
+			}
 		}
 		
 		if (enemiesAttackable.length > 0 && !isReloading) {
@@ -112,10 +119,17 @@ public class Launcher extends Unit {
 				rc.launchMissile(dirToFire);
 			}
 			
-			if (rc.getMissileCount() <= 5) {
-				isReloading = true;
+			if (targetType == RobotType.TANK ) {
+				if (rc.getMissileCount() <= 2) {
+					isReloading = true;
+				}
+			} else {
+				if (rc.getMissileCount() <= 5) {
+					isReloading = true;
+				}
 			}
-	    } else {
+			this.currentTargetType = targetType;
+	    } else if (!isReloading) { 
 			MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 			boolean isNextToTowerOrHQ = false;
 			MapLocation target = null;
@@ -139,6 +153,7 @@ public class Launcher extends Unit {
 				// no reloading with respect to towers
 				if (rc.getMissileCount() <= 2) {
 					isReloading = true;
+					this.currentTargetType = RobotType.TOWER;
 				}
 			}
         }
