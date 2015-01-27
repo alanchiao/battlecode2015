@@ -71,6 +71,7 @@ public class Builder {
 		boolean isOnBuildingLocation = rc.getLocation().equals(this.buildingLocation);
 		if (isOnBuildingLocation) {
 			navigation.moveToDestination(this.buildingLocation.add(Direction.NORTH), Navigation.AVOID_ALL);
+			return;
 		}
 		
 		boolean isNextToBuildingLocation = rc.getLocation().distanceSquaredTo(this.buildingLocation) == 1;

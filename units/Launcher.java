@@ -182,19 +182,19 @@ public class Launcher extends Unit {
 			MapLocation target = null;
 			if (rc.readBroadcast(Broadcast.enemyNearHQ) == 1) {
 				target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
-				if (myLocation.distanceSquaredTo(target) >= 65) {
+				if (myLocation.distanceSquaredTo(target) > 65) {
 					target = null;
 				}
 			}
 			if (target == null && rc.readBroadcast(Broadcast.towerAttacked) == 1) {
 				target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
-				if (myLocation.distanceSquaredTo(target) >= 65) {
+				if (myLocation.distanceSquaredTo(target) > 65) {
 					target = null;
 				}
 			}
 			if (rc.readBroadcast(Broadcast.enemyNearTower) == 1) {
 				target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
-				if (myLocation.distanceSquaredTo(target) >= 65) {
+				if (myLocation.distanceSquaredTo(target) > 65) {
 					target = null;
 				}
 			}
@@ -204,10 +204,10 @@ public class Launcher extends Unit {
 			}
 
 			if (notTooLate) {
+				target = null;
 				MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 				if (enemyTowers.length != 0) {
 					int minDistance = 9999;
-					target = null;
 					for (MapLocation tower : enemyTowers) {
 						int currentDistance = myLocation.distanceSquaredTo(tower);
 						if (currentDistance < minDistance) {
@@ -215,8 +215,11 @@ public class Launcher extends Unit {
 							minDistance = currentDistance;
 						}
 					}
+					if (enemyTowers.length < 5 && minDistance <= 65) {
+						target = null;
+					}
 				}
-				else {
+				if (target == null) {
 					target = enemyHQ;
 				}
 				launcherMoveWithMicro(target);

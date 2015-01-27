@@ -37,7 +37,7 @@ public class Soldier extends Unit {
 				if (e.type == RobotType.TANK || e.type == RobotType.LAUNCHER) {
 					countLauncherTank++;
 				}
-				if (countLauncherTank >= 2) {
+				if (countLauncherTank > 0) {
 					rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
 					actions();
 					return;
