@@ -49,27 +49,29 @@ public abstract class Unit extends Robot {
 			} **/
 			
 			// Transfer supply stage
-			if (autoSupplyTransfer) {
+			RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
+			if (friendlyRobots.length > 0) {
 				int mySupply = (int) rc.getSupplyLevel();
-				RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
-				if (friendlyRobots.length > 0) {
-					// If predicted to die on this turn
-					if (rc.getHealth() <= prevHealth / 2) {
-						rc.setIndicatorString(2, "almost dead");
-						RobotInfo bestFriend = null;
-						double maxHealth = 0;
-						for (RobotInfo r : friendlyRobots) {
-							if (r.health > maxHealth && !r.type.isBuilding) {
-								maxHealth = r.health;
-								bestFriend = r;
-							}
-						}
-						if (maxHealth > 8) {
-							rc.transferSupplies(mySupply, bestFriend.location);
+
+				// If predicted to die on this turn
+				if (rc.getHealth() <= prevHealth / 2) {
+					rc.setIndicatorString(2, "almost dead");
+					RobotInfo bestFriend = null;
+					double maxHealth = 0;
+					for (RobotInfo r : friendlyRobots) {
+						if (r.health > maxHealth && !r.type.isBuilding) {
+							maxHealth = r.health;
+							bestFriend = r;
 						}
 					}
+					if (maxHealth > 8) {
+						rc.transferSupplies(mySupply, bestFriend.location);
+					}
+				}
+
+				else if (autoSupplyTransfer) {
 					// Get rid of excess supply
-					else if (mySupply > rc.getType().supplyUpkeep * 250) {
+					if (mySupply > rc.getType().supplyUpkeep * 250) {
 						for (RobotInfo r : friendlyRobots) {
 							if (rc.getType() == r.type && r.supplyLevel < r.type.supplyUpkeep * 150 && r.health > 20) {
 								rc.transferSupplies(mySupply - rc.getType().supplyUpkeep * 250, r.location);
