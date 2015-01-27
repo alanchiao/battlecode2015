@@ -96,7 +96,7 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 			if (possibleDifficulty != scoutMiner) {
 				pathDifficulty = possibleDifficulty;
 				// switch to mid game harass condition 3 : map too hard to navigate
-				if (pathDifficulty >= 280 ) {
+				if (pathDifficulty >= 280) {
 					rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
 				}
 			} else if (turnsSinceScoutLeft >= 280) {
