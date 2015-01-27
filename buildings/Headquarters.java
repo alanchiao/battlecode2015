@@ -73,6 +73,9 @@ public class Headquarters extends Building {
 			rc.broadcast(Broadcast.enemyNearHQ, 1);
 			Broadcast.broadcastLocation(rc, Broadcast.enemyNearHQLocationChs, closestEnemy.location);
 		}
+		else {
+			rc.broadcast(Broadcast.enemyNearHQ, 0);
+		}
 		//rc.setIndicatorString(2, String.valueOf(closestEnemyLocation));
 		
 		RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());

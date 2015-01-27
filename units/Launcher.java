@@ -204,6 +204,7 @@ public class Launcher extends Unit {
 				}
 			}
 			if (target != null) {
+				rc.setIndicatorString(0, String.valueOf(target));
 				launcherMoveWithMicro(target);
 				return;
 			}

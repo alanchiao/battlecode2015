@@ -33,6 +33,7 @@ public class Tower extends Building {
 			closestEnemyLocation = closestEnemy.location;
 		}
 		rc.setIndicatorString(0, String.valueOf(closestEnemyLocation));
+		rc.setIndicatorString(1, String.valueOf(enemyNear));
 		rc.broadcast(Broadcast.enemyNearTower, enemyNear);
 		Broadcast.broadcastLocation(rc, Broadcast.enemyNearTowerLocationChs, closestEnemyLocation);
 	}
