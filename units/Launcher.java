@@ -223,7 +223,7 @@ public class Launcher extends Unit {
 							minDistance = currentDistance;
 						}
 					}
-					if (enemyTowers.length < 5 && minDistance <= 65) {
+					if (enemyTowers.length < 5 && minDistance > 65) {
 						target = null;
 					}
 				}
