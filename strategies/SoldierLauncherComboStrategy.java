@@ -150,7 +150,7 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 	
 	public void selectInitialStage() throws GameActionException {
 		if (hq.distanceBetweenHQ <= 70) {
-			System.out.println("distance between HQ + " + Double.toString(hq.distanceBetweenHQ));
+			System.out.println("distance between HQ: " + Double.toString(hq.distanceBetweenHQ));
 			rc.broadcast(Broadcast.gameStageCh, Broadcast.NO_SOLDIER_GAME);
 			return;
 		}

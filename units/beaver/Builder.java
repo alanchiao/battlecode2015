@@ -42,7 +42,6 @@ public class Builder {
 	
 	// choose to building a building type
 	public void buildBuilding(RobotType buildingType, int expectedCount) throws GameActionException {
-		rc.setIndicatorString(0, "is navigating");
 		this.isNavigating = true;
 		this.expectedCount = expectedCount;
 		this.buildingType = buildingType;
@@ -56,48 +55,34 @@ public class Builder {
 			}
 		}
 		this.isNavigating = false;
-		
 	}
 	
 	
 	// continue building the current building
 	public void continueNavigating() throws GameActionException {
-		Direction dirToBuildingLocation = rc.getLocation().directionTo(this.buildingLocation);
 		rc.setIndicatorString(1, this.buildingLocation.toString() + " " +  Integer.toString(this.expectedCount) + " " + this.buildingType.toString());
-		// excessive computations
-		if (this.expectedCount != countBuildings(this.buildingType)) {
-			this.isNavigating = false;
-			return;
-		}
-		
+
 		boolean isOnBuildingLocation = rc.getLocation().equals(this.buildingLocation);
 		if (isOnBuildingLocation) {
 			navigation.moveToDestination(this.buildingLocation.add(Direction.NORTH), Navigation.AVOID_ALL);
 			return;
 		}
+
+		if (this.expectedCount != countBuildings(this.buildingType)) {
+			this.isNavigating = false;
+			return;
+		}
 		
-		boolean isNextToBuildingLocation = rc.getLocation().distanceSquaredTo(this.buildingLocation) == 1;
+		boolean isNextToBuildingLocation = rc.getLocation().distanceSquaredTo(this.buildingLocation) <= 2;
 		if (isNextToBuildingLocation) {
+			Direction dirToBuildingLocation = rc.getLocation().directionTo(this.buildingLocation);
 			if (rc.canBuild(dirToBuildingLocation, this.buildingType)) {
 				rc.build(dirToBuildingLocation, this.buildingType);
 				this.isNavigating = false;
 			}
 		} else {
-			navigation.moveToDestination(this.buildingLocation.add(Direction.WEST), Navigation.AVOID_ALL);
+			navigation.moveToDestination(this.buildingLocation, Navigation.AVOID_ALL);
 		}
-	}
-	
-	public boolean isBuildingComplete() throws GameActionException {
-		if (this.buildingLocation == null) {
-			return true;
-		} else {
-			RobotInfo potentialBuilding = rc.senseRobotAtLocation(this.buildingLocation);
-			if (potentialBuilding == null || potentialBuilding.builder == null) {
-				rc.setIndicatorString(2, Boolean.toString(potentialBuilding.builder == null));
-				return true;
-			}
-		}
-		return false;
 	}
 	
 	// available build locations are in spiral around HQ
