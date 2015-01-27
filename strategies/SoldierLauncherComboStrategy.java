@@ -137,6 +137,9 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 					rc.broadcast(Broadcast.soldierAttackCh, 1);
 				}
 			}
+			if (allies.length < 8) {
+				rc.broadcast(Broadcast.soldierAttackCh, 0);
+			}
 		}
 	}
 	
