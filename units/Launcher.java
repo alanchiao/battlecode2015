@@ -76,9 +76,9 @@ public class Launcher extends Unit {
 			int missileDensity;
 			int missilesFired = 0;
 			if (targetType == RobotType.MISSILE || targetType == RobotType.LAUNCHER) {
-				missileDensity = 0;
-			} else {
 				missileDensity = 1;
+			} else {
+				missileDensity = 2;
 			}
 			
 			Direction dirToFire = dirToEnemy;

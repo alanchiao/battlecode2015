@@ -42,6 +42,7 @@ public class Builder {
 	
 	// choose to building a building type
 	public void buildBuilding(RobotType buildingType, int expectedCount) throws GameActionException {
+		rc.setIndicatorString(0, "is navigating");
 		this.isNavigating = true;
 		this.expectedCount = expectedCount;
 		this.buildingType = buildingType;
@@ -62,6 +63,7 @@ public class Builder {
 	// continue building the current building
 	public void continueNavigating() throws GameActionException {
 		Direction dirToBuildingLocation = rc.getLocation().directionTo(this.buildingLocation);
+		rc.setIndicatorString(1, this.buildingLocation.toString() + " " +  Integer.toString(this.expectedCount) + " " + this.buildingType.toString());
 		// excessive computations
 		if (this.expectedCount != countBuildings(this.buildingType)) {
 			this.isNavigating = false;
@@ -91,6 +93,7 @@ public class Builder {
 		} else {
 			RobotInfo potentialBuilding = rc.senseRobotAtLocation(this.buildingLocation);
 			if (potentialBuilding == null || potentialBuilding.builder == null) {
+				rc.setIndicatorString(2, Boolean.toString(potentialBuilding.builder == null));
 				return true;
 			}
 		}

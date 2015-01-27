@@ -17,13 +17,16 @@ public class Beaver extends Unit {
 
 	@Override
 	protected void actions() throws GameActionException {
+		rc.setIndicatorString(0, "doing nothing");
 		if (rc.isCoreReady()) {
 			computeStuff();
 			// continue building current building
 			if (builder.isNavigating) {
+				rc.setIndicatorString(0, "is navigating");
 				builder.continueNavigating();
 				return;
 			} else if (!builder.isBuildingComplete()){
+				rc.setIndicatorString(0, "is building");
 				return;
 			}
 			builder.buildingLocation = null;
