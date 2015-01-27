@@ -37,6 +37,7 @@ public class Navigation {
 	public MapLocation origLocation; // original location where you encountered obstacle
 	public MapLocation monitoredObstacle; // obstacle tile to move relative to
 	public boolean isRotateRight; // turn right or left relative to obstacle
+	public boolean isLastObstacleUnit;
 	public int timeSinceLastMove;
 	
 	// precomputation per turn
@@ -82,11 +83,12 @@ public class Navigation {
 		this.avoidLevel = avoidLevel;
 		this.possibleMovesAvoidingEnemies = null;
 		timeSinceLastMove++;
+		/**
 		if (timeSinceLastMove >= 6) {
 			isRotateRight = !isRotateRight;
 			timeSinceLastMove = 0;
 		}
-		
+		**/
 		if (USE_WALL_HUGGING) {
 			wallHuggingToDestination();
 		} else {
@@ -108,6 +110,13 @@ public class Navigation {
 				// 2. closer to destination than before when we first hit the obstacle
 				if(rc.canMove(directDirection) && rc.getLocation().distanceSquaredTo(destination) < origLocation.distanceSquaredTo(destination)) {
 					stopObstacleTracking();
+					wallHuggingToDestination();
+					return;
+				}
+				
+				if(!isObstacle(monitoredObstacle, directDirection)) {
+					stopObstacleTracking();
+					wallHuggingToDestination();
 					return;
 				}
 				
@@ -129,15 +138,14 @@ public class Navigation {
 					
 					if (isObstacle(attemptedLocation, attemptedDir)) {
 						monitoredObstacle = attemptedLocation;
+						if (isMobileUnit(attemptedLocation)) {
+							isLastObstacleUnit = true;
+						} else {
+							isLastObstacleUnit = false;
+						}
 					} else {
 						// if blocked by a mobile unit, go the other direction (to prevent
-						// blockades)
-						if (isMobileUnit(attemptedLocation)) {
-							isRotateRight = true;
-							return;
-						}
-						// move in that direction. newLocation = attemptedLocation. Handle updating logic
-						else if (isPassable(attemptedDir)) {
+						if (isPassable(attemptedDir)) {
 							if (rc.canMove(attemptedDir)) {
 								timeSinceLastMove = 0;
 								rc.move(attemptedDir);
@@ -155,9 +163,34 @@ public class Navigation {
 			} else {
 				if (isObstacle(directLocation, directDirection)) { // then start hugging
 					startObstacleTracking(directLocation, directDirection);
-				} else { // otherwise, greedy move since bugging gets scary with moving obstacles
+					if (isMobileUnit(directLocation)) {
+						isLastObstacleUnit = true;
+					} else {
+						isLastObstacleUnit = false;
+					}
+					wallHuggingToDestination();
+					return;
+				} else { // otherwise, greedy move since just a building
 					greedyMoveToDestination();
 				}
+				
+				/** else { // otherwise, greedy move since bugging gets scary with moving obstacles
+					// greedyMoveToDestination();
+					isLastObstacleUnit = true;
+					int index = 0;
+					while(!rc.canMove(directDirection) && index <= 7) {
+						if (isRotateRight) {
+							directDirection = directDirection.rotateRight();
+						} else {
+							directDirection = directDirection.rotateLeft();
+						}
+						index++;
+					}
+					
+					if (index <= 7) {
+						rc.move(directDirection);
+					}
+				} **/
 			}
 		} catch (GameActionException e) {
 			e.printStackTrace();
@@ -205,6 +238,10 @@ public class Navigation {
 		monitoredObstacle = obstacle;
 		origLocation = rc.getLocation();
 		
+		if (isLastObstacleUnit) { // then do not update direction
+			return;
+		}
+		
 		// turn in direction that brings it closer to destination, unless
 		MapLocation locationIfTurnRight = origLocation.add(collisionDirection.rotateRight());
 		MapLocation locationIfTurnLeft = origLocation.add(collisionDirection.rotateLeft());
@@ -247,7 +284,7 @@ public class Navigation {
 				return true;
 			}
 		}
-		return isStationaryBlock(location);
+		return isStationaryBlock(location) || isMobileUnit(location);
 	}
 	
 	// check if the location is somewhere a bot cannot go more or less for the entire game
