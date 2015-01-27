@@ -13,6 +13,7 @@ public class Drone extends Unit {
 	int followingID;
 	boolean gotSupply;
 	MapLocation followingLocation;
+	RobotType followingType;
 
 	public Drone(RobotController newRC) {
 		super(newRC);
@@ -20,14 +21,14 @@ public class Drone extends Unit {
 
 	@Override
 	protected void actions() throws GameActionException {
-		if (!autoSupplyTransfer) { // Must transfer supply to a launcher
+		if (!autoSupplyTransfer) {
 			MapLocation myLocation = rc.getLocation();
 			if (gotSupply) {
 				if (myLocation.distanceSquaredTo(followingLocation) <= 15) {
 					RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
 					if (friendlyRobots.length > 0) {
 						for (RobotInfo r : friendlyRobots) {
-							if (r.type == RobotType.LAUNCHER) {
+							if (r.type == followingType) {
 								rc.transferSupplies((int) (rc.getSupplyLevel()), r.location);
 								gotSupply = false;
 								autoSupplyTransfer = true;
@@ -39,7 +40,7 @@ public class Drone extends Unit {
 					int minDistance = 999999;
 					for (RobotInfo r : friendlyRobots) {
 						int distance = myLocation.distanceSquaredTo(r.location);
-						if (r.type == RobotType.LAUNCHER && distance < minDistance) {
+						if (r.type == followingType && distance < minDistance) {
 							followingLocation = r.location;
 							minDistance = distance;
 						}
@@ -55,13 +56,10 @@ public class Drone extends Unit {
 				}
 			}
 			else {
-				if (rc.getSupplyLevel() > 6000) {
+				if (rc.getSupplyLevel() > (followingType == RobotType.LAUNCHER ? 15000 : 3000)) {
 					gotSupply = true;
 				}
-				else if (myLocation.distanceSquaredTo(ownHQ) <= 15) {
-					rc.broadcast(Broadcast.requestSupplyFromHQCh, rc.getID());
-				}
-				else if (rc.isCoreReady()) {
+				else if (rc.isCoreReady() && myLocation.distanceSquaredTo(ownHQ) > 15) {
 					computeStuff();
 					navigation.moveToDestination(ownHQ, Navigation.AVOID_ALL);
 				}
@@ -72,7 +70,9 @@ public class Drone extends Unit {
 		if (followingID != 0) {
 			rc.broadcast(Broadcast.requestSupplyDroneCh, 0);
 			if (rc.canSenseRobot(followingID)) {
-				followingLocation = rc.senseRobot(followingID).location;
+				RobotInfo robot = rc.senseRobot(followingID);
+				followingLocation = robot.location;
+				followingType = robot.type;
 				autoSupplyTransfer = false;
 				gotSupply = false;
 			}

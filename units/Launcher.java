@@ -186,12 +186,6 @@ public class Launcher extends Unit {
 					target = null;
 				}
 			}
-			if (target == null && rc.readBroadcast(Broadcast.towerAttacked) == 1) {
-				target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
-				if (myLocation.distanceSquaredTo(target) > 65) {
-					target = null;
-				}
-			}
 			if (rc.readBroadcast(Broadcast.enemyNearTower) == 1) {
 				target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
 				if (myLocation.distanceSquaredTo(target) > 65) {

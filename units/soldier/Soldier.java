@@ -18,11 +18,15 @@ public class Soldier extends Unit {
 	
 	private Harasser harasser;
 	boolean attackTower;
+	boolean noSupply;
+	boolean broadcasted;
 	
 	public Soldier(RobotController newRC) {
 		super(newRC);
 		harasser = new Harasser(newRC, this);
 		attackTower = false;
+		noSupply = false;
+		broadcasted = false;
 	}
 
 	@Override
@@ -67,15 +71,31 @@ public class Soldier extends Unit {
 
 		if (rc.isCoreReady()) {
 			computeStuff();
-			if (rc.getSupplyLevel() == 0) { // then go to retrieve supply
-				//soldierMoveWithMicro(ownHQ);
-				//return;
-			}
 		
 			if (gameStage == Broadcast.EARLY_GAME) { // early-stage harass
 				harasser.harass();
 			}
 			else if (gameStage == Broadcast.MID_GAME) {
+				if (rc.getSupplyLevel() == 0 && rc.getLocation().distanceSquaredTo(ownHQ) > 15) {
+					if (noSupply) {
+						if (rc.readBroadcast(Broadcast.requestSupplyDroneCh) == 0) {
+							broadcasted = true;
+							rc.broadcast(Broadcast.requestSupplyDroneCh, rc.getID());
+						}
+					}
+					else {
+						noSupply = true;
+					}
+				}
+				else {
+					noSupply = false;
+					if (broadcasted) {
+						if (rc.readBroadcast(Broadcast.requestSupplyDroneCh) == rc.getID()) {
+							rc.broadcast(Broadcast.requestSupplyDroneCh, 0);
+						}
+						broadcasted = false;
+					}
+				}
 				if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTarget1ExistsCh)) {
 					harasser.harass();
 				}

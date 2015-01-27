@@ -23,10 +23,8 @@ public class Broadcast {
 	public static final int numHelipadsCh = 9;
 	
 	// Channels for signaling
-	public static final int requestSupplyFromHQCh = 10;
 	public static final int scoutEnemyHQCh = 11;
 	public static final int requestSupplyDroneCh = 12;
-	public static final int towerAttacked = 13;
 	public static final int enemyNearTower = 14;
 	public static final int enemyNearHQ = 15;
 	public static final int soldierTowerTarget1ExistsCh = 16;
@@ -50,7 +48,6 @@ public class Broadcast {
 	public static final int enemyTowerTargetLocationChs = 44;
 	public static final int enemyNearHQLocationChs = 46;
 	// target commanded by the towers
-	public static final int attackedTowerLocationChs = 48;
 	public static final int enemyNearTowerLocationChs = 50;
 	public static final int enemyHQLocation = 52;
 

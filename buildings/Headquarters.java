@@ -61,7 +61,7 @@ public class Headquarters extends Building {
 		case AERIAL_STRATEGY:		gameStrategy = new AerialStrategy(rc, this);
 									break;
 		case DUAL_STRATEGY:			gameStrategy = new SoldierLauncherComboStrategy(rc, this);
-	}
+		}
 	}
 	
 	@Override
@@ -103,7 +103,14 @@ public class Headquarters extends Building {
 				}
 			}
 			else if (r.type == RobotType.DRONE) {
-				if (r.supplyLevel < 20000) {
+				if (r.supplyLevel < 3000) {
+					if (priority < 1) {
+						loc = r.location;
+						supplyAmount = 6000;
+						priority = 1;
+					}
+				}
+				else if (r.supplyLevel < 15000) {
 					if (priority < 1) {
 						loc = r.location;
 						supplyAmount = 30000;
