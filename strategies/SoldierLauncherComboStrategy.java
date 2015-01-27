@@ -126,14 +126,14 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		int gameStage = rc.readBroadcast(Broadcast.gameStageCh);
 		if (gameStage == Broadcast.MID_GAME && rc.readBroadcast(Broadcast.soldierTowerTargetExistsCh) == 1) {
 			RobotInfo[] allies = rc.senseNearbyRobots(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocationChs), 52, rc.getTeam());
-			if (allies.length >= 11) {
+			if (allies.length >= 14) {
 				int effectiveSoldiers = 0;
 				for (RobotInfo ally : allies) {
 					if (ally.supplyLevel > 0 && ally.type == RobotType.SOLDIER) {
 						effectiveSoldiers += 1;
 					}
 				}
-				if (effectiveSoldiers >= 12) {
+				if (effectiveSoldiers >= 14) {
 					rc.broadcast(Broadcast.soldierAttackCh, 1);
 				}
 			}
