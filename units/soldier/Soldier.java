@@ -55,10 +55,17 @@ public class Soldier extends Unit {
 			}
 			**/
 		} else if (gameStage == Broadcast.MID_GAME) { // then check if progression to late game harass is necessary
-			if (false) {
-				rc.broadcast(Broadcast.gameStageCh, Broadcast.LATE_GAME);
-				actions();
-				return;
+			boolean attackTower = rc.readBroadcast(Broadcast.soldierAttackCh) == 1;
+			if (attackTower) {
+				MapLocation towerLocation = Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocationChs);
+				if (rc.canSenseLocation(towerLocation)) {
+					RobotInfo potentialTower = rc.senseRobotAtLocation(towerLocation);
+					if (potentialTower == null) {
+						rc.broadcast(Broadcast.gameStageCh, Broadcast.LATE_GAME);
+						actions();
+						return;
+					}
+				}	
 			}
 		}
 		
