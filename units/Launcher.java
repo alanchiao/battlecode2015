@@ -173,13 +173,11 @@ public class Launcher extends Unit {
 					runAwayDirection = null;
 					return;
 				}
-				
 				if (rc.canMove(runAwayDirection.rotateLeft())) {
 					rc.move(runAwayDirection.rotateLeft());
 					runAwayDirection = null;
 					return;
 				}
-				
 				if (rc.canMove(runAwayDirection.rotateRight())) {
 					rc.move(runAwayDirection.rotateRight());
 					runAwayDirection = null;
@@ -190,8 +188,7 @@ public class Launcher extends Unit {
 				shouldStay = false;
 				return;
 			}
-			
-		
+
 			MapLocation target = null;
 			if (rc.readBroadcast(Broadcast.enemyNearHQ) == 1) {
 				target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
@@ -269,9 +266,10 @@ public class Launcher extends Unit {
 				if (closestEnemy != null) {
 					Direction moveDirection = closestEnemy.directionTo(myLocation);
 					for (int i = 0; i < 3; i++) {
-						if (myLocation.add(moveDirection).distanceSquaredTo(closestEnemy) <= 24 &&
+						if (myLocation.add(moveDirection).distanceSquaredTo(closestEnemy) <= 24 && rc.canMove(moveDirection) &&
 								damages[DirectionHelper.directionToInt(moveDirection)] <= damages[8]) {
 							rc.move(moveDirection);
+							return;
 						}
 						else if (i == 0) {
 							moveDirection = moveDirection.rotateLeft();
