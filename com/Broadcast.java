@@ -61,8 +61,10 @@ public class Broadcast {
 	// target commanded by the towers
 	public static final int attackedTowerLocationChs = 48;
 	public static final int enemyNearTowerLocationChs = 50;
-
 	public static final int enemyHQLocation = 52;
+	
+	// misc 2
+	public static final int harassStrengthCh = 54;
 	
 	
 	
