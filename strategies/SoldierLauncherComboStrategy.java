@@ -177,9 +177,8 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 	}
 	
 	public void selectInitialStage(int pathDifficulty) throws GameActionException {
-		/**
 		// start as early_mid condition 1 : stage too large
-		if (pathDifficulty >= 100) {
+		if (hq.distanceBetweenHQ >= 4000 ||pathDifficulty >= 200) {
 			rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
 			return;
 		}
@@ -193,6 +192,5 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 			rc.broadcast(Broadcast.gameStageCh, Broadcast.MID_GAME);
 			return;
 		}
-		**/
 	}
 }

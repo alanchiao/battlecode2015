@@ -54,26 +54,27 @@ public class Soldier extends Unit {
 		}
 		
 		if (rc.isCoreReady()) {
+			computeStuff();
 			if (rc.getSupplyLevel() == 0) { // then go to retrieve supply
-				computeStuff();
 				soldierMoveWithMicro(ownHQ);
 				return;
 			}
 			rc.setIndicatorString(0, "not cool");
-			if (groupTracker.isGrouped()) {
-				if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocation1Chs)) {
-					harasser.harass();
-				}
-				else {
-					rc.setIndicatorString(0, "cool");
-					soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation1Chs));
-				}
-			}
-			else if (gameStage == Broadcast.EARLY_GAME) { // early-stage harass
+		
+			if (gameStage == Broadcast.EARLY_GAME) { // early-stage harass
 				harasser.harass();
 			}
 			else if (gameStage == Broadcast.MID_GAME) {
-				if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocation2Chs)) {
+				if (groupTracker.isGrouped()) {
+					if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocation1Chs)) {
+						harasser.harass();
+					}
+					else {
+						rc.setIndicatorString(0, "cool");
+						soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation1Chs));
+					}
+				}
+				else if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocation2Chs)) {
 					harasser.harass();
 				}
 				else {
