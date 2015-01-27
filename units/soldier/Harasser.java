@@ -62,7 +62,6 @@ public class Harasser {
 	}
 
 	public void harass() throws GameActionException {
-
 		if (this.state == SEARCH_STATE) { // then randomly move around searching for miner/beaver while avoiding attack
 			rc.setIndicatorString(0, Integer.toString(this.state));
 
@@ -108,7 +107,7 @@ public class Harasser {
 				return;
 			}
 			
-			if (rc.isCoreReady()) {
+			if (rc.isCoreReady()) { 
 				RobotInfo targetEnemy = rc.senseRobot(this.targetID);
 				unit.soldierMoveWithMicro(targetEnemy.location);
 			} 

@@ -52,8 +52,9 @@ public class Broadcast {
 	// target commanded by the towers
 	public static final int attackedTowerLocationChs = 48;
 	public static final int enemyNearTowerLocationChs = 50;
-
 	public static final int enemyHQLocation = 52;
+
+	public static final int harassStrengthCh = 54;
 
 	// check if channel has not been initialized yet
 	public static boolean isNotInitialized(RobotController rc, int channelStart) throws GameActionException {

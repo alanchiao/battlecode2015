@@ -37,6 +37,7 @@ public class Navigation {
 	public MapLocation origLocation; // original location where you encountered obstacle
 	public MapLocation monitoredObstacle; // obstacle tile to move relative to
 	public boolean isRotateRight; // turn right or left relative to obstacle
+	public int timeSinceLastMove;
 	
 	// precomputation per turn
 	public boolean[] possibleMovesAvoidingEnemies;
@@ -46,6 +47,7 @@ public class Navigation {
 		this.rc = unit.rc;
 		this.rand = unit.rand;
 		this.enemyHQ = unit.enemyHQ;
+		this.timeSinceLastMove = 0;
 		
 		isAvoidingObstacle = false;
 		avoidLevel = 0;
@@ -79,6 +81,11 @@ public class Navigation {
 		destination = nextDestination;
 		this.avoidLevel = avoidLevel;
 		this.possibleMovesAvoidingEnemies = null;
+		timeSinceLastMove++;
+		if (timeSinceLastMove >= 6) {
+			isRotateRight = !isRotateRight;
+			timeSinceLastMove = 0;
+		}
 		
 		if (USE_WALL_HUGGING) {
 			wallHuggingToDestination();
@@ -126,12 +133,13 @@ public class Navigation {
 						// if blocked by a mobile unit, go the other direction (to prevent
 						// blockades)
 						if (isMobileUnit(attemptedLocation)) {
-							isRotateRight = !isRotateRight;
+							isRotateRight = true;
 							return;
 						}
 						// move in that direction. newLocation = attemptedLocation. Handle updating logic
 						else if (isPassable(attemptedDir)) {
 							if (rc.canMove(attemptedDir)) {
+								timeSinceLastMove = 0;
 								rc.move(attemptedDir);
 							}
 							return;
@@ -141,6 +149,7 @@ public class Navigation {
 			}
 			// not in state of avoiding obstacle
 			else if (isPassable(directDirection)) { // then free to move!
+				timeSinceLastMove = 0;
 				rc.move(directDirection);
 			// possibly found obstacle
 			} else {
@@ -175,6 +184,7 @@ public class Navigation {
 			}
 			if (moveDirection != null && myLocation.add(moveDirection).distanceSquaredTo(destination) <= myLocation.distanceSquaredTo(destination)) {
 				if (rc.canMove(moveDirection)) {
+					timeSinceLastMove = 0;
 					rc.move(moveDirection);
 				}
 			} 
