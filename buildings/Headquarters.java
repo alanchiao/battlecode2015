@@ -53,6 +53,7 @@ public class Headquarters extends Building {
 		}
 		try {
 			Broadcast.broadcastLocation(rc, Broadcast.enemyHQLocation, enemyHQ);
+			rc.broadcast(Broadcast.gameStageCh, Broadcast.EARLY_GAME);
 		} catch (GameActionException e) {
 			e.printStackTrace();
 		}

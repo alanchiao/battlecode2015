@@ -27,6 +27,7 @@ public class Soldier extends Unit {
 	@Override
 	protected void actions() throws GameActionException {
 		int gameStage = rc.readBroadcast(Broadcast.gameStageCh);
+		rc.setIndicatorString(1, Integer.toString(gameStage));
 		
 		if (gameStage == Broadcast.EARLY_GAME) { // then check if progression to mid game tower attacking is necessary
 			// switch to mid condition 1 : powerful enemies
@@ -58,12 +59,13 @@ public class Soldier extends Unit {
 				soldierMoveWithMicro(ownHQ);
 				return;
 			}
-
+			rc.setIndicatorString(0, "not cool");
 			if (groupTracker.isGrouped()) {
 				if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTargetLocation1Chs)) {
 					harasser.harass();
 				}
 				else {
+					rc.setIndicatorString(0, "cool");
 					soldierMoveWithMicro(Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation1Chs));
 				}
 			}
