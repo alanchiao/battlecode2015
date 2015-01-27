@@ -8,7 +8,7 @@ public abstract class Robot {
 	public RobotController rc;
 	public MapLocation ownHQ;
 	public MapLocation enemyHQ;
-	public int distanceBetweenHQ;
+	public double distanceBetweenHQ;
 	
 	public abstract void move();
 	

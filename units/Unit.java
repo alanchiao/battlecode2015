@@ -2,8 +2,6 @@ package team158.units;
 import java.util.Random;
 
 import team158.Robot;
-import team158.com.Broadcast;
-import team158.units.com.GroupTracker;
 import team158.units.com.Navigation;
 import team158.utils.DirectionHelper;
 import battlecode.common.MapLocation;
@@ -14,7 +12,6 @@ import battlecode.common.RobotType;
 public abstract class Unit extends Robot {
 		
 	public Navigation navigation;
-	protected GroupTracker groupTracker;
 	protected double prevHealth;
 	protected boolean autoSupplyTransfer;
 	protected double[] damages;
@@ -37,7 +34,6 @@ public abstract class Unit extends Robot {
 		safeSpots = new int[9];
 	
 		navigation = new Navigation(this);
-		groupTracker = new GroupTracker(rc);
 	}
 
 	@Override
@@ -93,27 +89,6 @@ public abstract class Unit extends Robot {
 				}
 			}
 
-			// Grouping stage
-			if (groupTracker.groupID == GroupTracker.UNGROUPED) {
-				int broadcastCh = -1;
-				if (rc.getType() == RobotType.SOLDIER) {
-					broadcastCh = Broadcast.groupingSoldiersCh;
-				}
-				else if (rc.getType() == RobotType.LAUNCHER) {
-					broadcastCh = Broadcast.groupingLaunchersCh;
-				}
-				if (broadcastCh != -1) {
-					int newGroupID = rc.readBroadcast(broadcastCh);
-					if (newGroupID > 0) {
-						groupTracker.setGroupID(newGroupID);
-					}
-				}
-			}
-			else {
-				if (rc.readBroadcast(groupTracker.groupID) == -1) {
-					groupTracker.unGroup();
-				}
-			}
 			// Unit-specific actions
 			actions();
 			prevHealth = rc.getHealth();

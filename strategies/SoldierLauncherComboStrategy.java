@@ -2,10 +2,7 @@ package team158.strategies;
 
 import team158.buildings.Headquarters;
 import team158.com.Broadcast;
-import team158.com.GroupController;
 import team158.utils.DirectionHelper;
-import team158.utils.Hashing;
-import battlecode.common.Clock;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
@@ -14,8 +11,7 @@ import battlecode.common.RobotType;
 import battlecode.common.MapLocation;
 
 public class SoldierLauncherComboStrategy extends GameStrategy {
-	
-	private boolean enemyRush;
+
 	private int pathDifficulty;
 
 	public final static int ATTACK_GROUP = 0;
@@ -24,10 +20,9 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 	
 	private int scoutMiner;
 	
-	public SoldierLauncherComboStrategy(RobotController rc, GroupController gc, Headquarters hq) {
-		super(rc, gc, hq);
+	public SoldierLauncherComboStrategy(RobotController rc, Headquarters hq) {
+		super(rc, hq);
 
-		this.enemyRush = false;
 		this.pathDifficulty = 0;
 		this.scoutMiner = 0;
 		this.enemyHQ = rc.senseEnemyHQLocation();
@@ -41,11 +36,7 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		int numSupplyDepots = 0;
 		int numDrones = 0;
 		int numLaunchers = 0;
-		int numLaunchersAttack = 0;
-		int numLaunchersDefense = 0;
 		int numSoldiers = 0;
-		int numSoldiersAttack1 = 0;
-		int numSoldiersAttack2 = 0;
 		int numHelipads = 0;
 		int numAerospaceLabs = 0;
 		int numBarracks = 0;
@@ -64,12 +55,6 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 				numBeavers++;
 			} else if (type == RobotType.SOLDIER) {
 				numSoldiers++;
-				if (Hashing.find(r.ID) == Broadcast.soldierGroup1Ch) {
-					numSoldiersAttack1++;
-				}
-				if (Hashing.find(r.ID) == Broadcast.soldierGroup2Ch) {
-					numSoldiersAttack2++;
-				}
 			} else if (type == RobotType.MINERFACTORY) {
 				numMinerFactories++;
 			} else if (type == RobotType.SUPPLYDEPOT) {
@@ -80,12 +65,6 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 				numAerospaceLabs++;
 			} else if (type == RobotType.LAUNCHER) {
 				numLaunchers++;
-				if (Hashing.find(r.ID) == Broadcast.launcherGroupAttackCh) {
-					numLaunchersAttack++;
-				}							
-				else if (Hashing.find(r.ID)  == Broadcast.launcherGroupDefenseCh) {
-					numLaunchersDefense++;
-				}	
 			} else if (type == RobotType.BARRACKS) {
 				numBarracks++;
 			}
@@ -131,40 +110,9 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 			}
 		}
 
-		MapLocation closestTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
-		MapLocation myLocation = rc.getLocation();
-		int distance = myLocation.distanceSquaredTo(closestTower);
-		int hqDistance = myLocation.distanceSquaredTo(enemyHQ);
-		if (hqDistance < distance) {
-			distance = hqDistance; 
-		}
-		
-		if (Clock.getRoundNum() < (rc.getRoundLimit() - 100 - Math.sqrt(distance)*4)) {
-			// launcher grouping logic
-			if (enemyRush && numLaunchersDefense < 3) {
-				gc.groupUnits(RobotType.LAUNCHER, DEFENSE_GROUP);
-				rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
-			} else if (numLaunchersAttack >= 3) {
-				gc.groupUnits(RobotType.LAUNCHER, ATTACK_GROUP);
-				rc.broadcast(Broadcast.launcherGroupAttackCh, 1);
-			} else {
-				gc.groupUnits(RobotType.LAUNCHER, ATTACK_GROUP);
-				rc.broadcast(Broadcast.launcherGroupAttackCh, 0);				
-			}
-
-			int gameStage = rc.readBroadcast(Broadcast.gameStageCh);
-			if (gameStage == Broadcast.MID_GAME) {
-				if (numSoldiersAttack1 < 13) {
-					gc.groupUnits(RobotType.SOLDIER, 0);
-				}
-				else if (numSoldiersAttack2 < 13) {
-					gc.groupUnits(RobotType.SOLDIER, 1);
-				}
-			}
-		}
-		else {
-			gc.groupUnits(RobotType.LAUNCHER, DEFENSE_GROUP);
-			rc.broadcast(Broadcast.launcherGroupDefenseCh, 1);
+		int gameStage = rc.readBroadcast(Broadcast.gameStageCh);
+		if (gameStage == Broadcast.MID_GAME) {
+			// TODO: Compute soldier attack status
 		}
 	}
 	

@@ -10,7 +10,6 @@ import team158.Robot;
 import team158.utils.DirectionHelper;
 
 public abstract class Building extends Robot {
-	protected double hqDistance;
 	public MapLocation myLocation;
 	protected double prevHealth;
 
@@ -19,7 +18,7 @@ public abstract class Building extends Robot {
 		rand = new Random(rc.getID());
 		enemyHQ = rc.senseEnemyHQLocation();
 		myLocation = rc.getLocation();
-		hqDistance = Math.sqrt(rc.senseHQLocation().distanceSquaredTo(enemyHQ));
+		distanceBetweenHQ = Math.sqrt(rc.senseHQLocation().distanceSquaredTo(enemyHQ));
 		prevHealth = 0;
 	}
 

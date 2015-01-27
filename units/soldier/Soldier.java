@@ -76,46 +76,23 @@ public class Soldier extends Unit {
 				harasser.harass();
 			}
 			else if (gameStage == Broadcast.MID_GAME) {
-				if (groupTracker.groupID == Broadcast.soldierGroup1Ch) {
-					if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTarget1ExistsCh)) {
-						harasser.harass();
-					}
-					else {
-						boolean attackTower = rc.readBroadcast(groupTracker.groupID) == 1;
-						MapLocation towerLocation = Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation1Chs);
-						if (attackTower) {
-							chargeToLocation(towerLocation);
-						}
-						else {
-							rc.setIndicatorString(1, "" + rc.senseNearbyRobots(towerLocation, 34, rc.getTeam()).length);
-							if (rc.senseNearbyRobots(towerLocation, 34, rc.getTeam()).length >= 11) {
-								rc.broadcast(groupTracker.groupID, 1);
-								chargeToLocation(towerLocation);
-							}
-							else {
-								soldierMoveWithMicro(towerLocation);
-							}
-						}
-					}
+				if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTarget1ExistsCh)) {
+					harasser.harass();
 				}
-				else if (groupTracker.groupID == Broadcast.soldierGroup2Ch) {
-					if (Broadcast.isNotInitialized(rc, Broadcast.soldierTowerTarget2ExistsCh)) {
-						harasser.harass();
+				else {
+					boolean attackTower = rc.readBroadcast(Broadcast.soldierAttackCh) == 1;
+					MapLocation towerLocation = Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation1Chs);
+					if (attackTower) {
+						chargeToLocation(towerLocation);
 					}
 					else {
-						boolean attackTower = rc.readBroadcast(groupTracker.groupID) == 1;
-						MapLocation towerLocation = Broadcast.readLocation(rc, Broadcast.soldierTowerTargetLocation2Chs);
-						if (attackTower) {
+						rc.setIndicatorString(1, "" + rc.senseNearbyRobots(towerLocation, 34, rc.getTeam()).length);
+						if (rc.senseNearbyRobots(towerLocation, 34, rc.getTeam()).length >= 11) {
+							rc.broadcast(Broadcast.soldierAttackCh, 1);
 							chargeToLocation(towerLocation);
 						}
 						else {
-							if (rc.senseNearbyRobots(towerLocation, 34, rc.getTeam()).length >= 11) {
-								rc.broadcast(groupTracker.groupID, 1);
-								chargeToLocation(towerLocation);
-							}
-							else {
-								soldierMoveWithMicro(towerLocation);
-							}
+							soldierMoveWithMicro(towerLocation);
 						}
 					}
 				}

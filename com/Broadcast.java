@@ -28,21 +28,15 @@ public class Broadcast {
 	public static final int requestSupplyDroneCh = 12;
 	public static final int towerAttacked = 13;
 	public static final int enemyNearTower = 14;
-	public static final int gameStageCh = 15; // EARLY_GAME, EARLY_MID_GAME, or MID_GAME.
+	public static final int enemyNearHQ = 15;
 	public static final int soldierTowerTarget1ExistsCh = 16;
 	public static final int soldierTowerTarget2ExistsCh = 17;
+	public static final int soldierAttackCh = 18;
 
 	// Misc
-	public static final int minerOreX1000Ch = 18;
-	public static final int minersProducedCh = 19;
-	
-	// Channels for grouping
-	public static final int groupingSoldiersCh = 20;
-	public static final int groupingLaunchersCh = 22;
-	public static final int soldierGroup1Ch = 23;
-	public static final int soldierGroup2Ch = 24;
-	public static final int launcherGroupAttackCh = 27;
-	public static final int launcherGroupDefenseCh = 28;
+	public static final int minerOreX1000Ch = 20;
+	public static final int minersProducedCh = 21;
+	public static final int gameStageCh = 22; // EARLY_GAME, EARLY_MID_GAME, or MID_GAME.
 
 	// Location channels - each requires two consecutive channels
 	public static final int soldierRallyLocationChs = 30;
@@ -59,15 +53,8 @@ public class Broadcast {
 	public static final int attackedTowerLocationChs = 48;
 	public static final int enemyNearTowerLocationChs = 50;
 	public static final int enemyHQLocation = 52;
-	
-	// misc 2
+
 	public static final int harassStrengthCh = 54;
-	
-	
-	
-	
-	// Channels 8000 -  65121 on for internal map representation (remember 9999 is used somewhere)
-	public static final int internalMapHQCh = 36880;
 
 	// check if channel has not been initialized yet
 	public static boolean isNotInitialized(RobotController rc, int channelStart) throws GameActionException {

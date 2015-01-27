@@ -17,6 +17,7 @@ public class Launcher extends Unit {
 	public boolean isReloading;
 	public boolean noSupply;
 	public boolean broadcasted;
+	public boolean notTooLate;
 	public RobotType currentTargetType;
 
 	public Launcher(RobotController newRC) {
@@ -24,6 +25,17 @@ public class Launcher extends Unit {
 		this.isReloading = false;
 		noSupply = false;
 		broadcasted = false;
+		MapLocation closestTower;
+		try {
+			closestTower = Broadcast.readLocation(rc, Broadcast.enemyTowerTargetLocationChs);
+			int distance = rc.getLocation().distanceSquaredTo(closestTower);
+			if (distanceBetweenHQ < distance) {
+				distance = (int)distanceBetweenHQ; 
+			}
+			notTooLate = Clock.getRoundNum() < (rc.getRoundLimit() - 100 - Math.sqrt(distance)*4);
+		} catch (GameActionException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -167,69 +179,31 @@ public class Launcher extends Unit {
 				return;
 			}
 
-			if (Clock.getRoundNum() < rc.getRoundLimit() - 500) {
-				if (groupTracker.groupID == Broadcast.launcherGroupDefenseCh) {
-					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-					if (hasHQCommand) {			
-						// enemyNearHQLocationChs defaults to rally location if no enemy around.
-						MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
-						boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
-						boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
-						if (towerAttacked) {
-							target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
-						}
-						else if (enemyNear) {
-							target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
-						}
-						launcherMoveWithMicro(target);
-					}
-					else {
-						launcherMoveWithMicro(Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs));
-					}
+			MapLocation target = null;
+			if (rc.readBroadcast(Broadcast.enemyNearHQ) == 1) {
+				target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
+				if (myLocation.distanceSquaredTo(target) >= 65) {
+					target = null;
 				}
-				else if (groupTracker.groupID == Broadcast.launcherGroupAttackCh) {
-					boolean hasHQCommand = rc.readBroadcast(groupTracker.groupID) == 1;
-					if (hasHQCommand) {
-						// enemyNearHQLocationChs defaults to ownHQ location if no enemy around.
-						MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
-						MapLocation target;
-						if (enemyTowers.length != 0) {
-							int minDistance = 9999;
-							target = null;
-							for (MapLocation tower : enemyTowers) {
-								int currentDistance = myLocation.distanceSquaredTo(tower);
-								if (currentDistance < minDistance) {
-									target = tower;
-									minDistance = currentDistance;
-								}
-							}
-						}
-						else {
-							target = enemyHQ;
-						}
-						launcherMoveWithMicro(target);
-					}
-					else {
-						// enemyNearHQLocationChs defaults to rally location if no enemy around.
-						MapLocation target = Broadcast.readLocation(rc, Broadcast.enemyNearHQLocationChs);
-						boolean towerAttacked = rc.readBroadcast(Broadcast.towerAttacked) == 1; 
-						boolean enemyNear = rc.readBroadcast(Broadcast.enemyNearTower) == 1; 
-						if (towerAttacked) {
-							target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
-						}
-						else if (enemyNear) {
-							target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);;
-						}
-						launcherMoveWithMicro(target);
-					}
-				}
-				else {
-					launcherMoveWithMicro(Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs));
-				}
-				
 			}
-			else {
-				MapLocation target;
+			if (target == null && rc.readBroadcast(Broadcast.towerAttacked) == 1) {
+				target = Broadcast.readLocation(rc, Broadcast.attackedTowerLocationChs);
+				if (myLocation.distanceSquaredTo(target) >= 65) {
+					target = null;
+				}
+			}
+			if (rc.readBroadcast(Broadcast.enemyNearTower) == 1) {
+				target = Broadcast.readLocation(rc, Broadcast.enemyNearTowerLocationChs);
+				if (myLocation.distanceSquaredTo(target) >= 65) {
+					target = null;
+				}
+			}
+			if (target != null) {
+				launcherMoveWithMicro(target);
+				return;
+			}
+
+			if (notTooLate) {
 				MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 				if (enemyTowers.length != 0) {
 					int minDistance = 9999;
@@ -246,6 +220,9 @@ public class Launcher extends Unit {
 					target = enemyHQ;
 				}
 				launcherMoveWithMicro(target);
+			}
+			else {
+				launcherMoveWithMicro(Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs));
 			}
 		}
 	}

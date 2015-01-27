@@ -18,7 +18,7 @@ public class MinerFactory extends Building {
 		int miners = rc.readBroadcast(Broadcast.minersProducedCh);
 		int oreX1000 = rc.readBroadcast(Broadcast.minerOreX1000Ch);
 		double myOre = rc.getTeamOre();
-		if (rc.isCoreReady() && myOre >= 50 && (numMiners < 10 || (oreX1000 / miners >= 25000 || numMiners < hqDistance))) {
+		if (rc.isCoreReady() && myOre >= 50 && (numMiners < 10 || (oreX1000 / miners >= 25000 || numMiners < distanceBetweenHQ))) {
 			int[] offsets = {0,1,-1,2,-2,3,-3,4};
 			int offsetIndex = 0;
 			int dirint = rand.nextInt(8);
