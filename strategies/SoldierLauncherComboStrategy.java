@@ -84,11 +84,11 @@ public class SoldierLauncherComboStrategy extends GameStrategy {
 		rc.broadcast(Broadcast.numSupplyDepotsCh, numSupplyDepots);
 		rc.broadcast(Broadcast.numAerospaceLabsCh, numAerospaceLabs);
 		rc.broadcast(Broadcast.numHelipadsCh, numHelipads);
+		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numMinersCh, numMiners);
 		rc.broadcast(Broadcast.numDronesCh, numDrones);
 		rc.broadcast(Broadcast.numLaunchersCh, numLaunchers);
 		rc.broadcast(Broadcast.numBeaversCh, numBeavers);
-		rc.broadcast(Broadcast.numBarracksCh, numBarracks);
 		rc.broadcast(Broadcast.numSoldiersCh, numSoldiers);
 
 		if (pathDifficulty == 0) {

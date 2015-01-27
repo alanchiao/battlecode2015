@@ -1,17 +1,16 @@
 package team158.units.beaver;
 
+import team158.com.Broadcast;
 import team158.units.com.Navigation;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 
 public class Builder {
 	
 	public final static int NUMBER_BUILDINGS_MAX = 50;
-	public final static int SQUARE_RADIUS_MAX = 36;
 	
 	// necessary information from Beaver
 	private RobotController rc;
@@ -137,14 +136,14 @@ public class Builder {
 	    }
 	}
 	
-	public int countBuildings(RobotType buildingType) {
-		int count = 0;
-		RobotInfo[] nearbyAllyRobots = rc.senseNearbyRobots(this.hqLocation, SQUARE_RADIUS_MAX, rc.getTeam());
-		for (RobotInfo ally: nearbyAllyRobots){
-			if (ally.type.equals(buildingType)) {
-				count++;
-			}
+	public int countBuildings(RobotType buildingType) throws GameActionException {
+		switch(buildingType) {
+		case MINERFACTORY: return rc.readBroadcast(Broadcast.numMinerFactoriesCh);
+		case SUPPLYDEPOT: return rc.readBroadcast(Broadcast.numSupplyDepotsCh);
+		case AEROSPACELAB: return rc.readBroadcast(Broadcast.numAerospaceLabsCh);
+		case HELIPAD: return rc.readBroadcast(Broadcast.numHelipadsCh);
+		case BARRACKS: return rc.readBroadcast(Broadcast.numBarracksCh);
+		default: return 0;
 		}
-		return count;
 	}
 }
