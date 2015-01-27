@@ -289,6 +289,9 @@ public class Launcher extends Unit {
 				navigation.stopObstacleTracking();
 				rc.move(DirectionHelper.directions[bestDirection]);
 			}
+			else if (bestDamage == damages[8]) {
+				navigation.moveToDestination(ownHQ, Navigation.AVOID_NOTHING);
+			}
 		}
 	}
 }

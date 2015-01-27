@@ -40,47 +40,47 @@ public class Missile extends Robot {
 				if (effectiveEnemiesInAttack > 0 && valuableAlliesInAttack == 0) {
 					rc.explode();
 					return;
-				} 
-			   RobotInfo[] enemies = rc.senseNearbyRobots(24, rc.getTeam().opponent());
-			   if (enemies.length > 0) {
-				  Direction moveDirection = rc.getLocation().directionTo(enemies[0].location);
-				  if (rc.canMove(moveDirection)) {
-				          rc.move(moveDirection);
-				          return;
-				  }
-				  moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 9) % 8];
-				  if (rc.canMove(moveDirection)) {
-				          rc.move(moveDirection);
-				          return;
-				  }
-				  moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 6) % 8];
-				  if (rc.canMove(moveDirection)) {
-				          rc.move(moveDirection);
-				          return;
-				  }
-				  if (effectiveEnemiesInAttack - valuableAlliesInAttack >= 1) {
-					  rc.explode();
-				  }
-			   } else {
-				  Direction moveDirection = rc.getLocation().directionTo(Broadcast.readLocation(rc, Broadcast.enemyHQLocation));
-				  if (rc.canMove(moveDirection)) {
-				          rc.move(moveDirection);
-				          return;
-				  }
-				  moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 9) % 8];
-				  if (rc.canMove(moveDirection)) {
-				          rc.move(moveDirection);
-				          return;
-				  }
-				  moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 6) % 8];
-				  if (rc.canMove(moveDirection)) {
-				          rc.move(moveDirection);
-				          return;
-				  }
-				  if (effectiveEnemiesInAttack - valuableAlliesInAttack >= 1) {
-					  rc.explode();
-				  }	  
-			   }
+				}
+				RobotInfo[] enemies = rc.senseNearbyRobots(24, rc.getTeam().opponent());
+				if (enemies.length > 0) {
+					Direction moveDirection = rc.getLocation().directionTo(enemies[0].location);
+					if (rc.canMove(moveDirection)) {
+					    rc.move(moveDirection);
+					    return;
+					}
+					moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 9) % 8];
+					if (rc.canMove(moveDirection)) {
+						rc.move(moveDirection);
+						return;
+					}
+					moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 6) % 8];
+					if (rc.canMove(moveDirection)) {
+						rc.move(moveDirection);
+						return;
+					}
+					if (effectiveEnemiesInAttack - valuableAlliesInAttack >= 1) {
+						rc.explode();
+					}
+				} else {
+					Direction moveDirection = rc.getLocation().directionTo(Broadcast.readLocation(rc, Broadcast.enemyHQLocation));
+					if (rc.canMove(moveDirection)) {
+						rc.move(moveDirection);
+					    return;
+					}
+					moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 9) % 8];
+					if (rc.canMove(moveDirection)) {
+						rc.move(moveDirection);
+						return;
+					}
+					moveDirection = DirectionHelper.directions[(DirectionHelper.directionToInt(moveDirection) + 6) % 8];
+					if (rc.canMove(moveDirection)) {
+						rc.move(moveDirection);
+						return;
+					}
+					if (effectiveEnemiesInAttack - valuableAlliesInAttack >= 1) {
+						rc.explode();
+					}	  
+				}
 
 				if (timeUntilDeath == 1) {
 					rc.disintegrate();
