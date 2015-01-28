@@ -10,6 +10,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
+import battlecode.common.TerrainTile;
 
 public class Navigation {
 	
@@ -66,6 +67,12 @@ public class Navigation {
 	public void moveToDestination(MapLocation nextDestination, int avoidLevel) {
 		if (monitoredObstacle != null) {
 			rc.setIndicatorDot(monitoredObstacle, 0, 0, 0);
+		}
+		
+		if (monitoredObstacle != null && rc.canSenseLocation(monitoredObstacle)) {
+			if (rc.senseTerrainTile(monitoredObstacle).equals(TerrainTile.OFF_MAP)) {
+				isRotateRight = !isRotateRight;
+			}
 		}
 		
 		// optimization: stop avoiding current obstacle if destination changes
