@@ -9,6 +9,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.common.TerrainTile;
 import team158.units.Unit;
 import team158.units.com.Navigation;
 import team158.utils.DirectionHelper;
@@ -121,7 +122,13 @@ public class Soldier extends Unit {
 						chargeToLocation(towerLocation);
 					}
 					else {
-						soldierMoveWithMicro(towerLocation);
+						soldierMoveWithMicro(towerLocation);						
+						if (rc.getLocation().distanceSquaredTo(towerLocation) < 35) {
+							if (!rc.senseTerrainTile(navigation.monitoredObstacle).isTraversable()) {
+								navigation.isRotateRight = !navigation.isRotateRight;
+							}
+							
+						}
 					}
 				}
 			}
@@ -131,6 +138,15 @@ public class Soldier extends Unit {
 		}
 	}
 	
+	protected void soldierSurroundMove(MapLocation target) throws GameActionException {
+		if (rc.getLocation().distanceSquaredTo(target) < 35) {
+			soldierMoveWithMicro(target);
+			if (!rc.senseTerrainTile(navigation.monitoredObstacle).isTraversable()) {
+				navigation.isRotateRight = !navigation.isRotateRight;
+			}
+			
+		}
+	}
 	protected void chargeToLocation(MapLocation target) throws GameActionException {
 		Team opponentTeam = rc.getTeam().opponent();
 		// 25 covers the edge case with tanks if friendly units have vision

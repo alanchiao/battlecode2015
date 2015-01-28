@@ -228,9 +228,11 @@ public class Launcher extends Unit {
 				if (target == null) {
 					target = enemyHQ;
 				}
+				rc.setIndicatorString(0, String.valueOf(target));
 				launcherMoveWithMicro(target);
 			}
 			else {
+				rc.setIndicatorString(0, String.valueOf(target));
 				launcherMoveWithMicro(Broadcast.readLocation(rc, Broadcast.launcherRallyLocationChs));
 			}
 		}
