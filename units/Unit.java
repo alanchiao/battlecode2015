@@ -47,7 +47,6 @@ public abstract class Unit extends Robot {
 					internalMap.broadcastLocation(location, 1);
 				}
 			} **/
-			
 			// Transfer supply stage
 			RobotInfo[] friendlyRobots = rc.senseNearbyRobots(15, rc.getTeam());
 			if (friendlyRobots.length > 0) {

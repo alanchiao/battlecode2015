@@ -56,7 +56,8 @@ public class Miner extends Unit {
 				rc.mine();
 			}
 			else {
-				double maxOre = 0;
+				double currentThreshold = Clock.getRoundNum() < 1000 ? oreThreshold : 0;
+				double maxOre = currentThreshold;
 				Direction bestDirection = null;
 				// looks around for an ore concentration that is bigger than its current location by a certain fraction
 				int dirI = rand.nextInt(8);
@@ -69,12 +70,12 @@ public class Miner extends Unit {
 					}
 				}
 
-				if ((myOre <= (Clock.getRoundNum() < 1000 ? oreThreshold : 0) && bestDirection != null) || (myOre >= 2.5 && maxOre >= myOre * 1.5)) {
+				if ((myOre <= currentThreshold && bestDirection != null) || (myOre >= 2.5 && maxOre >= myOre * 1.5)) {
 					navigation.stopObstacleTracking();
 					rc.move(bestDirection);
 					prevDirection = null;
 				}
-				else if (myOre == 0) {
+				else if (myOre <= currentThreshold) {
 					int dirint;
 					if (prevDirection == null) {
 						dirint = rand.nextInt(8);

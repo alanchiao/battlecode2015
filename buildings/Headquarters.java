@@ -86,26 +86,26 @@ public class Headquarters extends Building {
 			}
 			else if (r.type == RobotType.MINER) {
 				if (r.supplyLevel < r.type.supplyUpkeep * 1000 * gameFractionLeft) {
-					if (priority == 0 || (r.supplyLevel == 0 && priority < 2)) {
+					if (priority == 0 || (r.supplyLevel == 0 && priority < 1)) {
 						loc = r.location;
 						supplyAmount = (int) (r.type.supplyUpkeep * 1500 * gameFractionLeft);
-						priority = 2;
+						priority = 1;
 					}
 				}
 			}
 			else if (r.type == RobotType.DRONE) {
 				if (r.supplyLevel < 3000) {
-					if (priority < 1) {
+					if (priority < 2) {
 						loc = r.location;
 						supplyAmount = 6000;
-						priority = 1;
+						priority = 2;
 					}
 				}
 				else if (r.supplyLevel < 15000) {
-					if (priority < 1) {
+					if (priority < 2) {
 						loc = r.location;
 						supplyAmount = 30000;
-						priority = 1;
+						priority = 2;
 					}
 				}
 			}

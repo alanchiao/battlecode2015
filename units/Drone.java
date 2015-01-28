@@ -21,6 +21,7 @@ public class Drone extends Unit {
 
 	@Override
 	protected void actions() throws GameActionException {
+
 		if (!autoSupplyTransfer) {
 			MapLocation myLocation = rc.getLocation();
 			if (gotSupply) {
@@ -56,7 +57,7 @@ public class Drone extends Unit {
 				}
 			}
 			else {
-				if (rc.getSupplyLevel() > (followingType == RobotType.LAUNCHER ? 15000 : 3000)) {
+				if (rc.getSupplyLevel() >= (followingType == RobotType.LAUNCHER ? 15000 : 3000)) {
 					gotSupply = true;
 				}
 				else if (rc.isCoreReady() && myLocation.distanceSquaredTo(ownHQ) > 15) {
@@ -66,6 +67,7 @@ public class Drone extends Unit {
 			}
 			return;
 		}
+
 		followingID = rc.readBroadcast(Broadcast.requestSupplyDroneCh);
 		if (followingID != 0) {
 			rc.broadcast(Broadcast.requestSupplyDroneCh, 0);
