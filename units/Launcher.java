@@ -11,6 +11,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
+import battlecode.common.TerrainTile;
 
 public class Launcher extends Unit {
 	
@@ -211,6 +212,7 @@ public class Launcher extends Unit {
 
 			if (notTooLate) {
 				target = null;
+				int saferange = -1;
 				MapLocation[] enemyTowers = rc.senseEnemyTowerLocations();
 				if (enemyTowers.length != 0) {
 					int minDistance = 9999;
@@ -218,6 +220,7 @@ public class Launcher extends Unit {
 						int currentDistance = myLocation.distanceSquaredTo(tower);
 						if (currentDistance < minDistance) {
 							target = tower;
+							saferange = 35;
 							minDistance = currentDistance;
 						}
 					}
@@ -227,9 +230,15 @@ public class Launcher extends Unit {
 				}
 				if (target == null) {
 					target = enemyHQ;
+					saferange = 40;
 				}
 				rc.setIndicatorString(0, String.valueOf(target));
 				launcherMoveWithMicro(target);
+				if (rc.getLocation().distanceSquaredTo(target) <= saferange) {
+					if (navigation.monitoredObstacle != null && !rc.senseTerrainTile(navigation.monitoredObstacle).equals(TerrainTile.VOID)) {
+						navigation.isRotateRight = !navigation.isRotateRight;
+					}
+				}
 			}
 			else {
 				rc.setIndicatorString(0, String.valueOf(target));

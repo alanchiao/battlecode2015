@@ -124,10 +124,9 @@ public class Soldier extends Unit {
 					else {
 						soldierMoveWithMicro(towerLocation);						
 						if (rc.getLocation().distanceSquaredTo(towerLocation) < 35) {
-							if (!rc.senseTerrainTile(navigation.monitoredObstacle).isTraversable()) {
+							if (navigation.monitoredObstacle != null && !rc.senseTerrainTile(navigation.monitoredObstacle).equals(TerrainTile.VOID)) {
 								navigation.isRotateRight = !navigation.isRotateRight;
 							}
-							
 						}
 					}
 				}
